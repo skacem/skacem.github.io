@@ -135,9 +135,7 @@ a:hover   { color: #6c757d; text-decoration: underline; }
   width: 18px;
   height: 18px;
   position: relative;
-  top: 3px;
-  stroke: black;
-  fill: none;
+  top: 3px; 
 }
 
 
@@ -330,15 +328,7 @@ th, td {
   text-align: center;
 }
 /* Syntax highlighting styles */
-/* ----------------------------------------------------------*/
-// define variables
-$code-bg:  #2e3e4e;
-$tea:      #ecebe7;
-$gray-200: #e9ecef;
-$gray-500: #adb5bd;
-$gray-800: #343a40;
-
-$font-family-monospace: 'Ubuntu Mono', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'Noto Serif SC', 'STSong', monospace;
+/* ----------------------------------------------------------*/ 
 
 figure.highlight,
 pre.highlight {
@@ -358,14 +348,14 @@ p code.highlighter-rouge,
 p kbd {
     color: #cc6666;
     font-size: 1rem;
-    background-color: lighten($tea, 5%);
+    background-color: lighten(#ecebe7, 5%);
     padding: 2px 4px;
     border-radius: 2px;
     word-break: break-word;
 }
 
 kbd {
-    border: 1px solid $gray-800;
+    border: 1px solid #343a40;
     border-radius: 4px;
 }
 
@@ -408,7 +398,7 @@ table.rouge-table pre {
 
 table.rouge-table td.gutter {
     padding-right: .5rem;
-    border-right: 1px solid $gray-500;
+    border-right: 1px solid #adb5bd;
 }
 
 table.rouge-table td.code {
