@@ -136,6 +136,8 @@ a:hover   { color: #6c757d; text-decoration: underline; }
   height: 18px;
   position: relative;
   top: 3px;
+  stroke: black;
+  fill: none;
 }
 
 
