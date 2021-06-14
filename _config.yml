@@ -1,0 +1,43 @@
+# Site settings
+title: Skander Kacem
+email: skander.kacem
+description: "Management, Engineering, AI, Technology"
+baseurl: ""
+url: "https://skacem.github.io"
+linkedin_username: "skander-kacem"
+twitter_username: "skanderkacem"
+github_username:  "skacem"
+breadcrumbs              : true #false # true, false (default)
+words_per_minute         : 150
+future                   : true
+read_more                : "enabled" 
+
+# Build settings
+markdown: kramdown
+permalink: pretty
+
+# Outputting
+paginate: 5 # amount of posts to show
+paginate_path: /page:num/
+
+# Disqus Comments
+disqus:
+  # Leave shortname blank to disable comments site-wide.
+  # Disable comments for any post by adding `comments: false` to that post's YAML Front Matter.
+  shortname: skacem
+google_analytics: G-MJT6KHN3F1
+highlighter: rouge
+kramdown:
+  math_engine: katex
+  input: GFM
+  auto_ids: true
+  syntax_highlighter: rouge
+
+include:
+  - _pages
+
+
+plugins:
+  - jekyll-katex
+  - jekyll-paginate
+  - jekyll-sitemap
