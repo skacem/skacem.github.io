@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: "Linear Algebra for Machine Learning"
-excerpt: "Confusion matrix is a basic instrument in machine learning used to evaluate the performance of  classification models. It provides insight into the nature of the classification errors by illustrating the match and mismatch between the predicted values and the corresponding true values."
+excerpt: "Linear algebra and statistics are the "languages" in which machine learning is formulated. Learning these topics not only contributes to a deeper understanding of the underlying algorithms but also enables you to develop new algorithms."
 author: "Skander Kacem"
 category: Everyday Machine Learning
 tags: [machine learning, mooc, review]
