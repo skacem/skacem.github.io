@@ -11,6 +11,7 @@ katex: true
 
 While learning about the mathematical foundations of machine learning, I came across this lecture by Professor Gilbert Strang at MIT: [Matrix Methods in Data Analysis, Signal Processing, and Machine Learning](https://ocw.mit.edu/courses/mathematics/18-065-matrix-methods-in-data-analysis-signal-processing-and-machine-learning-spring-2018/).  
 From the first video, I was enthralled. 
+
 [![Matrix Methods in Data Analysis by Professor Gilbert Strang](https://img.youtube.com/vi/YiqIkSHSmyc/hqdefault.jpg)](https://www.youtube.com/watch?v=YiqIkSHSmyc)
 
 In his way of teaching, Professor Strang takes this abstract and tedious class, to a new level. Concepts like basis, eigenvectors, null spaces, or SVD suddenly make a lot more sense. You don't have to know how to calculate them, it's "nice to have" but not a must. Most important is the ability to envision these abstract concepts and understand why and when to use them.
