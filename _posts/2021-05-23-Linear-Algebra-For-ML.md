@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: "Linear Algebra for Machine Learning"
-excerpt: "Linear algebra and statistics are the "languages" in which machine learning is formulated. Learning these topics not only contributes to a deeper understanding of the underlying algorithms but also enables you to develop new algorithms."
+excerpt: "Linear algebra and statistics are the \"languages\" in which machine learning is formulated. Learning these topics not only contributes to a deeper understanding of the underlying algorithms but also enables you to develop new algorithms."
 author: "Skander Kacem"
 category: Everyday Machine Learning
 tags: [machine learning, mooc, review]
