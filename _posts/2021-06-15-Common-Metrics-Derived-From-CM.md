@@ -7,6 +7,7 @@ author: "Skander Kacem"
 category: Everyday Machine Learning
 tags: [machine learning, tutorial, statistics]
 katex: true
+preview_pic: /assets/0/SPS_dist.gif
 ---
 
 In the previous post we introduced the confusion matrix in the context of hypothesis testing and we showed how such a simple and intuitive concept can be a powerful tool in illustrating the outcomes of classification models. Now, we are going to discuss various performance metrics that are computed from a confusion matrix.

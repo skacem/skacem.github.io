@@ -7,6 +7,8 @@ author: "Skander Kacem"
 category: Everyday Machine Learning
 tags: [machine learning, tutorial, statistics]
 katex: true
+preview_pic: /assets/1/Confusion_matrix.png
+
 ---
 
 The confusion matrix is a basic instrument in machine learning used to evaluate the performance of  classification models. Unlike other performance measures, it provides insight into the nature of the classification errors by illustrating the match and mismatch between the predicted values and the corresponding true values.  It is usually a 2x2 table and can be extended to multi-class classification problems.

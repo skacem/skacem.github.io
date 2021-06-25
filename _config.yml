@@ -1,43 +1,56 @@
-# Site settings
-title: Skander Kacem
-email: skander.kacem
-description: "Management, Engineering, AI, Technology"
+title: "Skander Kacem"
+#tagline: ""
+description: "Management, Engineering, Machine Learning"
 baseurl: ""
-url: "https://skacem.github.io"
-linkedin_username: "skander-kacem"
-twitter_username: "skanderkacem"
-github_username:  "skacem"
-breadcrumbs              : true #false # true, false (default)
-words_per_minute         : 150
-future                   : true
-read_more                : "enabled" 
+url: ""
+email: skanderkacem@gmail.com
+twitter_username: SkanderKacem
+github_username:  skacem
+linkedin_link: http://linkedin.com/in/skander-kacem
+stackoverflow: 
+gscholar: 
+researchgate: Skander-Kacem
+timezone: Europe/Berlin
 
-# Build settings
 markdown: kramdown
 permalink: pretty
 
-# Outputting
-paginate: 5 # amount of posts to show
-paginate_path: /page:num/
-
-# Disqus Comments
-disqus:
-  # Leave shortname blank to disable comments site-wide.
-  # Disable comments for any post by adding `comments: false` to that post's YAML Front Matter.
-  shortname: skacem
-google_analytics: G-MJT6KHN3F1
-highlighter: rouge
 kramdown:
   math_engine: katex
-  input: GFM
   auto_ids: true
+  footnote_nr: 1
+  entity_output: as_char
+  toc_levels: 1..6
+  smart_quotes: lsquo,rsquo,ldquo,rdquo
+  enable_coderay: false
+  input: GFM
   syntax_highlighter: rouge
 
-include:
-  - _pages
-
+# Build settings
+markdown: kramdown
+#permalink: pretty
 
 plugins:
   - jekyll-katex
-  - jekyll-paginate
+  - jemoji
+  - jekyll-paginate-v2
   - jekyll-sitemap
+
+emoji:
+  src: "https://github.githubassets.com/images/icons/"
+
+# Pagination Settings
+pagination:
+  enabled: false
+  debug: true
+  collection: 'posts'
+  trail:
+    before: 2 # The number of links before the current page
+    after: 2  # The number of links after the current page
+  per_page: 8
+  offset: 0
+  permalink: '/blog/:num/'
+  title: ':title - page :num of :max'
+  limit: 0
+  sort_field: 'date'
+  sort_reverse: true

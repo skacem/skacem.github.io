@@ -1,14 +1,13 @@
 <header class="site-header">
   <div class="wrap">
-    
+
     <div style="float:left; margin-top:10px; margin-right:10px;">
-        <a href="{{ "https://skacem.github.io"}}">
-      <img src="/sk.png" width="45">
-    </a>
-    </div>
+      <a href="{{ "/about/"}}">
+    <img src="/sk.png" width="45">
+  </a>
+  </div>
 
-    <a class="site-title" href="{{ site.baseurl }}/">{{ site.title }}</a><br>
-
+    <a class="site-title site-link" href="{{ site.baseurl }}/">{{ site.title }}</a> <br>
     <p class="site-subtitle">{{ site.description }}</p>
 
     <nav class="site-nav">
@@ -24,11 +23,16 @@
         </svg>
       </a>
       <div class="trigger">
-        {% for page in site.pages %}
-          {% if page.title and page.includelink %}<a class="page-link" href="{{ page.url | prepend: site.baseurl }}">{{ page.title }}</a>{% endif %}
+
+        {% assign site_pages = site.pages | sort: 'title' %}
+        {% for page in site_pages %}
+          {% if page.title and page.title != "404: Page not found" and page.title != "Skander Kacem"
+             and page.category != 'tag' and page.autogen == nil %}
+            <a class="site-link" href="{{ page.url | prepend: site.baseurl }}">{{ page.title }}</a>
+          {% endif %}
         {% endfor %}
+        <a class="site-link" target="_blank" href="/assets/documents/skacem-cv.pdf">CV</a>
       </div>
     </nav>
   </div>
-  
 </header>
