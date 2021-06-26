@@ -4,7 +4,9 @@ comments: true
 title: "Confusion Matrix"
 excerpt: "Confusion matrix is a basic instrument in machine learning used to evaluate the performance of  classification models. It provides insight into the nature of the classification errors by illustrating the match and mismatch between the predicted values and the corresponding true values."
 author: "Skander Kacem"
-tags: [machine learning, tutorial, statistics]
+tags: 
+  - Machine Learning 
+  - Confusion Matrix
 katex: true
 preview_pic: /assets/0/Confusion_matrix.png
 
@@ -108,9 +110,6 @@ Then we configure our jupyter notebook:
 %matplotlib inline
 warnings.filterwarnings('ignore')
 sns.set_style('white')
-
-# Auto-completion is not working bc of jedi
-%config Completer.use_jedi = False
 
 # set random seed to ensure reproducibility
 random.seed(23)

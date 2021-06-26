@@ -2,9 +2,13 @@
 layout: post
 comments: true
 title: Common Metrics Derived From the Confusion Matrix
-excerpt: "In the previous post we introduced the confusion matrix in the context of hypothesis testing and we showed how such a simple and intuitive concept can be a powerful tool in illustrating the outcomes of classification models. Now, we are going to discuss various performance metrics that are computed from a confusion matrix.  "
+excerpt: "In the previous post we introduced the confusion matrix in the context of hypothesis testing and we showed how such a simple and intuitive concept can be a powerful tool in illustrating the outcomes of classification models. Now, we are going to discuss various performance metrics that are derived from a confusion matrix."
 author: "Skander Kacem"
-tags: [machine learning, tutorial, statistics]
+tags: 
+  - Machine Learning 
+  - Confusion Matrix 
+  - Evaluation Metric
+  - F1-Score
 katex: true
 preview_pic: /assets/0/SPS_dist.gif
 ---
@@ -24,6 +28,7 @@ which together comprise the 2 x 2 Confusion Matrix (CM):
 
 $$\text{CM} = 
 \left[\begin{array}{cc} TN & FP \\ FN & TP \end{array}\right],
+\tag{1}
 $$
 
 where:
@@ -53,6 +58,7 @@ $$\text{CM} =
  990 & 0 \\
    10 & 0
  \end{array}\right]
+ \tag{2}
 $$
   
 According to the accuracy, the classifier's performance would be nearly perfect ($$=99\%$$). Which is clearly misleading, since the model doesn't detect a single  positive instance.  Hence, accuracy is not an adequate performance measure in this case or any other imbalanced dataset.
@@ -91,6 +97,7 @@ Precision (PREC) is the ratio of correct positive predictions out of all positiv
 
 $$
 PREC = \frac{TP}{TP + FP}  
+\tag{3}
 $$
 
 As we can see from the equation above, a model that produces no false positives has a precision of $$100\%$$, no matter how many true positives it classifies. It could be one or all of them. In fact, precision doesn't care  how many positive instances there are in the dataset ($$TP + FN$$). It only cares about the ones it predicts ($$TP + FP$$). This metric is important when the cost of $$FP$$ is particularly high and/or $$TP$$s are rare.
@@ -173,6 +180,7 @@ Recall (also known as sensitivity) is defined as follows:
 
 $$
 REC = \frac{TP}{TP + FN}
+\tag{4}
 $$
 
  It is the ratio of correct predicted positives to the total number of real positives. It is about completeness, classifying all instances as positive yields 100% recall, but a very low precision. Recall tells you how often your predictions actually capture the positive class!
@@ -218,6 +226,7 @@ To make a summary out of them, we usually use the F1-Score, also known as a harm
 
 $$
 F_1 = 2\times\frac{PREC.REC}{PREC + REC}
+\tag{5}
 $$
 
 We use the harmonic mean instead of a simple average because it punishes extreme values.  There are other metrics for combining precision and recall, such as the Geometric Mean of precision and recall, but the F1 score is the most commonly used.
@@ -253,12 +262,15 @@ Specificity is the ability of a model to correctly predict negative instances. I
 
 $$
 SPEC = \frac{TN}{TN + FP}
+\tag{6}
 $$
 
 Specificity is usually combined with sensitivity. Their combination uses all four numbers in the confusion matrix, as opposed to precision and recall which only use three.  
 To make a summary out of them, we usually use the geometric mean, which is defined as the square root of the product:
 
-$$ G = \sqrt{sensitivity \times specificity} $$
+$$ G = \sqrt{sensitivity \times specificity} 
+\tag{7}
+$$
 
 This formula has the beneficial property of averaging out both scores while penalizing unbalanced pairs.
 
