@@ -1,7 +1,7 @@
 ---
 layout: page
 title: About
-permalink: /about-me/
+permalink: /about/
 ---
 
 {:refdef: style="text-align: center;"}

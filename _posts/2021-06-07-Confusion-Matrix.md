@@ -4,10 +4,9 @@ comments: true
 title: "Confusion Matrix"
 excerpt: "Confusion matrix is a basic instrument in machine learning used to evaluate the performance of  classification models. It provides insight into the nature of the classification errors by illustrating the match and mismatch between the predicted values and the corresponding true values."
 author: "Skander Kacem"
-category: Everyday Machine Learning
 tags: [machine learning, tutorial, statistics]
 katex: true
-preview_pic: /assets/1/Confusion_matrix.png
+preview_pic: /assets/0/Confusion_matrix.png
 
 ---
 
@@ -72,13 +71,11 @@ A confusion matrix is also nothing but a convenient way of displaying this infor
 style="zoom:75%;" />
 <div class="thecap"> Source: xkcd </div></div>
 
-
 Understanding the difference between type I and type II errors is extremely important,  because there's a risk of making each type of error in every analysis and depending on the situation, the consequences of some errors are worse than others and the amount of risk regarding each is in your control.
 
 Type I error - seeing things that in fact aren't there - is the rejection of a true null hypothesis and tend to occur more easily than one might think. Indeed, the human brain is hardwired to recognize patterns and draw conclusions even when faced with total randomness.  In terms of the courtroom analogy, this error corresponds to convicting an innocent defendant.
 
-A Type II error, or not seeing things that are there, is the failure to reject a false null hypothesis. In terms of the courtroom analogy, a type II error corresponds to acquitting a criminal.  
-
+A Type II error, or not seeing things that are there, is the failure to reject a false null hypothesis. In terms of the courtroom analogy, a type II error corresponds to acquitting a criminal.
 
 <div class="imgcap">
 <img src="/assets/1/errortypes.png"
@@ -88,7 +85,6 @@ style="zoom:45%;" />
 Imagine you're a doctor specialized in testing patients for Covid-19. Which error would have more consequences than the other? An FP diagnosis or an FN?
 
 Clearly, the type II error here is the much bigger problem. Both for the person, and for the society. Your objective is to get Covid-19 patients as early as possible. Even if few are not, we can do the test again, but you don't want to miss early Covid-19 patients. So False Negative (When a patient is having the disease and our model saying he is fine) is something we want to minimize as low as possible. How about classification errors in the criminal justice? Or breath alcohol test? What error has more consequences than the other?  
-
 
 ## Confusion Matrix in Python
 
