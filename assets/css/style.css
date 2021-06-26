@@ -12,14 +12,14 @@ body {
   font-family: -apple-system, Helvetica, arial, sans-serif;
   font-size: 16.5px;
   line-height: 1.5;
-  font-weight: 200;
+  font-weight: 300;
   background-color: #fdfdfd; /* white;*/
 }
 
 /* link color and decoration*/
 a {
   color: #3355eb;
-  font-weight: 200;
+  font-weight: 300;
   text-decoration: none;
 }
 a:hover {
@@ -136,7 +136,7 @@ a:focus, a:hover {
     position: absolute;
     font-weight: 200;
     margin-left: 55px;
-    padding-top: 25px;
+    padding-top: 27px;
     padding-bottom: 1px;
 }
 
