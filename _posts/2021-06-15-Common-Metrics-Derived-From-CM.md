@@ -46,6 +46,7 @@ Accuracy (ACC) is the most widely-used metric in classification models. It is a 
 
 $$
 ACC = \frac{TP + TN}{TP + FN + TN + FP}  
+ \tag{2}
 $$
 
 Accuracy works best if the class labels are uniformly distributed.  
@@ -58,7 +59,6 @@ $$\text{CM} =
  990 & 0 \\
    10 & 0
  \end{array}\right]
- \tag{2}
 $$
   
 According to the accuracy, the classifier's performance would be nearly perfect ($$=99\%$$). Which is clearly misleading, since the model doesn't detect a single  positive instance.  Hence, accuracy is not an adequate performance measure in this case or any other imbalanced dataset.
@@ -297,6 +297,7 @@ print(f"1. Method: SPEC = {spec}")
 ## Summary
 
 In this article, we presented some of the common scores derived from the confusion matrix. We also discussed:
+
 * their advantages and disadvantages and
 * When to use them and when not to.
 

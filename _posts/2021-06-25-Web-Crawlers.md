@@ -208,13 +208,13 @@ In order to extract the needed information we have to understand the DOM structu
 <div class="thecap"> DevTool in Action </div>
 </div>
 
-As we can see, all the movies are listed under the element `table` with the class attribute `table` and the titlesare under the element `a` with the class attribute `unstyled articleLink`:
+As we can see, all the movies are listed under the element `table` with the class attribute `table` and the titles are under the element `a` with the class attribute `unstyled articleLink`:
 
 ```python
 movies = soup.find('table', class_="table").find_all('a', class_="unstyled articleLink")
 ```
 
-That's it we are done.  
+That's it we are done. 
 
 Let's get it all together:
 
@@ -264,8 +264,8 @@ Science_Fiction & Fantasy: Black Panther (2018), The Wizard of Oz (1939), Avenge
 Art_House & International: Parasite (Gisaengchung) (2019), The Cabinet of Dr. Caligari (Das Cabinet des Dr. Caligari) (1920), Seven Samurai (Shichinin no Samurai) (1956).
 ```
 
-I hope that wasn't too confusing. If you want to learn more about web scraping you can visit the following [repos](https://github.com/skacem/TIL/tree/main/Python/Web%20Scraping).  
-
+I hope that wasn't too confusing. At least you've got a nice list of movies to watch next.  
+If you want to learn more about web scraping you can visit the following [repos](https://github.com/skacem/TIL/tree/main/Python/Web%20Scraping).  
 
 ## References
 
