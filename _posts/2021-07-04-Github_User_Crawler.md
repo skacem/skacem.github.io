@@ -14,16 +14,16 @@ preview_pic: /assets/0/scraping-gh.png
 
 ---
 
-This project is organized in two main sections:  
+This project is organized in two sections:  
 
-1. Importing followers or followings of a given user.
+1. Importing followers or "followings" of a given user.
 2. Extracting some data from each imported user.
 
 In the first section, we are going to crawl our own Github page to import the users we want to analyze. Since I've only three followers, I'm going to import my list of following, which contains around 70 users. In the second section we are going to extract from each user on the list, the info needed for the upcoming analysis. So let's get started.
 
 ## 1. Import a List of Users
 
-  The first thing we want to do, is importing the required modules for our code. I can think of four,  that I'm sure I'm going to use: `pandas`, `numpy`, `requests` and `bs4`:
+  The first thing we want to do, is importing the required modules for our code. The usual four: `pandas`, `numpy`, `requests` and `bs4`:
 
 ```python
 import pandas as pd
