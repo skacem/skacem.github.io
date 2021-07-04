@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Github Users Crawler"
+title: "Github Crawler"
 excerpt: "In the previous post, we learned the basics of web crawling and developed our first one-page crawler. In this post, we implement something more fun and challenging. Something that every Github user could use: a Github Users Crawler!How does it sound? 
 Disclaimer: This project is intended for Educational Purposes ONLY."
 author: "Skander Kacem"
