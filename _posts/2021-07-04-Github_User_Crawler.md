@@ -19,7 +19,8 @@ This project is organized in two sections:
 1. Importing followers or "followings" of a given user.
 2. Extracting some data from each imported user.
 
-In the first section, we will crawl our own Github page to import the users we intend to parse. Because I personally have just three followers on Github, I'm using my following list, which is about 70 users, as a reference. In the second part, we extract the necessary data from each user on that list. So here we go.
+In the first section, we will crawl my own Github page to import the users we intend to parse. Because I personally have just three followers on Github, I'm using my following list as a reference, which is about 70 users. In the second part, we extract the necessary data from each user on that list.  
+So here we go.
 
 ## 1. Import a List of Users
 
@@ -155,7 +156,7 @@ def extract_info(user):
     return [full_name, user, city, work, followers, following, likes, repos, contributions]
 ```
 
-As output we get a list with a total of nine elements, some of which could be 'NaN' - well, certainly not the user.
+As output we get a list with a total of nine features, some of which could be 'NaN' - well, certainly not the users alias.
 
 Finally, we call the `extract_info()` function for all users in a `for-loop` and then save the output as a `csv` file.
 
