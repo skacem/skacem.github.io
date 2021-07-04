@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: "Github Crawler"
-excerpt: "In the previous post, we learned the basics of web crawling and developed our first one-page crawler. In this post, we implement something more fun and challenging. Something that every Github user could use: a Github Users Crawler!How does it sound? 
+excerpt: "In the previous post, we learned the basics of web crawling and developed our first one-page crawler. In this post, we implement something more fun and challenging. Something that every Github user could use: a Github Users Crawler! How does it sound? 
 Disclaimer: This project is intended for Educational Purposes ONLY."
 author: "Skander Kacem"
 tags: 
@@ -19,7 +19,7 @@ This project is organized in two sections:
 1. Importing followers or "followings" of a given user.
 2. Extracting some data from each imported user.
 
-In the first section, we are going to crawl our own Github page to import the users we want to analyze. Since I've only three followers, I'm going to import my list of following, which contains around 70 users. In the second section we are going to extract from each user on the list, the info needed for the upcoming analysis. So let's get started.
+In the first section, we will crawl our own Github page to import the users we intend to parse. Because I personally have just three followers on Github, I'm using my following list, which is about 70 users, as a reference. In the second part, we extract the necessary data from each user on that list. So here we go.
 
 ## 1. Import a List of Users
 
@@ -167,8 +167,108 @@ for user in users:
 df = pd.DataFrame(results, columns=COLUMNS)
 df.to_csv('github_users_info.csv')
 ```
+Let's check the result:
+
+```python
+# display 5 random users
+df.sample(5)
+```
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th> Name </th>
+      <th> Nickname </th>
+      <th> City </th>
+      <th> Work </th>
+      <th> Followers </th>
+      <th> Following </th>
+      <th> Likes </th>
+      <th> Repos </th>
+      <th> Contributions [2021] </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>58</th>
+      <td>Alexandre Sanlim</td>
+      <td>alexandresanlim</td>
+      <td>Curitiba - PR, Brazil</td>
+      <td>@Avanade</td>
+      <td>281</td>
+      <td>77</td>
+      <td>254</td>
+      <td>31</td>
+      <td>3,020</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>Johannes Gontrum</td>
+      <td>jgontrum</td>
+      <td>Uppsala, Sweden</td>
+      <td>NaN</td>
+      <td>50</td>
+      <td>34</td>
+      <td>275</td>
+      <td>72</td>
+      <td>113</td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td></td>
+      <td>vxunderground</td>
+      <td>International</td>
+      <td>NaN</td>
+      <td>1.6k</td>
+      <td>0</td>
+      <td>10</td>
+      <td>4</td>
+      <td>1,007</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>Rahul Dave</td>
+      <td>rahuldave</td>
+      <td>Somerville, MA</td>
+      <td>Harvard University/univ.ai</td>
+      <td>334</td>
+      <td>1</td>
+      <td>31</td>
+      <td>121</td>
+      <td>93</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Pierian Data</td>
+      <td>Pierian-Data</td>
+      <td>Las Vegas, Nevada</td>
+      <td>Pierian Data Inc.</td>
+      <td>6k</td>
+      <td>0</td>
+      <td>1</td>
+      <td>18</td>
+      <td>7</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 We made it.  It wasn't hard, was it? I hope you enjoyed it!  
 In case you are interested in experimenting more with the program, a more usable Python program that summarizes everything we've done here can be found at this [repo](https://github.com/skacem/TIL/blob/3e4eaf87fb3dc34a45164cbb17d638a9e2ec31d2/Python/github_crawler.py).
 
-<a name="note1">1</a>: NaN is used as a placeholder for missing data consistently in pandas. No matter if it is a float, integer or string. And we want to save our results as a `pandas.DataFrame`[↩](#n1)
+---
+<a name="note1">1</a>: NaN is used as a placeholder for missing data consistently in pandas. No matter if it is a float, integer or string. And we want to save our results as a `pandas.DataFrame`.[↩](#n1)
