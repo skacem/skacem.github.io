@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: "Github Crawler"
-excerpt: "In the previous post, we learned the basics of web crawling and developed our first one-page crawler. In this post, we implement something more fun and challenging. Something that every Github user could use: a Github Users Crawler! How does it sound? 
+excerpt: "In the previous post, we learned the basics of web crawling and developed our first one-page crawler. In this post, we implement something more fun and challenging. Something that every Github user could use: a Github Users Crawler.
 Disclaimer: This project is intended for Educational Purposes ONLY."
 author: "Skander Kacem"
 tags: 
@@ -19,14 +19,15 @@ This project is organized in two sections:
 1. Importing followers or "followings" of a given user.
 2. Extracting some data from each imported user.
 
-In the first section, we will crawl my own Github page to import the users we intend to parse. Because I personally have just three followers on Github, I'm using my following list as a reference, which is about 70 users. In the second part, we extract the necessary data from each user on that list.  
+In the first section, we will crawl my own Github page to import the users we intend to parse. Because I  have just three followers on my Github, I'm using my following list as a reference, which is about 70 users. In the second part, we extract the necessary data from each user on that list.  
 So here we go.
 
 ## 1. Import a List of Users
 
-  The first thing we want to do, is importing the required modules for our code. The usual four: `pandas`, `numpy`, `requests` and `bs4`:
+  The first thing we want to do, is importing the required modules for our code.  
 
 ```python
+# the usual four
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup as bs
@@ -50,7 +51,7 @@ COLUMNS  =  [ 'Name', 'Nickname', 'City', 'Work',
 
 ```  
 
-Now we can start drafting a function that returns a list of followers from a specified Github page. We need to keep in mind that a maximum of 50 users will be displayed per page. This means that in some cases we will have to iterate through more than one page, depending on the number of the corresponding followers:
+Now we can start drafting a function that returns a list of followers from a specified Github page. We need to keep in mind that per page a maximum of 50 users will be displayed. This means that in some cases we will have to iterate through more than one page, depending on the total number of followers:
 
 ```python
 
@@ -96,11 +97,11 @@ print(len(users))
     67
 
 Yes, the number of users I follow is correct.  All right!
-With that, the first part of the project is done. Now let's treat ourselves with a coffee break and then resume with second part of our cool project. :)
+With that, the first part of the project is done. Now let's treat ourselves with a coffee break and then resume with second part.
 
 ## 2. Extract Users Information
 
-The first part was quite straightforward. We only had to check the URL and the CSS class that render the users.  
+The first part was quite straightforward. We only had to check the URL and the CSS class that renders the users.  
 The second part of the project is a bit more challenging. We need to determine the CSS class of each chunk of data we plan to extract. This is usually done using the browser's Devtools. It takes trial and error to find the DOM path to the specific element in question. Usually there are different paths to target the very same element, the main rules here are "keep it simple" and "practicality beats purity".
 
 Note, a missing information might disrupt the normal flow of our program and cause it to terminate abruptly. To avoid this, we catch such an exception and assign `np.NaN`<sup id='n1'>[1](#note1)</sup> to the corresponding variable.  
@@ -268,8 +269,9 @@ df.sample(5)
 </table>
 </div>
 
-We made it.  It wasn't hard, was it? I hope you enjoyed it!  
-In case you are interested in experimenting more with the program, a more usable Python program that summarizes everything we've done here can be found at this [repo](https://github.com/skacem/TIL/blob/3e4eaf87fb3dc34a45164cbb17d638a9e2ec31d2/Python/github_crawler.py).
+Looks good, right? I hope you enjoyed it!  
+
+In case you are interested in experimenting more with the github crawler, a more useable Python code that summarizes everything we've done here can be found in [here](https://bit.ly/2Um27nF).
 
 ---
 <a name="note1">1</a>: NaN is used as a placeholder for missing data consistently in pandas. No matter if it is a float, integer or string. And we want to save our results as a `pandas.DataFrame`.[↩](#n1)
