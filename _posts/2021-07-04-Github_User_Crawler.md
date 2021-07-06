@@ -13,7 +13,6 @@ katex: true
 preview_pic: /assets/0/scraping-gh.png
 
 ---
-## Motivation
 
 In the previous post, we learned the basics of web crawling and developed our first one-page crawler. In this post, we implement something more fun and challenging. Something that every Github user could use: a Github Users Crawler.  
 
@@ -78,7 +77,14 @@ def get_followers(user, what='followers'):
             break
             
         soup = bs(html, 'lxml')
+
+        # Users nickname is wrapped in a span element with the class Link--secondary.
+        # Here we call .find_all() method, which returns an iterable containing  
+        # all users nicknames
         nicknames = soup.find_all('span', class_='Link--secondary')
+
+        # Here we iterate through the nickname elements.
+        # To get rid of the HTML code and return only the text content as a string we use `.text`.
         for nickname in nicknames:
             results.append(nickname.text)
         
@@ -90,6 +96,7 @@ To do this, we simply replace `followers` in the URL with `following`:
 
 ```python
 def get_followings(user):
+    # Switch followers with following
     return get_followers(user, what='following')
 ```
 Now let's call the above function and check if everything is working.
@@ -108,7 +115,12 @@ With that, the first part of the project is done. Now let's treat ourselves with
 The first part was quite straightforward. We only had to check the URL and the CSS class that renders the users.  
 The second part of the project is a bit more challenging. We need to determine the CSS class of each piece of information we plan to extract. This is usually done using the browser's Devtools. It takes trial and error to find the DOM path to the specific element in question. Usually there are different paths to target the very same element, the fundamental rules here are "keep it simple" and "practicality beats purity".
 
-Note, a missing information might disrupt the normal flow of our program and cause it to terminate abruptly. To avoid this, we catch such an exception and assign `np.NaN`<sup id='n1'>[1](#note1)</sup> to the corresponding variable.  
+Note, a missing information might disrupt the normal flow of our program and cause it to terminate abruptly by throwing the following exception: 
+```python
+AttributeError: 'NoneType' object has no attribute 'text'
+```
+Indeed, you will run quite often into this kind of error, when you are scraping data from the internet.
+To avoid this, we usually catch such an exception and assign `np.NaN`<sup id='n1'>[1](#note1)</sup> to the corresponding variable.  
 That being said, we can start writing a method to extract the needed information of a given user:
 
 ```python
@@ -118,12 +130,20 @@ def extract_info(user):
     html = requests.get(user_gh, headers=HEADER, timeout=10)
     soup = bs(html.text, 'lxml')
     
-    # extract info
+    # Extract the needed info of the given user.
+    # It turns out that each chunk of data we are looking for has a unique identifier in 
+    # form of attribute or class. That shows how clean is Github's HTML code.
+    # So no need for a find_all() or a concatenation of many `.find()`,  a unique .find() method will make the job. 
+    # The .strip() removes the superfluous whitespaces at the beginning and the end of the
+    # obtained string.
+    # Not all users entered their full name, city or work. So we need to catch the following exception:
+    # AttributeError: 'NoneType' object has no attribute 'text'
+    # We do so by using try and except. 
     try :
         full_name = soup.find('span', attrs={'itemprop':'name'}).text.strip()
     except:
+        # However, I would recommend you to specify the exception accurately and not to write such a general catch method.
         full_name = np.NAN
-    
     try:
         city = soup.find('span', class_='p-label').text.strip()
     except:
@@ -140,13 +160,12 @@ def extract_info(user):
         contributions = soup.find('h2', class_='f4 text-normal mb-2').text.split()[0]
     except:
         contributions = np.NAN
-        
+
     numbers = soup.find_all('span', class_='text-bold color-text-primary')
     try:
         followers = numbers[0].text
     except:
         followers = np.NAN
-    
     try:
         following = numbers[1].text
     except:
