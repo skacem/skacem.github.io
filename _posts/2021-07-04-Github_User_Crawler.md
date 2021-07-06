@@ -14,6 +14,9 @@ preview_pic: /assets/0/scraping-gh.png
 
 ---
 
+In the previous post, we learned the basics of web crawling and developed our first one-page crawler. In this post, we implement something more fun and challenging. Something that every Github user could use: a Github Users Crawler.  
+**Disclaimer**: This project is intended for Educational Purposes ONLY.
+
 This project is organized in two sections:  
 
 1. Importing followers or "followings" of a given user.
@@ -22,7 +25,7 @@ This project is organized in two sections:
 In the first section, we will crawl my own Github page to import the users we intend to parse. Because I  have just three followers on my Github, I'm using my following list as a reference, which is about 70 users. In the second part, we extract the data from each user on that list.  
 So here we go.
 
-## 1. Import a List of Users
+## GET a List of Users
 
   The first thing we want to do, is importing the required modules for our code.  
 
@@ -99,7 +102,7 @@ print(len(users))
 Yes, the number of users I follow is correct.  All right!
 With that, the first part of the project is done. Now let's treat ourselves with a coffee break and then resume with second part.
 
-## 2. Extract Users Information
+## Extract Users Information
 
 The first part was quite straightforward. We only had to check the URL and the CSS class that renders the users.  
 The second part of the project is a bit more challenging. We need to determine the CSS class of each piece of information we plan to extract. This is usually done using the browser's Devtools. It takes trial and error to find the DOM path to the specific element in question. Usually there are different paths to target the very same element, the fundamental rules here are "keep it simple" and "practicality beats purity".
