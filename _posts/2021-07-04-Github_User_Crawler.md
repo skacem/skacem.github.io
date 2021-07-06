@@ -297,7 +297,7 @@ Looks good, right?!
 ## Conclusion
 
 I hope this brief introduction to BeautifulSoup in combination with Requests has given you an idea of the power and simplicity of web scraping and crawling. Virtually any information can be extracted from any HTML (or XML) file, no matter how clean or messy the source code is, as long as it has some identifying tag surrounding it or nearby. You can start your crawler overnight and come back the next day to find thousands of entries. Just make sure that the normal flow of your crawling program is not interrupted by some kind of exceptions. Consequently, the tedious part of the script is to find a robust DOM path to the piece of information in question. There is no secret receipt for this. You can access the same information in different ways. Depending on the quality of the HTML's code, it is either straightforward or we need some trial and error with the browser's devtools to find a way to the targeted element.  However, some knowledge of CSS and JavaScript would be very helpful to this end.  
-And in case you are interested in experimenting more with the github crawler, a more useable Python code that summarizes everything we've done here can be found in [here](https://bit.ly/2Um27nF).
+And in case you are interested in experimenting more with the Github crawler, a more useable Python code that summarizes everything we've done here can be found in [here](https://bit.ly/2Um27nF).
 
 ---
 <a name="note1">1</a>: NaN is used as a placeholder for missing data consistently in pandas. No matter if it is a float, integer or string. And we want to save our results as a `pandas.DataFrame`.[↩](#n1)
