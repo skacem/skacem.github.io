@@ -84,7 +84,8 @@ def get_followers(user, what='followers'):
         nicknames = soup.find_all('span', class_='Link--secondary')
 
         # Here we iterate through the nickname elements.
-        # To get rid of the HTML code and return only the text content as a string we use `.text`.
+        # To get rid of the HTML code and return only the text content as a string, 
+        # we use `.text`.
         for nickname in nicknames:
             results.append(nickname.text)
         
@@ -133,16 +134,19 @@ def extract_info(user):
     # Extract the needed info of the given user.
     # It turns out that each chunk of data we are looking for has a unique identifier in 
     # form of attribute or class. That shows how clean is Github's HTML code.
-    # So no need for a find_all() or a concatenation of many `.find()`,  a unique .find() method will make the job. 
+    # So no need for a find_all() or a concatenation of many `.find()`,  
+    # a unique .find() method will make the job. 
     # The .strip() removes the superfluous whitespaces at the beginning and the end of the
     # obtained string.
-    # Not all users entered their full name, city or work. So we need to catch the following exception:
+    # Not all users entered their full name, city or work. 
+    # So we need to catch the following exception:
     # AttributeError: 'NoneType' object has no attribute 'text'
     # We do so by using try and except. 
     try :
         full_name = soup.find('span', attrs={'itemprop':'name'}).text.strip()
     except:
-        # However, I would recommend you to specify the exception accurately and not to write such a general catch method.
+        # However, I would recommend you to specify the exception accurately,
+        # and not to write such a general catch method.
         full_name = np.NAN
     try:
         city = soup.find('span', class_='p-label').text.strip()
