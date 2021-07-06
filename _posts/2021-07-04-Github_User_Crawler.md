@@ -13,9 +13,9 @@ katex: true
 preview_pic: /assets/0/scraping-gh.png
 
 ---
+## Motivation
 
 In the previous post, we learned the basics of web crawling and developed our first one-page crawler. In this post, we implement something more fun and challenging. Something that every Github user could use: a Github Users Crawler.  
-**Disclaimer**: This project is intended for Educational Purposes ONLY.
 
 This project is organized in two sections:  
 
@@ -25,6 +25,7 @@ This project is organized in two sections:
 In the first section, we will crawl my own Github page to import the users we intend to parse. Because I  have just three followers on my Github, I'm using my following list as a reference, which is about 70 users. In the second part, we extract the data from each user on that list.  
 So here we go.
 
+**Disclaimer**: This project is intended for Educational Purposes ONLY.
 ## GET a List of Users
 
   The first thing we want to do, is importing the required modules for our code.  
