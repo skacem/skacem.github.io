@@ -7,8 +7,7 @@ author: "Skander Kacem"
 tags: 
   - Machine Learning 
   - Confusion Matrix 
-  - Evaluation Metric
-  - F1-Score
+  - Evaluation Metrics
 katex: true
 preview_pic: /assets/0/SPS_dist.gif
 ---
@@ -27,9 +26,7 @@ Confusion matrix is a basic instrument in machine learning used to depict the ou
 which together comprise the 2 x 2 Confusion Matrix (CM):
 
 $$\text{CM} = 
-\left[\begin{array}{cc} TN & FP \\ FN & TP \end{array}\right],
-\tag{1}
-$$
+\left[\begin{array}{cc} TN & FP \\ FN & TP \end{array}\right],$$
 
 where:
 
@@ -46,7 +43,6 @@ Accuracy (ACC) is the most widely-used metric in classification models. It is a 
 
 $$
 ACC = \frac{TP + TN}{TP + FN + TN + FP}  
- \tag{2}
 $$
 
 Accuracy works best if the class labels are uniformly distributed.  
@@ -95,10 +91,7 @@ print(f"2. Method: ACC = {acc}")
 
 Precision (PREC) is the ratio of correct positive predictions out of all positive predictions made, or the accuracy of predicted positives. It is defined as follows:
 
-$$
-PREC = \frac{TP}{TP + FP}  
-\tag{3}
-$$
+$$PREC = \frac{TP}{TP + FP}$$
 
 As we can see from the equation above, a model that produces no false positives has a precision of $$100\%$$, no matter how many true positives it classifies. It could be one or all of them. In fact, precision doesn't care  how many positive instances there are in the dataset ($$TP + FN$$). It only cares about the ones it predicts ($$TP + FP$$). This metric is important when the cost of $$FP$$ is particularly high and/or $$TP$$s are rare.
 
@@ -180,7 +173,7 @@ Recall (also known as sensitivity) is defined as follows:
 
 $$
 REC = \frac{TP}{TP + FN}
-\tag{4}
+ {4}
 $$
 
  It is the ratio of correct predicted positives to the total number of real positives. It is about completeness, classifying all instances as positive yields 100% recall, but a very low precision. Recall tells you how often your predictions actually capture the positive class!
@@ -191,7 +184,7 @@ Let's compute the recall of the previous example, where
  \left[\begin{array}{cc} 1 & 9 \\ 0 & 990 \end{array}\right]
  $$
 
-$$REC = \frac{1}{1 + 9} = 0.1$$. Well, that was a low score. Which was in line with our expectation.  This is because precision and recall are often in tension. That is, an improvement in precision typically worsens recall and vice versa. 
+$$REC = \frac{1}{1 + 9} = 0.1$$. Well, that was a low score. Which was in line with our expectation.  This is because precision and recall are often in tension. That is, an improvement in precision typically worsens recall and vice versa.  
 
 ```python
 # Imports
@@ -226,7 +219,6 @@ To make a summary out of them, we usually use the F1-Score, also known as a harm
 
 $$
 F_1 = 2\times\frac{PREC.REC}{PREC + REC}
-\tag{5}
 $$
 
 We use the harmonic mean instead of a simple average because it punishes extreme values.  There are other metrics for combining precision and recall, such as the Geometric Mean of precision and recall, but the F1 score is the most commonly used.
@@ -260,17 +252,12 @@ print(f"2. Method: F1-Score = {f1}")
 
 Specificity is the ability of a model to correctly predict negative instances. It is defined as follows:
 
-$$
-SPEC = \frac{TN}{TN + FP}
-\tag{6}
-$$
+$$ SPEC = \frac{TN}{TN + FP} $$
 
 Specificity is usually combined with sensitivity. Their combination uses all four numbers in the confusion matrix, as opposed to precision and recall which only use three.  
 To make a summary out of them, we usually use the geometric mean, which is defined as the square root of the product:
 
-$$ G = \sqrt{sensitivity \times specificity} 
-\tag{7}
-$$
+$$ G = \sqrt{sensitivity \times specificity}$$
 
 This formula has the beneficial property of averaging out both scores while penalizing unbalanced pairs.
 
