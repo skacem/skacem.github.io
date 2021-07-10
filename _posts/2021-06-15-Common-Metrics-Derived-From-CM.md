@@ -173,7 +173,6 @@ Recall (also known as sensitivity) is defined as follows:
 
 $$
 REC = \frac{TP}{TP + FN}
- {4}
 $$
 
  It is the ratio of correct predicted positives to the total number of real positives. It is about completeness, classifying all instances as positive yields 100% recall, but a very low precision. Recall tells you how often your predictions actually capture the positive class!
