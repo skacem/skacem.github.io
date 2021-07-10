@@ -2,6 +2,13 @@
 
 '''
 This script creates tags for your Jekyll blog hosted by Github page.
+Only if tags are written as follows:
+---
+tags:
+  - tag1
+  - tag2
+  ...
+---
 No plugins required.
 '''
 
