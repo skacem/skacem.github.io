@@ -31,9 +31,9 @@ for filename in filenames:
     next_line_tag = False
     for line in f:
         content = line.strip()
-        if (line.strip() == '---' and crawl == False) :
-                crawl = True
-                continue
+        if (line.strip() == '---' and crawl == False):
+            crawl = True
+            continue
         if line.strip() == 'tags:':
             next_line_tag = True
             continue
@@ -43,10 +43,10 @@ for filename in filenames:
             tag = [tag.replace('- ', '')]
             total_tags += tag
 
-        if (line.strip() == '---' and crawl == True) :
-                break
+        if (line.strip() == '---' and crawl == True):
+            break
     total_tags
-        
+
     f.close()
 total_tags = set(total_tags)
 
@@ -57,7 +57,8 @@ for tag in old_tags:
 for tag in total_tags:
     tag_filename = tag_dir + tag + '.md'
     f = open(tag_filename, 'a')
-    write_str = '---\nlayout: tagpage\ntitle: \"Tag: ' + tag + '\"\ntag: ' + tag + '\ncategory: tag' + '\nrobots: noindex\n---\n'
+    write_str = '---\nlayout: tagpage\ntitle: \"Tag: ' + tag + \
+        '\"\ntag: ' + tag + '\ncategory: tag' + '\nrobots: noindex\n---\n'
     f.write(write_str)
     f.close()
 print("Tags generated, count", total_tags.__len__())
