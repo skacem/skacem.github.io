@@ -4,26 +4,38 @@ comments: true
 title: "Plotting with Seaborn - Part 2"
 excerpt: "Seaborn provides a high-level interface to Matplotlib and is compatible with Pandas’ data structures. Given a pandas DataFrame and a specification of the plot to be created, seaborn automatically converts the data values into visual attributes, internally computes statistical transformations and decorates the plot with informative axis labels and legends. In other words, seaborn saves you all the effort you would normally need to put into creating figures with matplotlib."
 author: "Skander Kacem"
-tags: [Visualization, tutorial, Seaborn]
+tags: 
+    - Visualization
+    - Tutorial
+    - Seaborn
+    - Python
 katex: true
 preview_pic: /assets/0/seabornp2.png
 ---
 
 ## Faceting
 
-One powerful technique in data visualization, particularly when exploring multidimensional data sets, is to create multiple versions of the same plot with several subsets of that data alongside each other, sharing the same scale and axis.  This allows a lot of information to be presented compactly and in a comparable way. It is related to the idea of ["small multiples"](https://en.wikipedia.org/wiki/Small_multiple) (also known as trellis or lattice) first introduced by Eadweard Muybridge and then popularized by Edward Tufte [1].
+One powerful technique in data visualization, particularly when exploring multidimensional data sets, is to create multiple versions of the same plot with several subsets of that data alongside each other, sharing the same scale and axis.  This allows a lot of information to be presented compactly and in a comparable way. 
+
+<div class="imgcap">
+<img src="/assets/4/Horse_in_Motion.jpg" style="zoom:50%;" alt="The horse in motion by Eadweard Muybridge as one of the first small multiple technique"/>
+<div class="thecap"> The Horse in Motion by Eadweard Muybridge</div></div>
+
+
+It is related to the idea of ["small multiples"](https://en.wikipedia.org/wiki/Small_multiple) (also known as trellis or lattice) first introduced by Eadweard Muybridge and then popularized by Edward Tufte [1].
 
 > At the heart of quantitative reasoning is a single question: *Compared to what?* Small multiple designs, multivariate and data bountiful, answer directly by visually enforcing comparisons of changes, of the differences among objects, of the scope of alternatives. For a wide range of problems in data presentation, small multiples are the best design solution. -- Edward Tufte, 1990
 
 While this may sound intuitive, it is very tedious to produce unless you use the right visualization library.   
-One of the most powerful aspects of the seaborn  is how easy it is to create these types of plots. With a single command, you can split a given plot into many related plots using: `FacetGrid()`, `JoinGrid()` or `PairGrid()`.
+One of the most powerful aspects of the seaborn  is how easy it is to create these types of plots. With a single command, you can split a given plot into many related plots using: `FacetGrid()`, `JointGrid()` or `PairGrid()`.
 
 In the following we'll put these seaborn's classes in action, and see why they are so useful.
 
-## FacetGrid
+## Faceting with Seaborn
+
+### FacetGrid
 
 The most basic utility provided by seaborn for faceting is the FacetGrid. It is an object that specifies how to split the layout of the data to be visualized. It partitions a figure into a matrix of axes defined by row and column faceting variables. It is most useful when you have two discrete variables, and all combinations of the variables exist in the data..  A third dimension can be added by specifying a hue parameter.
-
 
 For example, suppose that we're interested in comparing male and female penguins of each specie in some way. To do this, we start by importing the required modules, setting the notebook environment and loading the penguins dataset as pandas DataFrame:
 
@@ -62,6 +74,7 @@ Each facet is labeled at the top. The overall layout minimizes the duplication o
 We then use the `FacetGrid.map()` method to plot the data on the instantiated grid object.
 
 ```python
+plt.style.use('bmh')
 # plot a histogram 
 g.map(sns.histplot, 'body_mass_g', binwidth=200, kde=True)
 
@@ -70,26 +83,31 @@ g.set_axis_labels('Body Mass (g)', "Count")
 ```
 
 <div class="imgcap">
-<img src="/assets/4/facetGrid2.png" style="zoom:90%;" alt="3x2 body mass facets generated with FacetGrid"/>
+<img src="/assets/4/facetGrid2.png" style="zoom:120%;" alt="3x2 body mass facets generated with FacetGrid"/>
 <div class="thecap"> </div></div>
 
-Now, the function we pass to the `map` method doesn't have to be a seaborn plotting function. It accepts any kind of function you'd like as long as that function has a data argument.  
-So, let's define our own custom  function, which compute the average of a given variable and displays it on all facets:
+Now, the function we pass to the `map` method doesn't have to be a seaborn or matplotlib plotting function. It can handle any type of function as long as it meets the following requirements:
 
+1. It must plot on the "currently active" matplotlib `axes`. This applies to functions in the `matplotlib.pyplot` namespace. In fact you can call `matplotlib.pyplot.gca()` to get a reference to the current `axes` if you intend to use their methods.
+2. It must accept the data that it plots as arguments.
+3. It must have a generic dictionary of `**kwargs` and pass it along to the underlying plotting function.
 
+So let's define our own custom function according to the above requirements. The function is supposed to compute the average of a given variable and add it as a dashed line to the currently active `axes`.
 
 ```python
-def add_mean(data, var, **kws):
-    # Author @kimfetti
+def add_mean(data, var, **kwargs):
 
+    # 1. requirement
     # Calculate mean for each group
     m = np.mean(data[var])
     
+    # 2. requirement
     # Get current axis
     ax = plt.gca()
     
+    # 3. requirement
     # Add line at group mean
-    ax.axvline(m, color='maroon', lw=3, ls='--')
+    ax.axvline(m, color='maroon', lw=3, ls='--', **kwargs)
     
     # Annotate group mean
     x_pos=0.6
@@ -101,7 +119,7 @@ def add_mean(data, var, **kws):
 
 ```
 
-Let's go ahead and plot the same figure as above, but without the histograms. On top of that we will be adding our own custom function for computing the mean:
+Let's go ahead and plot the same figure as above, but without the histograms and on top of that we will be adding our own custom function.
 
 ```python
 g = sns.FacetGrid(penguins, row='sex', col='species', hue='species', height=6, aspect=1)
@@ -118,16 +136,34 @@ As you might notice, instead of using the `map()` method to call our custom func
 <img src="/assets/4/facetGrid3_1.png" style="zoom:90%;" alt="3x2 body mass facets generated with FacetGrid"/>
 <div class="thecap"> </div></div>
 
-
 As you can see, FacetGrid is simple yet powerful.  In just a few lines and without thinking about the layout and the appearance, you can elegantly convey a great deal of information. In my opinion, this is a vastly under-used technique in visualization and should actually be part of every exploratory data analysis, whether your goal is a report or a model.
 
+FacetGrid serves as a backbone for the following figure-level functions: `relplot()`, `catplot()`, `lmplot()` and `displot()`. In fact, it is strongly recommended to use one of these functions instead of using FacetGrid directly, particularly if you are using seaborn functions that infer semantic mappings from the dataset within your facets.
+
+### PairGrid
+
+PairGrid is another class provided by seaborn for faceting. It shows pairwise relationships between data elements. Unlike FacetGrid, it uses different variable pairs for each facet.  
+The usage of PairGrid is similar to facetGrid. We start by calling the PairGrid constructor in order to initialize the facet grid and then call the plotting functions.  
+
+```python
+plt.style.use('seaborn-paper')
+g = sns.PairGrid(penguins, diag_sharey=False, hue="species", palette="Set2")
+g.map_upper(sns.scatterplot)
+g.map_diag(sns.histplot, hue=None, legend=False, color='palevioletred', kde=True, bins=8, lw=.3)
+g.map_lower(sns.kdeplot, lw=.1)
+g.add_legend();
+```
+
+<div class="imgcap">
+<img src="/assets/4/pairGrid1.png" style="zoom:90%;" alt="Penguins Pairgrid using different plotting functions"/>
+<div class="thecap"> </div></div>
 
 
 
-serves as the backbone for `relplot()`, `catplot()`, `lmplot()` and `displot()`. 
 
 
 
+It is the backbone of the figure-level function `pairplot()`.
 
 
 
