@@ -143,13 +143,25 @@ FacetGrid serves as a backbone for the following figure-level functions: `relplo
 ### PairGrid
 
 PairGrid is another class provided by seaborn for faceting. It shows pairwise relationships between data elements. Unlike FacetGrid, it uses different variable pairs for each facet.  
-The usage of PairGrid is similar to facetGrid. We start by calling the PairGrid constructor in order to initialize the facet grid and then call the plotting functions.  
+
+The usage of PairGrid is similar to facetGrid. We start by calling the PairGrid constructor in order to initialize the facet grid and then call the plotting functions.  In the following example we are going to use the iris dataset from seaborn.
 
 ```python
+# Load the iris dataset
+iris = sns.load_dataset('iris')
+
+# Set the plotting style
 plt.style.use('seaborn-paper')
-g = sns.PairGrid(penguins, diag_sharey=False, hue="species", palette="Set2")
+
+# Initiate the PairGrid instance
+g = sns.PairGrid(iris, diag_sharey=False, hue="species", palette="Set2")
+
+# Scatter plots on the upper triangle
 g.map_upper(sns.scatterplot)
+# Kde on the diagonal
 g.map_diag(sns.histplot, hue=None, legend=False, color='palevioletred', kde=True, bins=8, lw=.3)
+
+
 g.map_lower(sns.kdeplot, lw=.1)
 g.add_legend();
 ```
@@ -159,14 +171,60 @@ g.add_legend();
 <div class="thecap"> </div></div>
 
 
+PairGrid serves as the backbone to the figure-level function `pairplot()`. W, unless you need more flexibility in generating your plots.
+
+### JointGrid
+
+JointGrid is another facet class from seaborn. It combines univariate plots such as histograms, rug plots, and KDE plots with bivariate plots such as scatter and regression.  
+Let's create a JointGrid instance without plots, to see how it looks like.
+
+```python
+g = sns.JointGrid(data=[])
+```
+
+<div class="imgcap">
+<img src="/assets/4/jointGrid1.png" style="zoom:90%;" alt="JointGrid default layout"/>
+<div class="thecap"> </div></div>
+
+The middle, large axes, referred to as joint axes, is intended for bivariate plots such as scatter and regression. The other two axes, known as marginal axes, are meant for univariate plots.  
+The simplest plot method, `plot()`, takes a pair of functions: one for the joint axes and one for the two marginal axes.
+
+```python
+tips = sns.load_dataset('tips')
+g = sns.JointGrid(x="total_bill", y="tip", data=tips, hue="time", palette="magma")
+g = g.plot(sns.scatterplot, sns.histplot)
+```
+
+<div class="imgcap">
+<img src="/assets/4/jointGrid2.png" style="zoom:100%;" alt="JointGrid with tips dataset and time as hue parameter"/>
+<div class="thecap"> </div></div>
+
+If you prefer to use different arguments for each function then you should use the following `JointGrid` class methods: `plot_joint()` and `plot_marginals()`.
+
+```python
+# Let's use the penguins dataset again
+g = sns.JointGrid(data=penguins, x="bill_length_mm", 
+                  y="bill_depth_mm", hue="species", palette="Set1")
+# Histplot with kde on both marginal axes
+g.plot_marginals(sns.histplot,  kde=True, hue=None, legend=False, element='step')
+# kde and scatter plots on the joint axes
+g.plot_joint(sns.kdeplot, levels=4)
+g.plot_joint(sns.scatterplot)
+```
+
+<div class="imgcap">
+<img src="/assets/4/jointGrid3.png" style="zoom:100%;" alt="JointGrid with penguins dataset and species as hue parameter using plot_marginal() and plot_joint()"/>
+<div class="thecap"> </div></div>
 
 
 
+JointGrid serves also as a backbone for a figure-level function and it is recommended to use the figure-level function `jointplot()` instead of JointGrid.
 
-It is the backbone of the figure-level function `pairplot()`.
+Let me briefly show you an example. This time we are using the tips dataset.
 
-
-
+```python 
+tips = sns.load_dataset('tips')
+```
 
 
 
