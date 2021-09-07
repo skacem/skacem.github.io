@@ -15,19 +15,19 @@ preview_pic: /assets/0/seabornp2.png
 ---
 
 
-In this part of the tutorial, we will look at more advanced visualization techniques for exploring multivariate and complex data sets, including conditional small multiples and pairwise data relationships. Namely, 
+In this part of the tutorial, we will look at more advanced visualization techniques for exploring multivariate and complex datasets, including conditional small multiples and pairwise data relationships. Namely, 
 when exploring multidimensional data, it is useful to draw multiple instances of the same representation for different subsets of your data. This type of representation is also known as faceting and is related to the idea of small multiples.  
 
 ## Faceting
 
-One powerful technique in data visualization, particularly when exploring multidimensional data sets, is to create multiple versions of the same plot with several subsets of that data alongside each other, sharing the same scale and axis.  This allows a lot of information to be presented compactly and in a comparable way. 
+One powerful technique in data visualization, particularly when exploring multidimensional datasets, is to create multiple versions of the same plot with several subsets of that data alongside each other, sharing the same scale and axis.  This allows a lot of information to be presented compactly and in a comparable way.  
 
 <div class="imgcap">
 <img src="/assets/4/Horse_in_Motion.jpg" style="zoom:50%;" alt="The horse in motion by Eadweard Muybridge as one of the first small multiple technique"/>
 <div class="thecap"> The Horse in Motion by Eadweard Muybridge</div></div>
 
 
-It is related to the idea of ["small multiples"](https://en.wikipedia.org/wiki/Small_multiple) (also known as trellis or lattice) first introduced by Eadweard Muybridge and then popularized by Edward Tufte [1].
+It is related to the idea of ["small multiples"](https://en.wikipedia.org/wiki/Small_multiple) (also known as trellis or lattice) first introduced by Eadweard Muybridge, around 1880, and popularized by Edward Tufte [1].
 
 > At the heart of quantitative reasoning is a single question: *Compared to what?* Small multiple designs, multivariate and data bountiful, answer directly by visually enforcing comparisons of changes, of the differences among objects, of the scope of alternatives. For a wide range of problems in data presentation, small multiples are the best design solution. -- Edward Tufte, 1990
 
@@ -303,7 +303,7 @@ g = sns.jointplot(data=penguins, x="bill_length_mm", y="bill_depth_mm",
 ## Wrapping Up
 
 With this series of visualization tutorials we have covered the most important aspects of seaborn.  
-In the first part, we introduced the matplotlib figure grammar and then discussed some common types of plots and their use cases, using only axis-level functions.  
+In the first part, we introduced the matplotlib figure grammar and then discussed some common types of plots and their use cases, using only axes-level functions.  
 In the second part of the tutorial, we looked at more advanced visualization techniques that use figure-level functions to analyze multivariate data, such as conditional small multiples and pairwise data relationships. 
 
 Both parts focused on the power and simplicity of seaborn. After all, no matter what plotting technique you use, there is no universally best way to represent your data. Different questions are better answered with different plotting techniques. Seaborn just makes it easy for you to switch between different visual representations by providing a consistent high-level API, while internally taking care of the layout design along with performing the necessary statistical computations. So that your only concern is to understand the various elements of your plots, rather than wasting time on the technicalities of generating them.
