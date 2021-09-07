@@ -2,7 +2,8 @@
 layout: post
 comments: true
 title: "Plotting with Seaborn - Part 2"
-excerpt: "In the first part of this tutorial, we first introduced seaborn and showed how easy it was to create elegant yet professional plots with little code compared to matplotlib. Then, using different datasets, we explained the main types of plots for exploratory and explanatory data analysis. Each time, providing clarification on which plot works best in the given context.   All plot functions we used were axes-level functions.  So that, each plot can be used as a subplot on a non-Seaborn figure."
+excerpt: "In this part of the tutorial, we will look at more advanced visualization techniques for exploring multivariate and complex datasets, including conditional small multiples and pairwise data relationships. Namely, 
+when exploring multidimensional data, it is useful to draw multiple instances of the same representation for different subsets of your data. This type of representation is also known as \"faceting\" and is related to the idea of small multiples. In this way, a lot of information can be presented in a compact and comparable way. While this may sound intuitive, it is very tedious to create unless you use the figure-level functions provided by seaborn."
 author: "Skander Kacem"
 tags: 
     - Visualization
@@ -12,6 +13,10 @@ tags:
 katex: true
 preview_pic: /assets/0/seabornp2.png
 ---
+
+
+In this part of the tutorial, we will look at more advanced visualization techniques for exploring multivariate and complex data sets, including conditional small multiples and pairwise data relationships. Namely, 
+when exploring multidimensional data, it is useful to draw multiple instances of the same representation for different subsets of your data. This type of representation is also known as faceting and is related to the idea of small multiples.  
 
 ## Faceting
 
@@ -83,7 +88,7 @@ g.set_axis_labels('Body Mass (g)', "Count")
 ```
 
 <div class="imgcap">
-<img src="/assets/4/facetGrid2.png" style="zoom:120%;" alt="3x2 body mass facets generated with FacetGrid"/>
+<img src="/assets/4/facetGrid2.png" style="zoom:120%;" alt="3x2 scatter matrix  generated with FacetGrid using penguins dataset"/>
 <div class="thecap"> </div></div>
 
 Now, the function we pass to the `map` method doesn't have to be a seaborn or matplotlib plotting function. It can handle any type of function as long as it meets the following requirements:
@@ -133,7 +138,7 @@ g.add_legend()
 As you might notice, instead of using the `map()` method to call our custom function, we used the `map_dataframe()` method.
 
 <div class="imgcap">
-<img src="/assets/4/facetGrid3_1.png" style="zoom:90%;" alt="3x2 body mass facets generated with FacetGrid"/>
+<img src="/assets/4/facetGrid3_1.png" style="zoom:90%;" alt="kde as small multiple with mean annotation generated with FacetGrid "/>
 <div class="thecap"> </div></div>
 
 As you can see, `FacetGrid` is simple yet powerful.  In just a few lines and without thinking about the layout and the appearance, you can elegantly convey a great deal of information. In my opinion, this is a vastly under-used technique in visualization and should actually be part of every exploratory data analysis, whether your goal is a report or a model.
