@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: "Plotting with Seaborn - Part 2"
-excerpt: "Seaborn provides a high-level interface to Matplotlib and is compatible with Pandas’ data structures. Given a pandas DataFrame and a specification of the plot to be created, seaborn automatically converts the data values into visual attributes, internally computes statistical transformations and decorates the plot with informative axis labels and legends. In other words, seaborn saves you all the effort you would normally need to put into creating figures with matplotlib."
+excerpt: "In the first part of this tutorial, we first introduced seaborn and showed how easy it was to create elegant yet professional plots with little code compared to matplotlib. Then, using different datasets, we explained the main types of plots for exploratory and explanatory data analysis. Each time, providing clarification on which plot works best in the given context.   All plot functions we used were axes-level functions.  So that, each plot can be used as a subplot on a non-Seaborn figure."
 author: "Skander Kacem"
 tags: 
     - Visualization
@@ -35,7 +35,7 @@ In the following we'll put these seaborn's classes in action, and see why they a
 
 ### FacetGrid
 
-The most basic utility provided by seaborn for faceting is the FacetGrid. It is an object that specifies how to split the layout of the data to be visualized. It partitions a figure into a matrix of axes defined by row and column faceting variables. It is most useful when you have two discrete variables, and all combinations of the variables exist in the data..  A third dimension can be added by specifying a hue parameter.
+The most basic utility provided by seaborn for faceting is the `FacetGrid`. It is an object that specifies how to split the layout of the data to be visualized. It partitions a figure into a matrix of axes defined by row and column faceting variables. It is most useful when you have two discrete variables, and all combinations of the variables exist in the data..  A third dimension can be added by specifying a hue parameter.
 
 For example, suppose that we're interested in comparing male and female penguins of each specie in some way. To do this, we start by importing the required modules, setting the notebook environment and loading the penguins dataset as pandas DataFrame:
 
@@ -58,7 +58,7 @@ plt.style.use('fivethirtyeight')
 penguins = sns.load_dataset('penguins')
 ```
 
-Then we create an instance of the FacetGrid class with our data, telling it that we want to break the `sex` and `species` variables, by `row` and `col`. Since we have 3 species, we obtain a 2x3-grid of facets ready for us to plot something on them.  
+Then we create an instance of the `FacetGrid` class with our data, telling it that we want to break the `sex` and `species` variables, by `row` and `col`. Since we have 3 species, we obtain a 2x3-grid of facets ready for us to plot something on them.  
 
 ```python
 g = sns.FacetGrid(penguins, row='sex', col='species', aspect=1.75)
@@ -68,7 +68,7 @@ g.set_titles(row_template='{row_name}', col_template='{col_name} Penguins');
 <div class="imgcap">
 <img src="/assets/4/facetGrid1.png" style="zoom:90%;" alt="3x2 matrix of grids generated with FacetGrid"/>
 <div class="thecap"> </div></div>
-      
+
 Each facet is labeled at the top. The overall layout minimizes the duplication of axis labels and other scales.  
 
 We then use the `FacetGrid.map()` method to plot the data on the instantiated grid object.
@@ -136,15 +136,15 @@ As you might notice, instead of using the `map()` method to call our custom func
 <img src="/assets/4/facetGrid3_1.png" style="zoom:90%;" alt="3x2 body mass facets generated with FacetGrid"/>
 <div class="thecap"> </div></div>
 
-As you can see, FacetGrid is simple yet powerful.  In just a few lines and without thinking about the layout and the appearance, you can elegantly convey a great deal of information. In my opinion, this is a vastly under-used technique in visualization and should actually be part of every exploratory data analysis, whether your goal is a report or a model.
+As you can see, `FacetGrid` is simple yet powerful.  In just a few lines and without thinking about the layout and the appearance, you can elegantly convey a great deal of information. In my opinion, this is a vastly under-used technique in visualization and should actually be part of every exploratory data analysis, whether your goal is a report or a model.
 
-FacetGrid serves as a backbone for the following figure-level functions: `relplot()`, `catplot()`, `lmplot()` and `displot()`. In fact, it is strongly recommended to use one of these functions instead of using FacetGrid directly, particularly if you are using seaborn functions that infer semantic mappings from the dataset within your facets.
+`FacetGrid` serves as a backbone for the following figure-level functions: `relplot()`, `catplot()`, `lmplot()` and `displot()`. In fact, it is strongly recommended to use one of these functions instead of using `FacetGrid` directly, particularly if you are using seaborn functions that infer semantic mappings from the dataset within your facets.
 
 ### PairGrid
 
-PairGrid is another class provided by seaborn for faceting. It shows pairwise relationships between data elements. Unlike FacetGrid, it uses different variable pairs for each facet.  
+`PairGrid` is another class provided by seaborn for faceting. It shows pairwise relationships between data elements. Unlike `FacetGrid`, it uses different variable pairs for each facet.  
 
-The usage of PairGrid is similar to facetGrid. We start by calling the PairGrid constructor in order to initialize the facet grid and then call the plotting functions.  In the following example we are going to use the iris dataset from seaborn.
+The usage of `PairGrid` is similar to `FacetGrid`. We start by calling the `PairGrid` constructor in order to initialize the facet grid and then call the plotting functions.  In the following example we are going to use the iris dataset. To demonstrate the flexibility of `PairGrid`, I will use different different kind of plots with extra many arguments. The `PairGrid` object provides three plotting methods for different axes groups: `map_diag()`, `map_upper()` and `map_lower()`.
 
 ```python
 # Load the iris dataset
@@ -158,25 +158,34 @@ g = sns.PairGrid(iris, diag_sharey=False, hue="species", palette="Set2")
 
 # Scatter plots on the upper triangle
 g.map_upper(sns.scatterplot)
-# Kde on the diagonal
-g.map_diag(sns.histplot, hue=None, legend=False, color='palevioletred', kde=True, bins=8, lw=.3)
 
+# Histplot with kde on the diagonal
+g.map_diag(sns.histplot, hue=None, legend=False, color='darksalmon', 
+           kde=True, bins=8, lw=.3)
 
-g.map_lower(sns.kdeplot, lw=.1)
+# Kde without hue parameter on the lower triangle 
+g.map_lower(sns.kdeplot,  shade=True, lw=1, 
+            shade_lowest=False, n_levels=6, 
+            zorder=0, alpha=.7, hue=None,
+            color='mediumaquamarine')
+
 g.add_legend();
 ```
 
 <div class="imgcap">
-<img src="/assets/4/pairGrid1.png" style="zoom:90%;" alt="Penguins Pairgrid using different plotting functions"/>
+<img src="/assets/4/pairGrid2.png" style="zoom:100%;" alt="Penguins Pairgrid using different plotting functions"/>
 <div class="thecap"> </div></div>
 
+It is important to understand the difference between a `FacetGrid` and a `PairGrid`:
 
-PairGrid serves as the backbone to the figure-level function `pairplot()`. W, unless you need more flexibility in generating your plots.
+>In the former, each facet shows the same relationship conditioned on different levels of other variables. In the latter, each plot shows a different relationship (although the upper and lower triangles will have mirrored plots). Using PairGrid can give you a very quick, very high-level summary of interesting relationships in your dataset.
+
+`PairGrid` serves as the backbone to the high-level interface `pairplot()` and it is recommended to use it, unless you need more flexibility.
 
 ### JointGrid
 
-JointGrid is another facet class from seaborn. It combines univariate plots such as histograms, rug plots, and KDE plots with bivariate plots such as scatter and regression.  
-Let's create a JointGrid instance without plots, to see how it looks like.
+`JointGrid` is another facet class from seaborn. It combines univariate plots such as histograms, rug plots, and KDE plots with bivariate plots such as scatter and regression.  
+Let's create a `JointGrid` instance without plots, to see how it looks like.
 
 ```python
 g = sns.JointGrid(data=[])
@@ -192,7 +201,7 @@ The simplest plot method, `plot()`, takes a pair of functions: one for the joint
 ```python
 tips = sns.load_dataset('tips')
 g = sns.JointGrid(x="total_bill", y="tip", data=tips, hue="time", palette="magma")
-g = g.plot(sns.scatterplot, sns.histplot)
+g.plot(sns.scatterplot, sns.histplot)
 ```
 
 <div class="imgcap">
@@ -216,28 +225,86 @@ g.plot_joint(sns.scatterplot)
 <img src="/assets/4/jointGrid3.png" style="zoom:100%;" alt="JointGrid with penguins dataset and species as hue parameter using plot_marginal() and plot_joint()"/>
 <div class="thecap"> </div></div>
 
+`JointGrid` serves also as a backbone for a figure-level function.
+
+Now that we have some knowledge of axes-level plotting functions and understand how faceting in Seaborn works, we can finally move on to explore figure-level plotting functions.
 
 
-JointGrid serves also as a backbone for a figure-level function and it is recommended to use the figure-level function `jointplot()` instead of JointGrid.
+## Exploring Figure-Level Plotting Functions
 
-Let me briefly show you an example. This time we are using the tips dataset.
+The purpose of seaborn's figure-level functions is to facilitate the plotting process. They provide high-level interfaces with matplotlib through one of the classes discussed above, usually a `FacetGrid`, which manages the figure.  They also provide a uniform interface to their underlying axes-level functions -Remember the following figure from the previous tutorial. 
 
-```python 
-tips = sns.load_dataset('tips')
+<div class="imgcap">
+<img src="/assets/3/function_overview2.png" style="zoom:80%;" alt="Figure-level functions and their corresponting axes-level functions"/>
+<div class="thecap"> </div></div>
+
+Hence, you don't need to know the arguments and other details of the corresponding axes-level functions, nor do you need to know how to edit a matplotlib figure. It is perfectly fine to know only the arguments of the few figure-level functions provided by seaborn to generate very advanced figures, well unless you need more flexibility.
+
+So in this section, we basically won't cover anything that we haven't already addressed in earlier sections. It is more a showcase of the power of seaborn than a how-to guide for using the figure-level functions.
+### catplot
+
+`seaborn.catplot()` is a figure-level interface for drawing categorical plots onto a `FacetGrid`. The `kind` parameter specifies the underlying axes-level plotting function to use.  
+So let me show you how powerful and yet simple are these kind of high-level interfaces. For this purpose we will use the tips dataset.
+
+```python
+g = sns.catplot(data=tips, x='day', y='tip', row='sex', col='smoker', kind='violin')
 ```
 
+<div class="imgcap">
+<img src="/assets/4/catplot1.png" style="zoom:90%;" alt="catplot with violinplots in a facet grid"/>
+<div class="thecap"> </div></div>
 
+It's really impressive how much information we can capture with just one line of code. No other visualization library can compete with this.  Well, at least not that I knew of.  
+Let's take a look at another figure-level function.
+### lmplot
 
-[ ] Small Multiples
-[ ] 
+This figure-level function combine `regplot()` and `FacetGrid`.  It is designed to provide a convenient interface for fitting regression models across conditional subsets of a given dataset.
 
+```python
+sns.set_theme(color_codes=True)
+g = sns.lmplot(x="size", y="total_bill", hue="smoker", col="day",
+               data=tips, height=6, aspect=.4, x_jitter=.1)
+```
 
+<div class="imgcap">
+<img src="/assets/4/lmplot1.png" style="zoom:110%;" alt="lmplot"/>
+<div class="thecap"> </div></div>
 
+### pairplot
 
+`pairplot()` is a high-level interface for `PairGrid` class with the purpose to make it easy to plot a few common styles. However, if you need more flexibility, you should use `PairGrid` directly.
 
-In the first part of this long tutorial, we first introduced seaborn and showed how easy it was to create elegant yet professional plots with little code compared to matplotlib. Then, using different datasets, we explained the main types of plots for exploratory and explanatory data analysis. Each time, providing clarification on which plot works best in the given context.   All plot functions we used were axes-level functions.  So that, each plot can be used as a subplot on a non-Seaborn figure.
+```python
+g = sns.pairplot(iris, hue="species", corner=True)
+```
+
+<div class="imgcap">
+<img src="/assets/4/pairplot1.png" style="zoom:110%;" alt="pairplot"/>
+<div class="thecap"> </div></div>
+
+### jointplot
+
+`jointplot()` is also meant to provide a convenient high-level interface to `JointGrid`.
+
+```python
+g = sns.jointplot(data=penguins, x="bill_length_mm", y="bill_depth_mm", 
+               kind="scatter", palette="BuPu", hue='species')
+```
+
+<div class="imgcap">
+<img src="/assets/4/jointplot1.png" style="zoom:100%;" alt="jointplot method on penguins dataset"/>
+<div class="thecap"> </div></div>
+
+## Wrapping Up
+
+With this series of visualization tutorials we have covered the most important aspects of seaborn.  
+In the first part, we introduced the matplotlib figure grammar and then discussed some common types of plots and their use cases, using only axis-level functions.  
+In the second part of the tutorial, we looked at more advanced visualization techniques that use figure-level functions to analyze multivariate data, such as conditional small multiples and pairwise data relationships. 
+
+Both parts focused on the power and simplicity of seaborn. After all, no matter what plotting technique you use, there is no universally best way to represent your data. Different questions are better answered with different plotting techniques. Seaborn just makes it easy for you to switch between different visual representations by providing a consistent high-level API, while internally taking care of the layout design along with performing the necessary statistical computations. So that your only concern is to understand the various elements of your plots, rather than wasting time on the technicalities of generating them.
 
 
 ## References
 
-[1] Tufte, Edward (1990). Envisioning Information. Graphics Press. p. 67. ISBN 978-0961392116.
+[1] Tufte, Edward (1990). Envisioning Information. Graphics Press. p. 67. ISBN 978-0961392116.  
+[2] [seaborn official website](https://seaborn.pydata.org/index.html)
