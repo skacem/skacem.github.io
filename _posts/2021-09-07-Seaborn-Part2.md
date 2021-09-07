@@ -3,7 +3,7 @@ layout: post
 comments: true
 title: "Plotting with Seaborn - Part 2"
 excerpt: "In this part of the tutorial, we will look at more advanced visualization techniques for exploring multivariate and complex datasets, including conditional small multiples and pairwise data relationships. Namely, 
-when exploring multidimensional data, it is useful to draw multiple instances of the same representation for different subsets of your data. This type of representation is also known as \"faceting\" and is related to the idea of small multiples. In this way, a lot of information can be presented in a compact and comparable way. While this may sound intuitive, it is very tedious to create unless you use the figure-level functions provided by seaborn."
+when exploring multidimensional data, it is useful to draw multiple instances of the same representation for different subsets of your data. This type of representation is also known as \"faceting\" and is related to the idea of small multiples. In this way, a lot of information can be presented in a compact and comparable way. While this may sound intuitive, it is very tedious to create, well unless you use the figure-level functions provided by seaborn."
 author: "Skander Kacem"
 tags: 
     - Visualization
