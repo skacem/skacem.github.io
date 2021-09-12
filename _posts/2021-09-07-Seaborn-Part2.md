@@ -80,7 +80,12 @@ We then use the `FacetGrid.map()` method to plot the data on the instantiated gr
 
 ```python
 plt.style.use('bmh')
-# plot a histogram 
+
+# Create a figure with 6 facet grids
+g = sns.FacetGrid(penguins, row='sex', col='species', aspect=1.75)
+g.set_titles(row_template='{row_name}', col_template='{col_name} Penguins');
+
+# plot a histogram  in each facet
 g.map(sns.histplot, 'body_mass_g', binwidth=200, kde=True)
 
 # set x, y labels
