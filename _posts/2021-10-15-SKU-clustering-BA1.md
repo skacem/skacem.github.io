@@ -27,7 +27,7 @@ So, how do we find the optimal level of inventories that guarantees customer sat
 
 * The second step is to identify groups and patterns among SKUs. This is the main subject of this tutorial and the topic of our next section.
 
-## Identifying Groups among SKUs
+## Identifying Groups Among SKUs
 
 The objective of finding groups across data is to find the right balance between similarities and differences. On one hand, we want to treat similar cases similarly to benefit from economies of scale and thus improve efficiency. On the other hand, we want to address different cases in distinctive ways in order to improve action's effectiveness. So by grouping similar data together, we are actually improving our business efficiency. That is why SKU classification is the most common approach to inventory control in operations management.
 
@@ -57,7 +57,7 @@ The dendrogram is also a very useful tool when it comes to choosing the number o
 
 Now that we have some theoretical background, we can move on to programming an example using python.
 
-## SKU Clustering using Python
+## SKU Clustering Using Python
 
 We start by loading the required libraries as well as the dataset:
 
@@ -150,9 +150,9 @@ When it comes to cut-off selection there is no golden rule on how to pick the pe
 * Too few and your audience my over-generalize your results.
 
 In this example, we can see from the dendrogram that 3 clusters is the best choice, as the maximum dissimilarity between clusters is at the vertical blue lines. However, if the number of clusters is not that obvious we could make use of some automated cut-off selection such as the Elbow Method.  
- For more information about determining the number of cluster check out the following [link][https://en.wikipedia.org/wiki/Elbow_method_(clustering)]
+ For more information about determining the number of cluster check out the following [link](https://en.wikipedia.org/wiki/Elbow_method_(clustering))
 
-Now we can go ahead and capture our three clusters.
+Now, we can go ahead and capture our three clusters.
 
 ```python
 # Capture the 3 clusters
@@ -229,6 +229,14 @@ plt.text(0.75, 1.8, "Crickets", color=col, fontsize=fsize)
 As already mentioned, the purpose of finding groups within data is to maximize the business efficiency: we want to treat similar cases similarly and different cases specifically! So how can we manage our supply chain differently for those three clusters?
 
 * Products in the horses category should be made quickly available and we should ensure that we have enough in stock. It may seem expensive to  keep everything in stock, but the benefits cover largely the costs. Because sales are expected to be high, and the risk of inaccurate forecast is low, since the coefficient of variation is small for this group: **Make to Stock**.  
-* Crickets will be **made to order**. We’ll wait to have an order before starting the production process. Since the sales are small. It’s not really efficient to prepare production too long in advance. So we want to reduce the risks by producing the goods, only if the order is made by the end of the chain.
-* Products in the Bulls category should be treated on a case by case basis. Because of the high volatility of this category it is not possible to come with a general rule. Case to Case 🐂
+* Crickets will be **made to order**. Since the sales are small, it’s not really efficient to keep them on stock. So we want to reduce the risks by producing or ordering the goods, only if a customer places an order. This will create additional wait time for the consumer to receive the product, but allowing for more flexible customization when compared to purchasing stocked SKUs. Another possibility is dropshipping. In this case we don't have to keep the SKUs in stock. Instead, we pass on the sales order to a third-party supplier, or directly to the manufacturer, who then ships the order to the customer.
+* Products in the Bulls category should be treated on a **case by case** basis. Because of the high volatility of this category it is not possible to come with a general rule and it's ok because there are only few of them. So let's be pragmatic and access the situation in each case specifically. We could also multiply the splits by dimensions. And may be we get a more suitable final segmentation of SKUs.
 
+
+
+## References
+
+1. Prasad Pai. [Hierarchical clustering explained](https://towardsdatascience.com/hierarchical-clustering-explained-e59b13846da8). Medium, 2021.
+2. Barbará, Axel Axel Nahuel, and Tomás Dominguez Molet. "SKU clustering for supply chain planning efficiency." PhD diss., Massachusetts Institute of Technology, 2015.
+3. Cohen, Maxime C. Demand Prediction in Retail: A Practical Guide to Leverage Data and Predictive Analytics. Springer Nature, 2022.
+4. Nicolas Glady. [Foundations of strategic business analytics](https://www.coursera.org/learn/strategic-business-analytics) (MOOC). Coursera
