@@ -194,4 +194,41 @@ Now that we got our clusters, we need to be able to express the complexity of th
 
 Too often when dealing with data we see it as a mean to understand a situation better and we stop there. It's actually not the end of it. The purpose of data analysis is to understand the problem we want to solve in order to determine business actions.  
 The questions we want to answer as business analyst are: What is the business issue that data can solve? What are the relevant conclusions of the data analysis? How can we make those conclusions actionable to improve our business efficiency?  
-The aim is to create value by making actionable recommendations based on data analysis to solve current business issues. 
+At the end of the day, the objective is to create value by making actionable recommendations based on data analysis to solve current business issues. So let's do that with our clusters.
+
+Once we get the result with the different clusters, it is crucial to understand what they mean, how do they differ and give them understandable names. From the above figures we recognize that: 
+
+1. Group 1: has high sales and low volatility. Let's call them "horses" since those products are strong and reliable
+2. Group 2 has also high sales but also high volatility. Let's call them "bulls", since they are strong, but difficult to control.
+3. Group 0: we name the group of low sales and high volatility "crickets". Because they are small, but can jump unexpectedly.
+
+```python
+# Scatter plot of the clusters with group separation lines and better names
+plt.scatter(df['CV'], df['ADS'], facecolors='none', edgecolors='b', )
+
+plt.title('SKU Example')
+plt.xlabel('Coefficient of Variation')
+plt.ylabel('Average Daily Sales')
+
+# Vertical line
+plt.axvline(x=.2, color='r') 
+# Horizontal line
+plt.axhline(y=4, color='r')
+
+# We can add some text to our plot  using text()
+fsize = 18
+col = 'orange'
+plt.text(0.09, 9.4, "Horses", color=col, fontsize=fsize)
+plt.text(0.6, 9, "Wild Bulls", color=col, fontsize=fsize)
+plt.text(0.75, 1.8, "Crickets", color=col, fontsize=fsize)
+```
+<div class="imgcap">
+<img src="/assets/5/scatter.png" style="zoom:75%;" />
+<div class="thecap"> </div></div>
+
+As already mentioned, the purpose of finding groups within data is to maximize the business efficiency: we want to treat similar cases similarly and different cases specifically! So how can we manage our supply chain differently for those three clusters?
+
+* Products in the horses category should be made quickly available and we should ensure that we have enough in stock. It may seem expensive to  keep everything in stock, but the benefits cover largely the costs. Because sales are expected to be high, and the risk of inaccurate forecast is low, since the coefficient of variation is small for this group: **Make to Stock**.  
+* Crickets will be **made to order**. We’ll wait to have an order before starting the production process. Since the sales are small. It’s not really efficient to prepare production too long in advance. So we want to reduce the risks by producing the goods, only if the order is made by the end of the chain.
+* Products in the Bulls category should be treated on a case by case basis. Because of the high volatility of this category it is not possible to come with a general rule. Case to Case 🐂
+
