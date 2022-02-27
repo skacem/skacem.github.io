@@ -25,11 +25,11 @@ So, how do we find the optimal level of inventories that guarantees customer sat
 
 * The first step is to make sure you have well-defined SKUs. I can't stress enough how important it is to define SKUs carefully. In e-commerce platforms like Shopify, SKUs can be generated with a click. I don't advise you to proceed this way. You do have to think about the design of  SKUs. After all, they are the cornerstone for your forecasts. That is, however, beyond the scope of this tutorial
 
-* The second step is to identify groups and patterns among SKUs. This is the main subject of this tutorial and the topic of our next section.
+* The second step is to identify groups and patterns among SKUs. This is the main subject of this tutorial and the topic of our next sections.
 
 ## Identifying Groups Among SKUs
 
-The objective of finding groups across data is to find the right balance between similarities and differences. On one hand, we want to treat similar cases similarly to benefit from economies of scale and thus improve efficiency. On the other hand, we want to address different cases in distinctive ways in order to improve action's effectiveness. So by grouping similar data together, we are actually improving our business efficiency. That is why SKU classification is the most common approach to inventory control in operations management.
+The objective of finding groups across data is to find the right balance between similarities and differences. On one hand, we want to treat similar cases similarly to benefit from economies of scale and thus improve efficiency. On the other hand, we want to address different cases in distinctive ways in order to improve action's effectiveness. So, by grouping similar data together, we are actually improving our business efficiency. That is why SKU classification is the most common approach to inventory control in operations management.
 
 Imagine you work as sales  or supply and logistics manager and you want to organize your supply chain more efficiently.  You realize that some products  are sold at different speeds  and in different quantities than others. It’s impacting your ability to deliver the right products at the right time. Sure, you could keep a maximum stock level  to ensure customer satisfaction. However, this costs you a lot of money and comes at the expense of other potential investment opportunities. A simple approach to tackling such a problem, very much like in other industries, is to analyze the issue along two dimensions:  
 
@@ -43,8 +43,8 @@ Certainly, we can plot the sales data along the above two dimensions and visuall
 ## Hierarchical Cluster Analysis (HCA)
 
 Clustering algorithms are unsupervised machine learning algorithms. They look for similarities or dissimilarities between data points so that similar points can be grouped together. There are many different approaches and algorithms for performing clustering tasks. Hierarchical clustering is the most widely used. 
-As its name implies, hierarchical clustering is an algorithm that builds a hierarchy of clusters. It starts with all the data points assigned to a cluster of their own. Then the two nearest clusters are merged into a single cluster. There are multiple metrics for deciding the closeness of two clusters, such as Euclidean distance, Manhattan distance or Mahalanobis distance.  
-The algorithm is terminated when only a single cluster is left.  
+As its name implies, hierarchical clustering is an algorithm that builds a hierarchy of clusters. It starts with all the data points each assigned to a cluster of their own. Then the two nearest clusters are merged into a single cluster. There are multiple metrics for deciding the closeness of two clusters, such as Euclidean distance, Manhattan distance or Mahalanobis distance.  
+The algorithm is than terminated when only a single cluster is left.  
 
 An illustration of how hierarchical clustering works can be nicely conveyed using a dendrogram:
 
@@ -71,8 +71,8 @@ import seaborn as sns
 # Read the csv file
 df = pd.read_csv('DATA_2.01_SKU.csv')
 ```
-The dataframe consists of 100 SKU examples with their corresponding average daily sales (ADS) as well as the product sales volatility (CV).  
 
+The dataframe consists of 100 SKUs with their corresponding average daily sales (ADS) as well as the product sales volatility (CV).  
 
 ### Hierarchical Cluster Analysis
 
@@ -150,7 +150,7 @@ When it comes to cut-off selection there is no golden rule on how to pick the pe
 * Too few and your audience my over-generalize your results.
 
 In this example, we can see from the dendrogram that 3 clusters is the best choice, as the maximum dissimilarity between clusters is at the vertical blue lines. However, if the number of clusters is not that obvious we could make use of some automated cut-off selection such as the Elbow Method.  
- For more information about determining the number of cluster check out the following [link](https://en.wikipedia.org/wiki/Elbow_method_(clustering))
+ For more information about determining the number of cluster check out the following [link](https://en.wikipedia.org/wiki/Elbow_method_(clustering)).
 
 Now, we can go ahead and capture our three clusters.
 
@@ -228,12 +228,13 @@ plt.text(0.75, 1.8, "Crickets", color=col, fontsize=fsize)
 
 As already mentioned, the purpose of finding groups within data is to maximize the business efficiency: we want to treat similar cases similarly and different cases specifically! So how can we manage our supply chain differently for those three clusters?
 
-* Products in the horses category should be made quickly available and we should ensure that we have enough in stock. It may seem expensive to  keep everything in stock, but the benefits cover largely the costs. Because sales are expected to be high, and the risk of inaccurate forecast is low, since the coefficient of variation is small for this group: **Make to Stock**.  
-* Crickets will be **made to order**. Since the sales are small, it’s not really efficient to keep them on stock. So we want to reduce the risks by producing or ordering the goods, only if a customer places an order. This will create additional wait time for the consumer to receive the product, but allowing for more flexible customization when compared to purchasing stocked SKUs. Another possibility is dropshipping. In this case we don't have to keep the SKUs in stock. Instead, we pass on the sales order to a third-party supplier, or directly to the manufacturer, who then ships the order to the customer.
-* Products in the Bulls category should be treated on a **case by case** basis. Because of the high volatility of this category it is not possible to come with a general rule and it's ok because there are only few of them. So let's be pragmatic and access the situation in each case specifically. We could also multiply the splits by dimensions. And may be we get a more suitable final segmentation of SKUs.
+* Products in the horses category should be made quickly available and we should ensure that we have enough in stock: **made to Stock**. It may seem expensive to  keep everything in stock, but the benefits cover largely the costs. Because sales are expected to be high, and the risk of inaccurate forecast is low, since the coefficient of variation is small for this group.  
+* Crickets will be **made to order**. Since the sales are small, it’s not really efficient to keep them on stock. So we want to reduce the risks by producing or ordering the goods, only if a customer places an order. This will create additional wait time for the consumer to receive the product, but allowing for more flexible customization when compared to purchasing stocked SKUs. Another possibility is **dropshipping**. In this case, we act as an middleman by forwarding the customer order to a third-party supplier or directly to the manufacturer, who then delivers the order to the customer.  
+* Products in the "bulls" category should be dealt with on a **case by case** basis. Due to the high volatility of this category, it is not possible to establish a general rule, and this is a good thing, because there are only a few of them. Therefore, we should take a pragmatic approach and analyze the situation in each case in more detail. We could also multiply the splits by adding other dimensions. And maybe then we will get a more suitable final segmentation of the SKUs of this group.
 
+## Summary
 
-
+This brief introduction to business analysis shows a practical application of hierarchical clustering in supply chain management. Although simple and straightforward, it can be very powerful. Provided we come up with the right actionable business recommendations. Especially in today's competitive landscape, where every additional percentage of efficiency gain can be a competitive advantage. Of course, we could have elaborated on this further and refined our categorization by using factors such as lead time, cost of goods sold, or seasonality and trends However, this was not the goal of this tutorial.
 ## References
 
 1. Prasad Pai. [Hierarchical clustering explained](https://towardsdatascience.com/hierarchical-clustering-explained-e59b13846da8). Medium, 2021.
