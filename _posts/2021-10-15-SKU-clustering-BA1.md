@@ -3,7 +3,7 @@ layout: post
 comments: true
 title: "SKU Clustering for Inventory Optimization"
 excerpt: "Any online retailer using an established e-commerce platform is sitting on a treasure trove of data, but typically lacks the skills and people to analyze it efficiently. Only those companies that know how to leverage their collected data have a clear competitive advantage - especially when it comes to marketing, and sales management, as about 95% of the data relates to customers and inventory.
-This is the first in a series on reference machine learning and business process optimization models. The aim of this collection is to incentivize small businesses to invest in data and analytics capabilities to drive revenue and profit growth through sales forecasting, precision marketing, inventory optimization and more. "
+This is the first tutorial in a series of documents written about business analytics. The aim of this collection is to incentivize small businesses to invest in data and analytics capabilities to drive revenue and profit growth through sales forecasting, precision marketing, and inventory optimization, to name just a few. "
 author: "Skander Kacem"
 tags: 
     - Business Analytics
