@@ -182,15 +182,92 @@ customers[['recency', 'frequency', 'amount']].describe()
 +-------+-----------+-------------+----------+
 ```
 
+Then we plot the distributions of the RFM variables.
 
+```python
+# Plot the recency distribution
+plt.style.use('seaborn-whitegrid')
+customers.hist(column='recency', bins=31)
+plt.ylabel('Customers', fontsize=15)
+plt.xlabel('Days Since Last Purchase', fontsize=15)
+plt.xlim(0,);
+```
 
+<div class="imgcap">
+<img src="/assets/6/recency.png" style="zoom:75%;" />
+<div class="thecap">  </div></div>
 
+Except for a peak at the very Left, the recency distribution is relatively uniform. Which is good to see, as it means that recently our business has been appreciated and hitting record sales. It's always worth doing an in-depth analysis when it comes to outliers or exceptions. For this spike, I recommend you to  closely  analyze it, in order to determine its causes and drivers. It could be that our last marketing campaign was a success or that the pop-up sale we recently had was the consequence. So try to identify the trigger for that spike and capitalize on it.
 
+```python
+# Plot the frequency distribution
+customers.hist(column='frequency', bins=41)
+plt.ylabel('Customers', fontsize=15)
+plt.xlabel('Number of Purchases', fontsize=15)
+plt.xlim(0,20);
+```
 
+<div class="imgcap">
+<img src="/assets/6/frequency.png" style="zoom:75%;" />
+<div class="thecap">  </div></div>
 
+The frequency distribution is extremely skewed to the right. Almost 50% all customers have made only one purchase. Here, too, further clarification is required. It is possible that most of the first purchases have been made recently and with a good marketing campaign we could change this for the better. It's possible that most one-time purchases are recent first-time transactions. With a marketing approach tailored to customer segments, we could change this for the better.  
 
+```python
+customers.hist(column='amount', bins=601)
+plt.ylabel('Customers', fontsize=15)
+plt.xlabel('Average Amount in $', fontsize=15)
+plt.xlim(0,400)
+plt.ylim(0,);
+```
 
+<div class="imgcap">
+<img src="/assets/6/amount.png" style="zoom:75%;" />
+<div class="thecap">  </div></div>
 
+Due to the presence of some extreme outliers, it is preferable to use the median here. 50% of all transactions are between \$5 and \$30.  
+
+This was a small overview of how to conduct an exploratory data analysis. Usually, at this stage of analysis, we develop hypotheses that we want to test later, especially with respect to ambiguous relationships such as finding out if it involves correlation or causation. Therefore, it is best to spend a little more time exploring the data.
+
+Lets now move on to customer segmentation. 
+
+### Hierarchical Cluster Analysis
+
+#### Data Transformation
+
+Before starting the data transformation it is better to keep a copy of the original data, in case something goes wrong.
+
+```python
+# Copy the dataset
+new_data = customers.copy()
+new_data.set_index('customer_id', inplace=True)
+```
+
+Data transformation is an essantial part of segmentation. We need to prepare and transform our data, so the segmentation variables can be compared to one another.
+
+Since our segmentation variables don't use the same scales, we have to standardize them. In statistical terms, to standardize means that we subtract the mean and divide by the standard deviation:
+
+$$
+Standardize=\frac{Data - data~mean}{Data~standard~deviation}
+$$
+
+Now, regardles of what the original scale was in days, dollar, or number of purchase, they can be compared to another.  
+
+Another issue to deal with is data dispersion or skewed data. Skew is the degree of distortion from a normal distribution. In the plot above we can see that the average amount of purchase in $ is right skewed, meaning there are a minority of very large values. When data is extremely skewed, it might be unuseful for segmentation purpose.
+
+When we are facing this kind of situation, it might be worth transforming the data into a logarithmic scale.
+
+```python
+# transform amount into a logarithmic scale and plot the result
+new_data['amount'] = np.log10(new_data['amount'])
+# plot
+ax, fig = plt.subplots()
+new_data['amount'].plot(kind='hist', density=True, bins=40)
+new_data['amount'].plot(kind='kde')
+
+plt.xlim(0,4)
+plt.ylim(0,);
+```
 
 ## References
 
