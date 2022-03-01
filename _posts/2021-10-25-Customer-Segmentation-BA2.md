@@ -42,9 +42,20 @@ A great segmentation is all about finding a good balance between simplifying eno
 
 ## RFM Analysis
 
+RFM (Recency, Frequency, Monetary) analysis is a segmentation approach based on customer behavior. It groups customers according to their purchasing behavior. How recently, how frequently, and how much has a customer spent on purchases.  It is one of the best predictor of future purchase and customer lifetime value in terms of their activity and engagement.
+
+Recency indicates when a customer made his or her last purchase. Usually the smaller the recency, that is the more recent the last purchase, the more likely the next purchase will happen soon. On the other hand, if a customer has lapsed and has not made any purchase for a long period of time, he may have lost interest or switched to competition.  
+Frequency is about the number of customers purchases in a given period. Customers who bought frequently were more likely to buy again, as opposed to customers who made only one or two purchases.  
+Monetary is about how much a customer has spent during a certain period of time. Customers who spend more should be treated differently than customers who spend less. Furthermore, they are more likely to buy again.  
+
+## Practical Example in Python
+
+
 ## References
 
-1. Melo, Karl. [Customer Analytics I - Customer Segmentation](https://rstudio-pubs-static.s3.amazonaws.com/226524_10f550ea696f4db8a033c6583a8fc526.html). 2016
+1. Karl Melo. [Customer Analytics I - Customer Segmentation](https://rstudio-pubs-static.s3.amazonaws.com/226524_10f550ea696f4db8a033c6583a8fc526.html). 2016
 2. Navlani, A. [Introduction to Customer Segmentation in Python](https://www.datacamp.com/community/tutorials/introduction-customer-segmentation-python). datacamp, 2018.
-3. 
-4. Preview Picture by Vecteezy. [Customer Segmentation Vectors](https://www.vecteezy.com/free-vector/customer-segmentation) 
+3. Lilien, Gary L, Arvind Rangaswamy, and Arnaud De Bruyn. 2017. Principles of Marketing Engineering and Analytics. State College, PA: Decisionpro.
+4. Jim Novo. [Turning Customer Data into Profits](https://www.jimnovo.com/RFM-tour.htm)
+5. Kohavi, Ron, Llew Mason, Rajesh Parekh, and Zijian Zheng. 2004. "Lessons and Challenges from Mining Retail E-Commerce Data." Machine Learning 57 (1/2): 83–113.
+6. Preview Picture by Vecteezy. [Customer Segmentation Vectors](https://www.vecteezy.com/free-vector/customer-segmentation) 
