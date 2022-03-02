@@ -423,7 +423,14 @@ plt.axis('off');
 
 ## Summary
 
+In this tutorial, we presented another use case of hierarchical clustering based on customer buying behavior. It is a simple yet powerful technique    We also showed how clusters profiling works and how a company can tailor its marketing campaigns to the customer segments whose expected profitability exceeds the cost to reach them. 
+However, this segmentation method is not without problems and comes with a number of limitations:
 
+1. new customers are constantly being added, requiring frequent updates of segmentations.
+2. Clusters can capture seasonal customer behavior, so the results are no longer applicable to different periods of times.
+3. frequent updates can be expensive, at least if you need each time a data scientist.
+
+That is why companies are still reluctant to use statistical segmentation and favor managerial segmentation. 
 ## References
 
 1. Karl Melo. [Customer Analytics I - Customer Segmentation](https://rstudio-pubs-static.s3.amazonaws.com/226524_10f550ea696f4db8a033c6583a8fc526.html). 2016
