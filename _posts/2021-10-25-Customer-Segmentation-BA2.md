@@ -423,7 +423,7 @@ plt.axis('off');
 
 ## Summary
 
-In this tutorial, we presented another use case of hierarchical clustering based on customer buying behavior. It is a simple yet powerful technique    We also showed how clusters profiling works and how a company can tailor its marketing campaigns to the customer segments whose expected profitability exceeds the cost to reach them. 
+In this tutorial, we presented another use case of hierarchical clustering: Customer Segmentation based on their buying behavior. It is a simple yet powerful technique when it comes to customer targeting and precision marketing. We also showed how clusters profiling works and how a company can tailor its marketing campaigns to the customer segments whose expected profitability exceeds the cost to reach them. 
 However, this segmentation method is not without problems and comes with a number of limitations:
 
 1. new customers are constantly being added, requiring frequent updates of segmentations.
