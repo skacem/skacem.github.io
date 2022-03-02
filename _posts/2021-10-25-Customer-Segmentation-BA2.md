@@ -194,7 +194,7 @@ plt.xlim(0,);
 ```
 
 <div class="imgcap">
-<img src="/assets/6/recency.png" style="zoom:75%;" />
+<img src="/assets/6/recency.png" style="zoom:100%;" />
 <div class="thecap">  </div></div>
 
 Except for a peak at the very Left, the recency distribution is relatively uniform. Which is good to see, as it means that recently our business has been appreciated and hitting record sales. It's always worth doing an in-depth analysis when it comes to outliers or exceptions. For this spike, I recommend you to  closely  analyze it, in order to determine its causes and drivers. It could be that our last marketing campaign was a success or that the pop-up sale we recently had was the consequence. So try to identify the trigger for that spike and capitalize on it.
@@ -208,7 +208,7 @@ plt.xlim(0,20);
 ```
 
 <div class="imgcap">
-<img src="/assets/6/frequency.png" style="zoom:75%;" />
+<img src="/assets/6/frequency.png" style="zoom:100%;" />
 <div class="thecap">  </div></div>
 
 The frequency distribution is extremely skewed to the right. Almost 50% all customers have made only one purchase. Here, too, further clarification is required. It is possible that most of the first purchases have been made recently and with a good marketing campaign we could change this for the better. It's possible that most one-time purchases are recent first-time transactions. With a marketing approach tailored to customer segments, we could change this for the better.  
@@ -222,7 +222,7 @@ plt.ylim(0,);
 ```
 
 <div class="imgcap">
-<img src="/assets/6/amount.png" style="zoom:75%;" />
+<img src="/assets/6/amount.png" style="zoom:100%;" />
 <div class="thecap">  </div></div>
 
 Due to the presence of some extreme outliers, it is preferable to use the median here. 50% of all transactions are between \$5 and \$30.  
@@ -251,9 +251,9 @@ $$
 Standardize=\frac{Data - data~mean}{Data~standard~deviation}
 $$
 
-Now, regardles of what the original scale was in days, dollar, or number of purchase, they can be compared to another.  
+Now, regardless of what the original scale was in days, dollar, or number of purchase, they can be compared to another.  
 
-Another issue to deal with is data dispersion or skewed data. Skew is the degree of distortion from a normal distribution. In the plot above we can see that the average amount of purchase in $ is right skewed, meaning there are a minority of very large values. When data is extremely skewed, it might be unuseful for segmentation purpose.
+Another issue to deal with is data dispersion or skewed data. Skew is the degree of distortion from a normal distribution. In the plot above we can see that the average amount of purchase in $ is right skewed, meaning there are a minority of very large values. When data is extremely skewed, it might be not useful for segmentation purpose.
 
 When we are facing this kind of situation, it might be worth transforming the data into a logarithmic scale.
 
@@ -269,12 +269,167 @@ plt.xlim(0,4)
 plt.ylim(0,);
 ```
 
+<div class="imgcap">
+<img src="/assets/6/logscale.png" style="zoom:100%;" />
+<div class="thecap">  </div></div>
+
+From the plot above we can see that after the transformation our data became more symmetrical and less skewed.  
+
+Now we scale our data, to make sure that the clustering algorithm is robust against outliers and extreme values. Not all machine learning algorithms require feature scaling. However, scaling is mandatory for distance-based algorithms such as HCA, KNN, K-means or SVM. This is because all these algorithms are using distances between data points to determine similarities.
+
+```python
+# Now we scale our data and we save it as dataframe:
+new_data = pd.DataFrame(scale(new_data), index=new_data.index, 
+                        columns=new_data.columns)
+# computing the distance would generate a huge matrix:
+print(f'Dimension of the distance matrix: ({new_data.shape[0]**2}, {new_data.shape[1]})')
+```
+
+```text
+Dimension of the distance matrix: (339185889, 3)
+```
+
+Calculating the distance matrix would generate a huge matrix. Therefore, we take a sample of our RFM dataset with a sampling rate of 10\%. This means that only every 10th customer is considered in our analysis.  
+
+```python
+# Since the distance matrix is that huge, 
+# we are sampling with a sampling rate of 10%
+sample = np.arange(0, 18417, 10)
+sample[:10]
+```
+
+```
+array([ 0, 10, 20, 30, 40, 50, 60, 70, 80, 90])
+```
+
+Let's display some random samples from our newly created data frame; the one we will use to perform hierarchical clustering.
+
+```python
+new_data_sample = new_data.iloc[sample]
+new_data_sample.sample(5)
+```
+
+```text
++---------------+-----------+-------------+----------+
+|   customer_id |   recency |   frequency |   amount |
+|---------------+-----------+-------------+----------|
+|         69760 |      3178 |           1 |  1.47712 |
+|        147990 |      1911 |           1 |  1.30103 |
+|        100510 |      2739 |           1 |  1.47712 |
+|        138990 |        22 |           9 |  1.74473 |
+|        258230 |        55 |           1 |        2 |
++---------------+-----------+-------------+----------+
+```
+
+```python
+customers_sample = customers.iloc[sample].copy()
+# we compute the distances on the sampled data
+d = pdist(new_data_sample) # default metric is euclidean
+# and we perform the hierarchical clustering:
+hcward = linkage(d, method='ward')
+```
+`pdist()` computes pairwise distances between observations. The default distance metric is Euclidean. There are, however, many other metrics to choose from, such as: `minkowski`, `chebyshev` and `hamming`. Here we choose the default method.
+
+The clustering is performed by calling the `linkage()` using the `ward` method. There are many other methods to choose from and it doesn't have to be `ward`.
+
+After performing HCA we display the results using dendrogram.
+
+```python
+# Plot dendrogram
+plt.title("Customer Dendrogram - Truncated")
+dend = dendrogram(hcward, 
+                  truncate_mode='lastp',
+                  p = 45,
+                  show_contracted=True,
+                  leaf_rotation=90,
+                  leaf_font_size=12);
+plt.xlabel('Customer ID')
+plt.ylabel('Distance');
+```
+
+<div class="imgcap">
+<img src="/assets/6/dendrogram.png" style="zoom:100%;" />
+<div class="thecap">  </div></div>
+
+### Determining the Number of Clusters
+
+In RFM models it is usual to choose 11 clusters as recommended by [PULTER](https://bit.ly/32UPdhu) and other experts. They also provide a well-documented customer segment table with the description of each segment as well as a list of marketing actions corresponding to each segment. 
+
+<div class="imgcap">
+<img src="/assets/6/rfms.png" style="zoom:100%;" />
+<div class="thecap"> Table 1. Customer Segments - Source: putler [5] </div></div>
+
+However, it is not necessary to have 11 clusters. In fact, based on the dendrogram, we can see that 4 clusters is the best choice in this scenario. So let's try that.
+
+Remember: When it comes to cut-off selection there is no golden method on how to pick the perfect number of clusters. What matters is to use the right clustering approach for the business problem at hand and that your conclusions are actionable.
+
+```python
+# Cut at 4 clusters
+members = cut_tree(hcward, n_clusters=4)
+# Assign to each customer a group
+groups, counts = np.unique(members, return_counts=True)
+segments = dict(zip(groups, counts))
+
+customers_sample['group'] = members.flatten()
+# Create a table with the obtained groups and their characteristics
+clusters = customers_sample[['recency', 'frequency', 'amount', 'group']].groupby('group').mean()
+clusters
+```
+
+```text
++---------+-----------+-------------+----------+
+|   group |   recency |   frequency |   amount |
+|---------+-----------+-------------+----------|
+|       0 |   2612.50 |        1.30 |    29.03 |
+|       1 |    193.65 |       10.62 |    42.02 |
+|       2 |    712.52 |        2.55 |    31.12 |
+|       3 |    972.55 |        2.76 |   149.70 |
++---------+-----------+-------------+----------+
+```
+
+```python
+print(f'Number of customers per segment: {segments}')
+```
+
+```text
+Number of customers per segment: {0: 521, 1: 130, 2: 859, 3: 332}
+```
+### Clusters Profiling
+
+Now that we have our clusters and are convinced of their number, we can start profiling them. For this purpose we are going to use the Customer Segments table from putler.   
+
+1. **Group 0** has the lowest recency, frequency and monetary value. Thus, we identify this cluster as **Lost**. So, it's better to completely ignore this group in your next marketing campaign.  
+2. **Group 1**  consists of your **Loyal Customers**. They buy often and spend a good money with us. As actionable tips I would suggest to Offer them higher value products, ask for reviews and create meaningful interactions with them, using engagement marketing strategies.
+3. **Group 2** are the **Customers Needing Attention**. It's by far your largest group, so you need to reconnect with the customers in this group. The sooner, the better; before they fall into the group "about to sleep". Offer them limited-time product deals based on their previous purchases.
+4. **Group 3** contains the **Can't Lose Them** customers . They spent most money in our business, but haven't returned for a long time. Win them back, talk to them and don't lose them to your competitors. Try to re-engage them through renewals or new products or perhaps through special marketing events.
+
+Let us include the profiling results in our `clusters` variable and create an appealing visualization of the findings. After all, it is your job as a business analyst to convince the management team to implement your recommendations for action.
+
+```python
+clusters['n_customers'] = customers_sample['group'].value_counts()
+clusters['cluster_names'] = ['lost', 'loyal', 'needing attention', "can't lose them"]
+
+# Visualization
+plt.set_cmap('hsv')
+clusters.sort_values(by=['recency', 'amount'], ascending=[True, False], inplace=True)
+
+squarify.plot(sizes=clusters['n_customers'], 
+              label=clusters['cluster_names'], alpha=.45 )
+plt.title("RFM Segments",fontsize=22)
+plt.axis('off');
+```
+
+<div class="imgcap">
+<img src="/assets/6/segments.png" style="zoom:110%;" />
+<div class="thecap">  </div></div>
+
 ## References
 
 1. Karl Melo. [Customer Analytics I - Customer Segmentation](https://rstudio-pubs-static.s3.amazonaws.com/226524_10f550ea696f4db8a033c6583a8fc526.html). 2016
 2. Navlani, A. [Introduction to Customer Segmentation in Python](https://www.datacamp.com/community/tutorials/introduction-customer-segmentation-python). datacamp, 2018.
 3. Lilien, Gary L, Arvind Rangaswamy, and Arnaud De Bruyn. 2017. Principles of Marketing Engineering and Analytics. State College, PA: Decisionpro.
 4. Jim Novo. [Turning Customer Data into Profits](https://www.jimnovo.com/RFM-tour.htm)
-5. Kohavi, Ron, Llew Mason, Rajesh Parekh, and Zijian Zheng. 2004. "Lessons and Challenges from Mining Retail E-Commerce Data." Machine Learning 57 (1/2): 83–113.
-6. Preview Picture by Vecteezy. [Customer Segmentation Vectors](https://www.vecteezy.com/free-vector/customer-segmentation) 
-7. 
+5. Anish Nair. [RFM Analysis For Successful Customer Segmentation](https://www.putler.com/rfm-analysis/). putler, 2022.
+6. Kohavi, Ron, Llew Mason, Rajesh Parekh, and Zijian Zheng. 2004. "Lessons and Challenges from Mining Retail E-Commerce Data." Machine Learning 57 (1/2): 83–113.
+7. Preview Picture by Vecteezy. [Customer Segmentation Vectors](https://www.vecteezy.com/free-vector/customer-segmentation) 
+   
