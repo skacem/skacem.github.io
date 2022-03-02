@@ -36,21 +36,21 @@ In this tutorial, we will explore the first two questions using customer segment
 You can't treat your customers the same way, offer them the same product, charge the same price, or communicate the same benefits. Otherwise you will miss a lot of value. So you need to understand the distinctions in your customers' needs, wants, preferences and behaviors. Only then can you customize your offering, personalize your customer approach, and optimize your marketing campaigns.  
 
 Now, in today's digital world, almost every online retailer holds a massive customer database. So, how do we deal with big customer databases?  
-Treating each and every customer individually is very costly. 
+Treating each and every customer individually is very costly. The answer is, of course, segmentation. I know, you've already guessed that yourselves.  
 
 A great segmentation is all about finding a good balance between simplifying enough, so it remains usable and not simplifying too much, so it's still statistically and managerially relevant.
 
 ## RFM Analysis
 
-RFM (Recency, Frequency, Monetary) analysis is a segmentation approach based on customer behavior. It groups customers according to their purchasing behavior. How recently, how frequently, and how much has a customer spent on purchases.  It is one of the best predictor of future purchase and customer lifetime value in terms of their activity and engagement.
+RFM (Recency, Frequency, Monetary) analysis is a segmentation approach based on customer behavior. It groups customers according to their purchasing history (How recently, how frequently, and how much has a customer spent on past purchases).  It is one of the best predictor of future purchase and customer lifetime value in terms of their activity and engagement.
 
 Recency indicates when a customer made his or her last purchase. Usually the smaller the recency, that is the more recent the last purchase, the more likely the next purchase will happen soon. On the other hand, if a customer has lapsed and has not made any purchase for a long period of time, he may have lost interest or switched to competition.  
-Frequency is about the number of customers purchases in a given period. Customers who bought frequently were more likely to buy again, as opposed to customers who made only one or two purchases.  
-Monetary is about how much a customer has spent during a certain period of time. Customers who spend more should be treated differently than customers who spend less. Furthermore, they are more likely to buy again.  
+Frequency is about the number of customers purchases in a given period of time. Customers who bought frequently were more likely to buy again, as opposed to customers who made only one or two purchases.  
+Monetary is about how much a customer has spent in total during a given period. Customers who spend more should be treated differently than customers who spend less. Furthermore, they are more likely to buy again.  
 
 ## Practical Example in Python
 
-We start as usual, by loading the required libraries and the dataset, and set up our environment. However, make sure you have `pandassql` and `squarify` installed on your Python environment.
+We start by loading the required libraries and the dataset, and set up our programming environment. Also, make sure you have `pandassql` and `squarify` installed.
 
 ```python
 import numpy as np
@@ -102,14 +102,14 @@ dtypes: float64(1), int64(1), object(1)
 memory usage: 1.2+ MB
 ```
 
-We proceed by transforming the column `data_of_purchase` from object a date object.
+We proceed by converting the `data_of_purchase` column from object to a date object.
 
 ```python
 # Transform the last column to a date object
 df['date_of_purchase'] = pd.to_datetime(df['date_of_purchase'], format='%Y-%m-%d')
 ```
 
-To compute `recency` we will create a new variable `day_since`, which contains the number of days since the last purchase. For that, we set January 1st 2016 as the pining date and count backward the number of days from the latest purchase for each customer based on customer id.  
+To calculate the recency, we create a new variable `day_since` that contains the number of days since the last purchase. To do this, we set January 1, 2016 as the start date and count the number of days since the last purchase for each customer backwards using the customers ID. 
 
 ```python
 # Extract year of purchase and save it as a column
@@ -122,10 +122,10 @@ df['days_since'] = (basedate - df['date_of_purchase']).dt.days
 ### RFM Computation
 
 To implement the RFM analysis, further data processing need to be done.  
-Next we are going to compute the customers recency, frequency and average purchase amount. This part is a big tricky specially when it's done with pandas. The trick here is that the customer ID will only appear once for every customer. So even though we have 51,243 purchases we'll only have as many unique customer IDs as there are in the database.  
-Now, for each customer, we need to compute the minimum number of days between all of his or her purchases and January 1st, 2016. Of course, if we take the minimum number of days, then we are going to have the day of the last purchase, which is the very definition of recency.  
-Then for each customer we need to compute the frequency, which is basically how many purchases that customer has made.  
-This is  done with the python sql module:
+Next we are going to compute the customers recency, frequency and average purchase amount. This part is a bit tricky, particularly when implemented with pandas. The trick here is that the customer ID is unique for each customer. So even though we have 51,243 purchases, we will only have as many unique customer IDs as there are in the database.   
+For each customer, we now need to calculate the minimum number of days between all of their purchases and January 1, 2016. By taking the minimum number of days, we obviously have the day of the last purchase, which is the exact definition of recency.   
+The next step is to calculate the frequency for each customer, namely how many purchases this customer has made.  
+This is achieved with the python sql module:
 ```python
 # Compute recency, frequency, and average purchase amount
 q = """
@@ -140,8 +140,8 @@ customers = sqldf(q)
 The asterisk here actually refers to anything in the data that is related to this customer; and then for the amount, we averaged the purchase amount for that specific customer ID and named that aggregate calculation as `amount`.  
 Now, the trick is we want to make sure that each row only appears once per customer. So we're going to calculate that from the data and group by one, which means that everything here is going to be calculated and grouped by customer ID.  
 
-Of course, it would have been possible to perform all the calculations using only the pandas. However, it would have required much more work. When working with databases, it is very useful to have some knowledge of sql. As we can see here, only one sql command is required to create an RFM table.  
-The results are then stored under the variable `customers` and the first five entries are as follows:
+Sure, it would have been possible to do all the computations with pandas only. However, this would have required much more work. When working with databases, SQL knowledge is an advantage. Indeed, a single sql command is all that is needed to create an RFM table.  
+The results are then stored under the variable `customers` and the first five entries have the following values:
 
 ```python
 customers.head()
@@ -197,7 +197,8 @@ plt.xlim(0,);
 <img src="/assets/6/recency.png" style="zoom:100%;" />
 <div class="thecap">  </div></div>
 
-Except for a peak at the very Left, the recency distribution is relatively uniform. Which is good to see, as it means that recently our business has been appreciated and hitting record sales. It's always worth doing an in-depth analysis when it comes to outliers or exceptions. For this spike, I recommend you to  closely  analyze it, in order to determine its causes and drivers. It could be that our last marketing campaign was a success or that the pop-up sale we recently had was the consequence. So try to identify the trigger for that spike and capitalize on it.
+Except for a peak on the very left, the recency distribution is relatively uniform. This is good to see, because it means that our business has been gaining attention lately and has been generating record sales. It's always worth doing a detailed analysis when it comes to outliers or exceptions. So I recommend taking a closer look at this peak to determine its triggers and drivers. It could be that our last marketing campaign was a success or that the pop-up sale we had recently was the consequence. So try to figure out the reason for this and take advantage of it.
+
 
 ```python
 # Plot the frequency distribution
@@ -211,7 +212,7 @@ plt.xlim(0,20);
 <img src="/assets/6/frequency.png" style="zoom:100%;" />
 <div class="thecap">  </div></div>
 
-The frequency distribution is extremely skewed to the right. Almost 50% all customers have made only one purchase. Here, too, further clarification is required. It is possible that most of the first purchases have been made recently and with a good marketing campaign we could change this for the better. It's possible that most one-time purchases are recent first-time transactions. With a marketing approach tailored to customer segments, we could change this for the better.  
+The frequency distribution is extremely skewed to the right. Almost 50% of all customers have only made one purchase. Again, further clarification is necessary here. It is possible that most one-time purchases are recent, first-time transactions. And with a marketing approach tailored to the relevant customer segments, we could encourage these customers to make their next purchase.  
 
 ```python
 customers.hist(column='amount', bins=601)
@@ -227,7 +228,7 @@ plt.ylim(0,);
 
 Due to the presence of some extreme outliers, it is preferable to use the median here. 50% of all transactions are between \$5 and \$30.  
 
-This was a small overview of how to conduct an exploratory data analysis. Usually, at this stage of analysis, we develop hypotheses that we want to test later, especially with respect to ambiguous relationships such as finding out if it involves correlation or causation. Therefore, it is best to spend a little more time exploring the data.
+This was a small overview of how to conduct an exploratory data analysis. Usually, at this stage of analysis, we develop hypotheses that we want to test later, especially with respect to ambiguous relationships such as finding out if it involves correlation or causation. Therefore, it is best to spend a little more time exploring your dataset.
 
 Lets now move on to customer segmentation. 
 
@@ -243,19 +244,17 @@ new_data = customers.copy()
 new_data.set_index('customer_id', inplace=True)
 ```
 
-Data transformation is an essantial part of segmentation. We need to prepare and transform our data, so the segmentation variables can be compared to one another.
+Data preprocessing is an essential part of segmentation and ML algorithms in general. We need to prepare and transform our data, so the segmentation variables can be compared to one another.
 
-Since our segmentation variables don't use the same scales, we have to standardize them. In statistical terms, to standardize means that we subtract the mean and divide by the standard deviation:
+Since our segmentation variables don't use the same scales, we need to standardize them. In statistics, standardization means to subtract the mean and divide by the standard deviation:
 
 $$
 Standardize=\frac{Data - data~mean}{Data~standard~deviation}
 $$
 
-Now, regardless of what the original scale was in days, dollar, or number of purchase, they can be compared to another.  
+Regardless of what the original scale was, days, dollars, or number of purchases, they can now be compared to one another.
 
-Another issue to deal with is data dispersion or skewed data. Skew is the degree of distortion from a normal distribution. In the plot above we can see that the average amount of purchase in $ is right skewed, meaning there are a minority of very large values. When data is extremely skewed, it might be not useful for segmentation purpose.
-
-When we are facing this kind of situation, it might be worth transforming the data into a logarithmic scale.
+Another problem to deal with is the dispersion or skewness of data. Skewness indicates the direction and relative magnitude of a distribution's deviation from the normal distribution. In the figure above, we see that the average purchase amount in $ is right skewed, meaning that there is a minority of very large positive values. And when data is extremely skewed, it may not be adequate for segmentation. In such a situation, it can be useful to convert it to a logarithmic scale.  
 
 ```python
 # transform amount into a logarithmic scale and plot the result
@@ -275,7 +274,7 @@ plt.ylim(0,);
 
 From the plot above we can see that after the transformation our data became more symmetrical and less skewed.  
 
-Now we scale our data, to make sure that the clustering algorithm is robust against outliers and extreme values. Not all machine learning algorithms require feature scaling. However, scaling is mandatory for distance-based algorithms such as HCA, KNN, K-means or SVM. This is because all these algorithms are using distances between data points to determine similarities.
+Now we scale our data to ensure that the clustering algorithm is stable against outliers and extreme values. Not all machine learning algorithms require feature scaling. However, for distance-based algorithms such as HCA, KNN, K-means, or SVM, scaling is required. The reason is that all these algorithms use distances between data points to determine similarities.
 
 ```python
 # Now we scale our data and we save it as dataframe:
@@ -289,7 +288,7 @@ print(f'Dimension of the distance matrix: ({new_data.shape[0]**2}, {new_data.sha
 Dimension of the distance matrix: (339185889, 3)
 ```
 
-Calculating the distance matrix would generate a huge matrix. Therefore, we take a sample of our RFM dataset with a sampling rate of 10\%. This means that only every 10th customer is considered in our analysis.  
+Calculating the distance matrix would generate a huge matrix. Therefore, we take a sample from our RFM dataset with a sampling rate of 10\%. It means that only every 10th customer is considered in our segmentation.  
 
 ```python
 # Since the distance matrix is that huge, 
@@ -302,7 +301,7 @@ sample[:10]
 array([ 0, 10, 20, 30, 40, 50, 60, 70, 80, 90])
 ```
 
-Let's display some random samples from our newly created data frame; the one we will use to perform hierarchical clustering.
+Let's display some random samples from our newly generated dataframe; the one we will use to perform hierarchical clustering.
 
 ```python
 new_data_sample = new_data.iloc[sample]
@@ -398,10 +397,10 @@ Number of customers per segment: {0: 521, 1: 130, 2: 859, 3: 332}
 
 Now that we have our clusters and are convinced of their number, we can start profiling them. For this purpose we are going to use the Customer Segments table from putler.   
 
-1. **Group 0** has the lowest recency, frequency and monetary value. Thus, we identify this cluster as **Lost**. So, it's better to completely ignore this group in your next marketing campaign.  
+1. **Group 0** has the lowest recency, frequency and monetary value. Therefore, we refer to this group as **Lost**. You'd better ignore it completely.  
 2. **Group 1**  consists of your **Loyal Customers**. They buy often and spend a good money with us. As actionable tips I would suggest to Offer them higher value products, ask for reviews and create meaningful interactions with them, using engagement marketing strategies.
-3. **Group 2** are the **Customers Needing Attention**. It's by far your largest group, so you need to reconnect with the customers in this group. The sooner, the better; before they fall into the group "about to sleep". Offer them limited-time product deals based on their previous purchases.
-4. **Group 3** contains the **Can't Lose Them** customers . They spent most money in our business, but haven't returned for a long time. Win them back, talk to them and don't lose them to your competitors. Try to re-engage them through renewals or new products or perhaps through special marketing events.
+3. **Group 2** are the **Customers Needing Attention**. It's by far your largest group, so you need to reconnect with the customers in this group. The sooner, the better; before they fall into the group "about to sleep". You might, for instance, offer them limited-time product deals based on their past purchases.
+4. **Group 3** contains the **Can't Lose Them** customers. They spent the most money in our business, but haven't come back for a long time. Win them back, talk to them, and don't lose them to your competitors. Try to reengage them with your company through renewals or new products, or perhaps special marketing events.
 
 Let us include the profiling results in our `clusters` variable and create an appealing visualization of the findings. After all, it is your job as a business analyst to convince the management team to implement your recommendations for action.
 
@@ -422,6 +421,9 @@ plt.axis('off');
 <div class="imgcap">
 <img src="/assets/6/segments.png" style="zoom:110%;" />
 <div class="thecap">  </div></div>
+
+## Summary
+
 
 ## References
 
