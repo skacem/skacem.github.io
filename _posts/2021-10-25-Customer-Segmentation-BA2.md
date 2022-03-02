@@ -234,8 +234,6 @@ Lets now move on to customer segmentation.
 
 ### Hierarchical Cluster Analysis
 
-#### Data Transformation
-
 Before starting the data transformation it is better to keep a copy of the original data, in case something goes wrong.
 
 ```python
@@ -358,7 +356,8 @@ In RFM models it is usual to choose 11 clusters as recommended by [PULTER](https
 <img src="/assets/6/rfms.png" style="zoom:100%;" />
 <div class="thecap"> Table 1. Customer Segments - Source: putler [5] </div></div>
 
-However, it is not necessary to have 11 clusters. In fact, based on the dendrogram, we can see that 4 clusters is the best choice in this scenario. So let's try that.
+However, it is not necessary to have 11 clusters.  
+From the dendrogram we can see that 4 clusters make sense for this scenario as well as for simplicity sake. So let's try that.
 
 Remember: When it comes to cut-off selection there is no golden method on how to pick the perfect number of clusters. What matters is to use the right clustering approach for the business problem at hand and that your conclusions are actionable.
 
@@ -433,5 +432,5 @@ plt.axis('off');
 4. Jim Novo. [Turning Customer Data into Profits](https://www.jimnovo.com/RFM-tour.htm)
 5. Anish Nair. [RFM Analysis For Successful Customer Segmentation](https://www.putler.com/rfm-analysis/). putler, 2022.
 6. Kohavi, Ron, Llew Mason, Rajesh Parekh, and Zijian Zheng. 2004. "Lessons and Challenges from Mining Retail E-Commerce Data." Machine Learning 57 (1/2): 83–113.
-7. Preview Picture by Vecteezy. [Customer Segmentation Vectors](https://www.vecteezy.com/free-vector/customer-segmentation) 
+
    
