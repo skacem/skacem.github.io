@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: "Customer Segmentation using RFM Analysis"
-excerpt: "It is impossible to develop a precision marketing strategy without identifying who you want to target. Marketing campaigns tailored to specific customers rely on the ability to accurately categorize those based on their demographic characteristics and buying behavior. Segments should be clearly differentiated from each other according to the maxim: \"Customers are unique, but sometimes similar\".
+excerpt: "It is impossible to develop a precision marketing strategy without identifying who you want to target. Marketing campaigns tailored to specific customers rely on the ability to accurately categorize those based on their demographic characteristics and buying behavior. Segments should be clearly differentiated from one another according to the maxim: \"Customers are unique, but sometimes similar\".
 In this tutorial, we will learn how to segment your customers database using RFM analysis along with hierarchical cluster analysis (HCA) we introduced in the previous tutorial."
 author: "Skander Kacem"
 tags: 
@@ -250,7 +250,7 @@ $$
 Standardize=\frac{Data - data~mean}{Data~standard~deviation}
 $$
 
-Regardless of what the original scale was, days, dollars, or number of purchases, they can now be compared to one another.
+Regardless of what the original scale was, days, dollars, or number of purchases, they can now be related to one another.
 
 Another problem to deal with is the dispersion or skewness of data. Skewness indicates the direction and relative magnitude of a distribution's deviation from the normal distribution. In the figure above, we see that the average purchase amount in $ is right skewed, meaning that there is a minority of very large positive values. And when data is extremely skewed, it may not be adequate for segmentation. In such a situation, it can be useful to convert it to a logarithmic scale.  
 
