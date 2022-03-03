@@ -441,5 +441,6 @@ This is the main reason why companies are still reluctant to use statistical seg
 4. Jim Novo. [Turning Customer Data into Profits](https://www.jimnovo.com/RFM-tour.htm)
 5. Anish Nair. [RFM Analysis For Successful Customer Segmentation](https://www.putler.com/rfm-analysis/). putler, 2022.
 6. Kohavi, Ron, Llew Mason, Rajesh Parekh, and Zijian Zheng. 2004. "Lessons and Challenges from Mining Retail E-Commerce Data." Machine Learning 57 (1/2): 83–113.
+7. Dataset from [Github repo](https://github.com/skacem/Business-Analytics/tree/main/Datasets). Accessed 25 October 2021.
 
    
