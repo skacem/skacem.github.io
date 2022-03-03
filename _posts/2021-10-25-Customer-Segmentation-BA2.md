@@ -428,9 +428,9 @@ However, this segmentation method is not without problems and comes with a numbe
 
 1. New customers are constantly being added, requiring frequent updates of segmentations.
 2. Clusters can capture seasonal customer behavior, so the results are no longer applicable to different periods of times.
-3. Frequent updates can be expensive, at least if you need each time a data scientist.
+3. Frequent updates can be expensive. Unless they are automated and you don't need each time to hire a data scientist.
 
-That is why companies are still reluctant to use statistical segmentation and favor managerial segmentation. 
+This is the main reason why companies are still reluctant to use statistical segmentation and prefer to rely on managerial segmentation.  Non-statistical segmentation approaches are based on simple rules and guidelines and rely heavily on subjective judgment. TThis also comes with some drawbacks, as it can be severely affected by various types of biases and cognitive limitations when processing complex data. Which one you choose depends on your goals and budget. However, if you prefer the latter approach, I strongly recommend that you perform statistical segmentation at least once to identify complex patterns in multivariate data sets. Then you can build your segmentation rules around them.
 ## References
 
 1. Karl Melo. [Customer Analytics I - Customer Segmentation](https://rstudio-pubs-static.s3.amazonaws.com/226524_10f550ea696f4db8a033c6583a8fc526.html). 2016
