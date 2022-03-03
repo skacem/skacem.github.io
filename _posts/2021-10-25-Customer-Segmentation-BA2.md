@@ -423,11 +423,10 @@ plt.axis('off');
 
 ## Summary
 
-In this tutorial, we presented another use case of hierarchical clustering: Customer Segmentation based on their buying behavior. It is a simple yet powerful technique when it comes to customer targeting and precision marketing. We also showed how clusters profiling works and how a company can tailor its marketing campaigns to the customer segments whose expected profitability exceeds the cost to reach them. 
-However, this segmentation method is not without problems and comes with a number of limitations:
+In this tutorial, we presented another use case of hierarchical clustering: Customer Segmentation based on buying behavior. It is a simple yet powerful technique when it comes to customer targeting and precision marketing. We also showed how clusters profiling works and how a company can tailor its marketing campaigns to the customer segments whose expected profitability exceeds the cost to reaching them. However, this segmentation method is not without problems and comes with a number of limitations:
 
-1. New customers are constantly being added, requiring frequent updates of segmentations.
-2. Clusters can capture seasonal customer behavior, so the results are no longer applicable to different periods of times.
+1. New customers are constantly being added, which requires frequent updating of the segmentation.
+2. Clusters can capture seasonal customer behaviors, so results are no longer generalizable to different time periods.
 3. Frequent updates can be expensive. Unless they are automated and you don't need each time to hire a data scientist.
 
 This is the main reason why companies are still reluctant to use statistical segmentation and prefer to rely on managerial segmentation.  Non-statistical segmentation approaches are based on simple rules and guidelines and rely heavily on subjective judgment. This also comes with some drawbacks, as it can be severely affected by various types of biases and cognitive limitations when processing complex data. Which one you choose depends on your goals and budget. However, if you prefer the latter approach, I strongly recommend that you perform statistical segmentation at least once to identify complex patterns in multivariate data sets. Then you can build your segmentation rules around them.
