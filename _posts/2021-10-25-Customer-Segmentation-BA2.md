@@ -286,7 +286,7 @@ print(f'Dimension of the distance matrix: ({new_data.shape[0]**2}, {new_data.sha
 Dimension of the distance matrix: (339185889, 3)
 ```
 
-Calculating the distance matrix would generate a huge matrix. Therefore, we take a sample from our RFM dataset with a sampling rate of 10\%. It means that only every 10th customer is considered in our segmentation.  
+Calculating the distance matrix would generate a huge matrix. Therefore, we take a sample from our RFM dataset with a sampling rate of 10%. It means that only every 10th customer is considered in our segmentation.  
 
 ```python
 # Since the distance matrix is that huge, 
