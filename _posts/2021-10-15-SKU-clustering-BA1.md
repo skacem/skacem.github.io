@@ -234,7 +234,8 @@ As already mentioned, the purpose of finding groups within data is to maximize t
 
 ## Summary
 
-This brief introduction to business analysis shows a practical application of hierarchical clustering in supply chain management. Although simple and straightforward, it can be very powerful. Provided we come up with the right actionable business recommendations. Especially in today's competitive landscape, where every additional percentage of efficiency gain can be a competitive advantage. Of course, we could have elaborated on this further and refined our categorization by using factors such as lead time, cost of goods sold, or seasonality and trends However, this was not the goal of this tutorial.
+This brief introduction to business analysis shows a practical application of hierarchical clustering in supply chain management. Although simple and straightforward, it can be very powerful. Provided you come up with the right actionable business recommendations for each group. Consequently, the question of how many groups to have is crucial. Ideally, you want to treat similar cases similarly to take advantage of economies of scale to improve efficiency. While at the same time, you want to treat different cases in different ways to improve the effectiveness of your measures. Indeed, grouping is about increasing the efficiency of your business operations, and in today's competitive environment, every additional percentage point of efficiency gain can translate into a competitive advantage.  
+
 ## References
 
 1. Prasad Pai. [Hierarchical clustering explained](https://towardsdatascience.com/hierarchical-clustering-explained-e59b13846da8). Medium, 2021.
