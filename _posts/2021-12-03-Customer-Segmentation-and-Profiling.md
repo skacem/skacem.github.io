@@ -24,16 +24,15 @@ In reality, there is no single best method for segmenting a market and, more imp
 3. Accessibility which means that your company's marketing activities and distribution system are capable of reaching and adequately serving the target segment. 
 4. Substantiality; implying that the target segments are large enough to be profitable.
 
-Broadly speaking, any market segmentation falls into one of these two approaches: *a priori* (or prescriptive) and *post hoc* (or exploratory) segmentation. Segmentation based on hierarchical cluster analysis, which we introduced in the last tutorial, is a typical example of exploratory *post-hoc* segmentation. In this tutorial, we will introduce and implement an *a priori* approach to segmentation, namely managerial market segmentation.
+Broadly speaking, any market segmentation falls into one of the following two approaches: *a priori* (or prescriptive) and *post hoc* (or exploratory) segmentation. Segmentation based on hierarchical cluster analysis, which we introduced in the last tutorial, is a typical example of exploratory *post-hoc* segmentation. In this tutorial, we will introduce and implement an *a priori* approach to segmentation, namely managerial market segmentation.
 
 
 ## Managerial Segmentation
 
-Managerial segmentation is an *a priori* segmentation, and is performed when the manager proactively chooses the basis of the market analysis and the variables to be included in the segmentation. Hence, the basis for segmentation varies depending on the specific business decisions that management is facing. For instance, if the management is concerned with the likely impact of a price increase on its customers, the appropriate basis might be the current customers' price sensitivity. If, however the management is concerned with the loss of customers, the basis for segmentation could be recency.
+Managerial segmentation is an *a priori* segmentation, and is performed when the manager proactively chooses the basis of the market analysis and the variables to be included in the segmentation. Hence, the basis for segmentation varies depending on the specific business decisions that management is facing. For instance, if the management is concerned with the likely impact of a price increase on the customers, the appropriate basis might be the current customers' price sensitivity. If, however the management is concerned with the loss of customers, the basis for segmentation could be recency.
 
-In this tutorial, we want to predict which customers are most likely to make further purchases in the near future. A basic criterion for this would be whether the customer has made a purchase recently or not. After all, someone who bought at our store a few weeks ago is much more likely to buy again in the future than someone whose last purchase was several years ago.
-
-For example we could divide our customer database into four groups or segments based on recency; where:
+In this tutorial, we want to predict which customers are most likely to make further purchases in the near future. A basic criterion for this would be whether the customer has made a purchase recently or not. After all, someone who bought at our store a few weeks ago is much more likely to buy again in the future than someone whose last purchase was several years ago.  
+In this case, an appropriate model would be to divide our customer database into four groups or segments based on recency; where:
 
 1. **Active** are customers whose last purchase was within the last 12 months. 
 2. **Warm** if their last purchase was one year ago, that is, between 13 and 24 months. 
@@ -133,8 +132,7 @@ dtypes: datetime64[ns](1), float64(1), int64(3)
 memory usage: 2.0 MB
 ```
 
-Everything looks great.  
-
+Everything looks good. So let's get on with the RFM analysis.
 ### RFM Analysis
 
 Now we want to compute the customers recency, frequency and average purchase amount. This part is done using SQL queries from `pandasql` library. The library uses SQLite syntax and can execute complex SQL queries. This keeps our code neat, comprehensible and easy to debug.
@@ -190,7 +188,67 @@ print(tabulate(customers.head() , headers='keys', tablefmt='psql'))
 +----+---------------+-----------+------------------+-------------+----------+
 ```
 
+And as they say, a picture is worth a thousand words:
+
+```python
+customers.iloc[:,1:].hist(bins=30, figsize=(15, 10));
+```
+
+{% include image.html url="/assets/7/rfm.png" description="Output Visualization" zoom="85%" %}
+
+In the next section we will implement the first segmentation model based on recency. On the basis of this model, we will later build the more complex eight-segment model.
+
 ### Managerial Segmentation Based on One Variable
 
-We start by implementing  the first segmentation model based on recency. It consists of four segments in total, namely: Active, Warm, Cold and Inactive. On the basis of this model, we will later build the more complex eight-segment model.
+Instead of using machine learning to identify segments as seen in the previous tutorial, we will now implement a managerial segmentation. Simply put, it is nothing more but a sequence of if-then-else statements and consists of four segments in total: Active, Warm, Cold and Inactive.
+
+We first begin by identifying the segment of inactive customers. According to the above definition, these are those who have not made a single purchase in more than three years:
+
+```python
+customers.loc[customers['recency'] > 365*3, 'segment'] = 'inactive'
+# Fill missing values with NA/NaN values
+customers['segment'] =  customers['segment'].fillna('NA')
+customers_2015['segment'].value_counts()
+```
+
+```tex
+NA          9259
+inactive    9158
+Name: segment, dtype: int64
+```
+
+So nearly half of our customers are inactive. This is not good, as we know an inactive customer is a lost customer. We can only blame ourselves (or management) for not having used Segmenting, Targeting and Positioning (STP) marketing a few years earlier.
+
+The rest of the customers are then mapped to the corresponding segments using the same approach:
+
+```python
+# Build the Cold segment
+customers.loc[(customers['recency']<= 365*3) & 
+                   (customers['recency'] > 356*2), 'segment'] = "cold"
+# Warm Segment
+customers.loc[(customers['recency']<= 365*2) & 
+                   (customers['recency'] > 365*1), 'segment'] = "warm"
+# Active segment
+customers.loc[customers['recency']<= 365, 'segment'] = "active"
+# Plot results
+customers['segment'].value_counts()
+```
+
+```tex
+inactive    9158
+active      5398
+warm        1958
+cold        1903
+Name: segment, dtype: int64
+```
+
+
+
+## References
+
+[blank2020]: Blank, Steven G, and Bob Dorf. 2020. The Startup Owner’s Manual: The Step-by-Step Guide for Building a Great Company. Vol. 1 
+
+[piercy1993]: Piercy, Nigel F., and Neil A. Morgan. 1993. "Strategic and Operational Market Segmentation: A Managerial Analysis." Journal of Strategic Marketing 1 (2): 123–40. https://doi.org/10.1080/09652549300000008.
+
+
   
