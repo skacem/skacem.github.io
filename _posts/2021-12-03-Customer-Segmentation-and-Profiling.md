@@ -219,7 +219,7 @@ Name: segment, dtype: int64
 
 So nearly half of our customers are inactive. This is not good, as we know an inactive customer is a lost customer. We can only blame ourselves (or management) for not having used Segmenting, Targeting and Positioning (STP) marketing a few years earlier.
 
-The rest of the customers are then mapped to the corresponding segments using the same approach:
+The rest of the customers are then mapped to the corresponding segments using the same approach.
 
 ```python
 # Build the Cold segment
@@ -230,8 +230,14 @@ customers.loc[(customers['recency']<= 365*2) &
                    (customers['recency'] > 365*1), 'segment'] = "warm"
 # Active segment
 customers.loc[customers['recency']<= 365, 'segment'] = "active"
-# Plot results
-customers['segment'].value_counts()
+
+```
+Let's print and visualize the results.
+
+```python
+# Print the results
+clusters = customers['segment'].value_counts()
+clusters
 ```
 
 ```tex
@@ -242,7 +248,114 @@ cold        1903
 Name: segment, dtype: int64
 ```
 
+```python
+plt.rcParams["figure.figsize"] = (10,6)
+plt.rcParams.update({'font.size': 22})
 
+
+squarify.plot(sizes=clusters, 
+              label=clusters.index, 
+              color=['tab:purple', 'tab:green', 'tab:blue', 'tab:orange'], alpha=.4 )
+plt.axis('off');
+```
+
+{% include image.html url="/assets/7/4seg.png" description="Market Segmentation Based on One Variable" zoom="85%" %}
+
+### Managerial Segmentation Based on RFM
+
+In this section, we will add two new variables to the segmentation model from above, which are: frequency and monetary. More specifically, we want to separate new customers from the rest of the customers and differentiate between high and low value customers. To increase efficiency, we want to limit our marketing activities to just the following two  market segments: active and warm. 
+
+We begin by adding a new group to the warm segment: *new warm*, which refers to those who have made only a single purchase in the past two years. Then, we divide the warm segment into two subgroups based on how much money they spend on average, with $100 as the threshold.
+
+```python
+# Further segmentation of the warm segment:
+customers.loc[(customers['segment'] == "warm") &
+                  (customers['first_purchase'] <= 365*2), 'segment'] = "new warm"
+
+customers.loc[(customers['segment'] == "warm") &
+                  (customers['amount'] < 100), 'segment'] = "warm low value"
+
+customers.loc[(customers['segment'] == "warm") &
+                  (customers['amount'] >= 100), 'segment'] = "warm high value"
+
+```
+Finally, we do the same for our Active segment.
+
+```python
+customers.loc[(customers['segment'] == "active") &
+                  (customers['first_purchase'] <= 365), 'segment'] = "new active"
+
+customers.loc[(customers['segment'] == "active") &
+                  (customers['amount'] < 100), 'segment'] = "active low value"
+
+customers.loc[(customers['segment'] == "active") &
+                  (customers['amount'] >= 100), 'segment'] = "active high value"
+```
+
+As output we get:
+
+```python
+customers['segment'].value_counts()
+```
+
+```tex
+inactive             9158
+active low value     3313
+cold                 1903
+new active           1512
+new warm              938
+warm low value        901
+active high value     573
+warm high value       119
+Name: segment, dtype: int64
+```
+
+To make the results look better, let's arrange the segments in the order shown above and print the first five and last five entries in our Pandas dataframe.
+
+```python
+# We start first by changing the type of the segment variable to categorical
+customers['segment'] = customers['segment'].astype('category')
+customers['segment_sort'] = pd.Categorical( customers['segment'],
+        categories=['inactive', 'cold', 'warm high value','warm low value', 
+           'new warm', 'active high value', 'active low value',
+           'new active'], ordered=True)
+customers.sort_values('segment_sort', inplace=True)
+```
+
+```python
+# print first 5 rows
+print(tabulate(customers[['customer_id', 'segment_sort']].head(), headers='keys', 
+               tablefmt='psql', showindex=False))```
+
+```tex
++---------------+----------------+
+|   customer_id | segment_sort   |
+|---------------+----------------|
+|            10 | inactive       |
+|        119690 | inactive       |
+|        119710 | inactive       |
+|        119720 | inactive       |
+|        119730 | inactive       |
++---------------+----------------+
+```
+
+```python
+# print the last 5 rows
+print(tabulate(customers_2015[['customer_id', 'segment_sort']].tail(), headers='keys', 
+               tablefmt='psql', showindex=False))
+```
+
+```tex
++---------------+----------------+
+|   customer_id | segment_sort   |
+|---------------+----------------|
+|        252380 | new active     |
+|        252370 | new active     |
+|        252360 | new active     |
+|        252450 | new active     |
+|        264200 | new active     |
++---------------+----------------+
+```
 
 ## References
 
