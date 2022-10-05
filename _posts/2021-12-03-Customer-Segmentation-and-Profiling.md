@@ -17,7 +17,7 @@ preview_pic: /assets/7/manager_seg.png
 
 One of the most used and familiar concepts in marketing is market segmentation, that is, the division of markets, based on common characteristics such as geographic, demographic, psychographic and behavioristic, into homogeneous groups of customers, in order to develop segment-specific marketing strategies or to look for new product opportunities to effectively capture the target segments.  
 
-In reality, there is no single best method for segmenting a market and, more importantly, the way we segment a market should reflect what we intend to achieve. Useful segments must, however, possess the following four qualities (Kottler 1980):
+In reality, there is no single best method for segmenting a market and, more importantly, the way we segment a market should reflect what we intend to achieve. Useful segments must, however, possess the following four qualities [kotler2017]:
 
 1. Measurability; in terms of the size and purchasing power of the segment.
 2. Actionability, that is, the extent to which it is possible to design an effective marketing plan for the target segment  
@@ -147,7 +147,7 @@ q = """
         FROM df GROUP BY 1"""
 customers = sqldf(q)
 ```
-Nothing we have implemented so far is new. We have already seen the same code in the previous tutorial. So if you have trouble following, especially when it comes to SQL, I recommend you take a look at the first part of the practical example from xx.  
+Nothing we have implemented so far is new. We have already seen the same code in the previous tutorial. So if you have trouble following, especially when it comes to SQL, I recommend you take a look at the first part of the practical example from [Customer Segmentation using RFM Analysis](https://skacem.github.io/2021/10/25/Customer-Segmentation-BA2/).  
 As result we get around 18,000 customers and four variables: `customer_id`, `recency`, `frequency` and `amount`.
 
 Let's print some descriptive statistics as well as the first five rows of our RFM analysis.
@@ -200,7 +200,7 @@ In the next section we will implement the first segmentation model based on rece
 
 ### Managerial Segmentation Based on One Variable
 
-Instead of using machine learning to identify segments as seen in the previous tutorial, we will now implement a managerial segmentation. Simply put, it is nothing more but a sequence of if-then-else statements and consists of four segments in total: Active, Warm, Cold and Inactive.
+Instead of using machine learning to identify segments as seen in the previous tutorial, we will now implement a managerial segmentation. Simply put, it is nothing more but a sequence of if-then-else statements and consists of four segments in total: active, warm, cold and inactive.
 
 We first begin by identifying the segment of inactive customers. According to the above definition, these are those who have not made a single purchase in more than three years:
 
@@ -358,10 +358,12 @@ print(tabulate(customers_2015[['customer_id', 'segment_sort']].tail(), headers='
 ```
 
 ## References
-
-[blank2020]: Blank, Steven G, and Bob Dorf. 2020. The Startup Owner’s Manual: The Step-by-Step Guide for Building a Great Company. Vol. 1 
-
-[piercy1993]: Piercy, Nigel F., and Neil A. Morgan. 1993. "Strategic and Operational Market Segmentation: A Managerial Analysis." Journal of Strategic Marketing 1 (2): 123–40. https://doi.org/10.1080/09652549300000008.
+ 
+1. Lilien, Gary L, Arvind Rangaswamy, and Arnaud De Bruyn. 2017. Principles of Marketing Engineering and Analytics. State College, PA: Decisionpro.
+2. Piercy, Nigel F., and Neil A. Morgan. 1993. "Strategic and Operational Market Segmentation: A Managerial Analysis." Journal of Strategic Marketing 1 (2): 123–40. https://doi.org/10.1080/09652549300000008.
+3. Wind, Yoram. 1978. "Issues and Advances in Segmentation Research." Journal of Marketing Research 15 (3): 317. https://doi.org/10.2307/3150580.
+4. Armstrong, G.M., S. Adam, S.M. Denize, M. Volkov, and P. Kotler. 2017. Principles of Marketing. Pearson Australia. https://books.google.cd/books?id=KndhuwEACAAJ.
+5. Dataset from [Github repo](https://github.com/skacem/Business-Analytics/tree/main/Datasets). Accessed 15 December 2021.
 
 
   
