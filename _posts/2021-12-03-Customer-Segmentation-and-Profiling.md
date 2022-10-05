@@ -232,7 +232,9 @@ customers.loc[(customers['recency']<= 365*2) &
 customers.loc[customers['recency']<= 365, 'segment'] = "active"
 
 ```
-Let's print and visualize the results.
+Let's print and visualize the results. Make sure before that you have the `squarify` package installed. It is very handy, when it comes to Tremapping [^2]. 
+
+[^2]: Tremapping is a data visualization technique that displays hierarchical data using rectangles of decreasing sizes, often called nesting, to create treemap charts. As the name suggests, treemap charts depict data in a tree-like format.
 
 ```python
 # Print the results
@@ -259,7 +261,8 @@ squarify.plot(sizes=clusters,
 plt.axis('off');
 ```
 
-{% include image.html url="/assets/7/4seg.png" description="Market Segmentation Based on One Variable" zoom="85%" %}
+
+{% include image.html url="/assets/7/4seg.png" description="Market Segmentation Based on One Variable as a Treemap" zoom="85%" %}
 
 ### Managerial Segmentation Based on RFM
 
@@ -356,6 +359,23 @@ print(tabulate(customers_2015[['customer_id', 'segment_sort']].tail(), headers='
 |        264200 | new active     |
 +---------------+----------------+
 ```
+If you like, we can plot the results as a treemap again to give you a sense on how the segment sizes compare to each other.
+
+```python
+plt.rcParams["figure.figsize"] = (20,10)
+plt.rcParams.update({'font.size': 16})
+
+colors = ['tab:purple', 'tab:green', 'tab:orange', 'tab:green', 
+                     'tab:blue', 'tab:blue', 'tab:green', 'tab:blue']
+squarify.plot(sizes=clusters, 
+              label=clusters.index, 
+              color=colors, pad=True, alpha=.4,
+              norm_x=80, norm_y=65)
+plt.axis('off');
+```
+
+{% include image.html url="/assets/7/8seg.png" description="Market Segmentation Based on RFM Analysis" zoom="70%" %}
+
 
 ## References
  
@@ -365,5 +385,4 @@ print(tabulate(customers_2015[['customer_id', 'segment_sort']].tail(), headers='
 4. Armstrong, G.M., S. Adam, S.M. Denize, M. Volkov, and P. Kotler. 2017. Principles of Marketing. Pearson Australia. https://books.google.cd/books?id=KndhuwEACAAJ.
 5. Dataset from [Github repo](https://github.com/skacem/Business-Analytics/tree/main/Datasets). Accessed 15 December 2021.
 
-
-  
+-----
