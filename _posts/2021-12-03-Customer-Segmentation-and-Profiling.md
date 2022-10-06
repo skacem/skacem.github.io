@@ -376,6 +376,8 @@ plt.axis('off');
 
 {% include image.html url="/assets/7/8seg.png" description="Market Segmentation Based on RFM Analysis" zoom="70%" %}
 
+## Conclusion
+
 
 ## References
  
