@@ -216,7 +216,7 @@ inactive    9158
 Name: segment, dtype: int64
 ```
 
-So nearly half of our customers are inactive. This is not good, as we know an inactive customer is a lost customer. We can only blame ourselves (or management) for not having used Segmenting, Targeting and Positioning (STP) marketing a few years earlier.
+So nearly half of our customers are inactive. This is not good, as we know an inactive customer is a lost customer. Now, before we try to recover lost customers, we first need to understand the reasons behind our customers' attrition. Of course, this requires diving deeper into our data, benchmarking our competitors, and also sending out customer loss surveys to the relevant customers.
 
 The rest of the customers are then mapped to the corresponding segments using the same approach.
 
