@@ -17,7 +17,7 @@ preview_pic: /assets/7/manager_seg.png
 
 One of the most used and familiar concepts in marketing is market segmentation, that is, the division of markets, based on common characteristics such as geographic, demographic, psychographic and behavioristic, into homogeneous groups of customers, in order to develop segment-specific marketing strategies or to look for new product opportunities to effectively capture the target segments.  
 
-In reality, there is no single best method for segmenting a market and, more importantly, the way we segment a market should reflect what we intend to achieve. Useful segments must, however, possess the following four qualities [kotler2017]:
+In reality, there is no single best method for segmenting a market and, more importantly, the way we segment a market should reflect what we intend to achieve. Useful segments must, however, possess the following four qualities [4]:
 
 1. Measurability; in terms of the size and purchasing power of the segment.
 2. Actionability, that is, the extent to which it is possible to design an effective marketing plan for the target segment  
@@ -25,7 +25,6 @@ In reality, there is no single best method for segmenting a market and, more imp
 4. Substantiality; implying that the target segments are large enough to be profitable.
 
 Broadly speaking, any market segmentation falls into one of the following two approaches: *a priori* (or prescriptive) and *post hoc* (or exploratory) segmentation. Segmentation based on hierarchical cluster analysis, which we introduced in the last tutorial, is a typical example of exploratory *post-hoc* segmentation. In this tutorial, we will introduce and implement an *a priori* approach to segmentation, namely managerial market segmentation.
-
 
 ## Managerial Segmentation
 
@@ -41,7 +40,6 @@ In this case, an appropriate model would be to divide our customer database into
 
 {% include image.html url="/assets/7/segment_1.png" description="Customer Segmentation Based on One Variable: Recency" zoom="60%" %}
 
-
 Now, given the scope and diversity of marketing decisions, attempting to use a single basis for segmentation to develop a marketing strategy is likely to result in adopting the wrong solutions and wasting resources. So let's add another variable to our segmentation model, namely average spending. By doing so, we want to differentiate between valuable and less valuable customers in each subgroup within **Warm** and **Active** customers. Furthermore, we want to differentiate between those who have only made one purchase so far, regardless of how much money they spend, and refer to them as **New Customers**. That is an RFM analysis. 
 
 {% include image.html url="/assets/7/segment_2.png" description="Customer Segmentation Based on Recency, Frequency and Monetary (RFM) Analysis" zoom="60%" %}
@@ -56,7 +54,7 @@ Once we are done with the segmentation, we want to describe each segment in more
 
 [^1]: Some literature make the difference between those three terms: Customer Profile, Persona and Centroid. However, in this tutorial we will use them as synonyms. 
 
-##  Practical Example in Python
+## Practical Example in Python
 
 Now that we are done with the theory, let's have some fun. In the following we want to implement the height market segment depicted above. We will be using the same data as in the previous tutorial. It consists of 51,243 observations across 3 variables:
 
@@ -81,7 +79,7 @@ pd.options.display.float_format = '{:,.2f}'.format
 plt.rcParams["figure.figsize"] = (12,8)
 ```
 
-It is also recommended to replace the names of the variables with meaningful and easy-to-remember names. 
+It is also recommended to replace the names of the variables with meaningful and easy-to-remember names.  
 
 ```python
 columns = ['customer_id', 'purchase_amount', 'date_of_purchase']
@@ -89,8 +87,8 @@ df = pd.read_csv('purchases.txt', header=None, sep='\t',
             names=columns)
 df.sample(n=5, random_state=57)
 ```
-
     
+
     +-------+---------------+-------------------+--------------------+
     |       |   customer_id |   purchase_amount | date_of_purchase   |
     |-------+---------------+-------------------+--------------------|
@@ -147,6 +145,7 @@ q = """
         FROM df GROUP BY 1"""
 customers = sqldf(q)
 ```
+
 Nothing we have implemented so far is new. We have already seen the same code in the previous tutorial. So if you have trouble following, especially when it comes to SQL, I recommend you take a look at the first part of the practical example from [Customer Segmentation using RFM Analysis](https://skacem.github.io/2021/10/25/Customer-Segmentation-BA2/).  
 As result we get around 18,000 customers and four variables: `customer_id`, `recency`, `frequency` and `amount`.
 
@@ -328,7 +327,8 @@ customers.sort_values('segment_sort', inplace=True)
 ```python
 # print first 5 rows
 print(tabulate(customers[['customer_id', 'segment_sort']].head(), headers='keys', 
-               tablefmt='psql', showindex=False))```
+               tablefmt='psql', showindex=False))
+```
 
 ```tex
 +---------------+----------------+
@@ -359,6 +359,7 @@ print(tabulate(customers_2015[['customer_id', 'segment_sort']].tail(), headers='
 |        264200 | new active     |
 +---------------+----------------+
 ```
+
 If you like, we can plot the results as a treemap again to give you a sense on how the segment sizes compare to each other.
 
 ```python
@@ -376,15 +377,20 @@ plt.axis('off');
 
 {% include image.html url="/assets/7/8seg.png" description="Market Segmentation Based on RFM Analysis" zoom="70%" %}
 
-## Conclusion
+Alright. Now we want to create buyer personas for the target segments so we can develop the right marketing activities for each segment to increase sales and reduce customer churn. Unfortunately, we will not cover these topics here. If you are interested in how it works, check out my previous tutorial.
 
+## Summary
 
+Managerial segmentation is basically a sequence of if-then statements based on simple rules. It relies heavily on the experience and subjective judgment of the manager in charge and usually leads to the implementation of familiar strategies. Now, applying known segmentation models too early without exploring new ones can lead to inferior results. Ideally, is to find a balance between exploring new strategies and applying known ones. After all, to adapt to complex and rapidly changing business environments, managers need to explore new knowledge. This is also known as exploration-exploitation dilemma in cognitive science. Even more problematic is the fact that managers are usually older. So can they still innovate and think outside the box?  
+Fact is, the cognitive processes associated with innovation can be learned and improved, provided one has the proper training and willingness to learn.  
 ## References
  
 1. Lilien, Gary L, Arvind Rangaswamy, and Arnaud De Bruyn. 2017. Principles of Marketing Engineering and Analytics. State College, PA: Decisionpro.
 2. Piercy, Nigel F., and Neil A. Morgan. 1993. "Strategic and Operational Market Segmentation: A Managerial Analysis." Journal of Strategic Marketing 1 (2): 123–40. https://doi.org/10.1080/09652549300000008.
 3. Wind, Yoram. 1978. "Issues and Advances in Segmentation Research." Journal of Marketing Research 15 (3): 317. https://doi.org/10.2307/3150580.
 4. Armstrong, G.M., S. Adam, S.M. Denize, M. Volkov, and P. Kotler. 2017. Principles of Marketing. Pearson Australia. https://books.google.cd/books?id=KndhuwEACAAJ.
-5. Dataset from [Github repo](https://github.com/skacem/Business-Analytics/tree/main/Datasets). Accessed 15 December 2021.
+5. Laureiro-Martínez, Daniella, Stefano Brusoni, Nicola Canessa, and Maurizio Zollo. 2015. “Understanding the Exploration-Exploitation Dilemma: An FMRI Study of Attention Control and Decision-Making Performance: Understanding the Exploration-Exploitation Dilemma.” Strategic Management Journal 36 (3): 319–38. https://doi.org/10.1002/smj.2221.
+6. Arnaud De Bruyn. [Foundations of marketing analytics](https://www.coursera.org/learn/foundations-marketing-analytics) (MOOC). Coursera. 
+7. Dataset from [Github repo](https://github.com/skacem/Business-Analytics/tree/main/Datasets). Accessed 15 December 2021.
 
 -----
