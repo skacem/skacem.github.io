@@ -216,7 +216,7 @@ inactive    9158
 Name: segment, dtype: int64
 ```
 
-So nearly half of our customers are inactive. This is not good, as we know an inactive customer is a lost customer. Now, before we try to recover lost customers, we first need to understand the reasons behind our customers' attrition. Of course, this requires diving deeper into our data, benchmarking our competitors, and also sending out customer loss surveys to the relevant customers.
+So nearly half of our customers are inactive. This is not good, as we know an inactive customer is a lost customer. Now, before we try to recover lost customers, we first need to understand the reasons behind our customers' attrition. This, in turn, requires us to dive deeper into our data, to benchmark against our competitors, and also to send out customer loss surveys to the relevant customers. As we gain a better understanding of the reasons, we can implement a marketing strategy aimed at recovering high-value customers.
 
 The rest of the customers are then mapped to the corresponding segments using the same approach.
 
