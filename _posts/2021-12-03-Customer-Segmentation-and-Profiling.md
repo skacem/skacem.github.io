@@ -381,8 +381,10 @@ Alright. Now we want to create buyer personas for the target segments so we can 
 
 ## Summary
 
-Managerial segmentation is basically a sequence of if-then statements based on simple rules. It relies heavily on the experience and subjective judgment of the manager in charge and usually leads to the implementation of familiar strategies. Now, applying known segmentation models too early without exploring new ones can lead to inferior results. Ideally, is to find a balance between exploring new strategies and applying known ones. After all, to adapt to complex and rapidly changing business environments, managers need to explore new knowledge. This is also known as exploration-exploitation dilemma in cognitive science. Even more problematic is the fact that managers are usually older. So can they still innovate and think outside the box?  
-Fact is, the cognitive processes associated with innovation can be learned and improved, provided one has the proper training and willingness to learn.  
+Managerial segmentation is basically a sequence of if-then statements based on simple rules. It relies heavily on the experience and subjective judgment of the manager in charge and usually leads to the implementation of familiar strategies. Now, applying known segmentation models too early without exploring new ones can lead to inferior results. Ideally, is to find a balance between exploring new strategies and applying known ones. After all, to adapt to complex and rapidly changing business environments, managers need to explore and refine new knowledge. This is also known as exploration-exploitation dilemma in cognitive science and ambidexterity in management theory. Even more problematic is the fact that managers are usually older. So can they still innovate and think outside the box?[^3]  
+You tell me.
+
+[^3]:In fact, the cognitive processes associated with innovation can be learned and improved, provided one has the proper training and willingness to learn; no matter their age. For more information see [5]  
 ## References
  
 1. Lilien, Gary L, Arvind Rangaswamy, and Arnaud De Bruyn. 2017. Principles of Marketing Engineering and Analytics. State College, PA: Decisionpro.
