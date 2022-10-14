@@ -24,5 +24,6 @@ In this tutorial we will develop a typical marketing application. We will predic
 1. A first model to calculate the probability of purchase
 2. A second model to predict the amount spent  
 
-Finally, we will combine the two models into one large scoring model. 
+For simplicity sake, we will use linear regression in both models. As it is one of the simplest supervised learning algorithms.  
+Finally, we will combine the two models into one large scoring model.
 
