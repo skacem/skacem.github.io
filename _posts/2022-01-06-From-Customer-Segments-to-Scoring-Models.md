@@ -219,8 +219,16 @@ actual[["revenue_2015", "segment"]].groupby("segment").mean()
 ```
 
 As you can see from above, `active high value` customers generated the highest revenue in 2015. Although they represent only 3% of all customers, they have generated more than 71% of total revenues.  
+As far as resource allocation and how much money you want to invest to maintain good relationships with certain customers, based on what segment they belong to, such information is crucial.  
+
 And in case you're wondering why there are so many zeros. It's because, by definition, only customers who have purchased at least once in the last 365 days are considered `active`.
+
 ## Segmenting a Database Retrospectively
+
+From a business strategy perspective, it is also extremely useful to determine not only the extent to which each segment is contributing to today's revenues, but also to what extent each segment today would likely contribute to tomorrow's revenues. Only then can we achieve a forward-looking analysis of revenue development; namely: from which of today's customers will tomorrow's revenue come?  
+Unfortunately, we cannot answer this question with certainty, as tomorrow has not yet happened. Only future can tell. Nevertheless, if we examine the recent past, we can have a pretty good idea of what tomorrow will be like; just ask the weather experts about it. After all, customers in a segment today are likely to behave pretty much the same as customers in that same segment did a year ago. So analyzing the past will inform us about the most likely future. In other words, analyzing the past helps us to understand the expected future. Now let's find out how this can be implemented.
+
+
 
 
 
