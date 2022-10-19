@@ -225,13 +225,98 @@ And in case you're wondering why there are so many zeros. It's because, by defin
 ## Segmenting a Database Retrospectively
 
 From a business strategy perspective, it is also extremely useful to determine not only the extent to which each segment is contributing to today's revenues, but also to what extent each segment today would likely contribute to tomorrow's revenues. Only then can we achieve a forward-looking analysis of revenue development; namely: from which of today's customers will tomorrow's revenue come?  
-Unfortunately, we cannot answer this question with certainty, as tomorrow has not yet happened. Only future can tell. Nevertheless, if we examine the recent past, we can have a pretty good idea of what tomorrow will be like; just ask the weather experts about it. After all, customers in a segment today are likely to behave pretty much the same as customers in that same segment did a year ago. So analyzing the past will inform us about the most likely future.  
-Now let's find out how this can be implemented.
+Unfortunately, we cannot answer this question with certainty, as tomorrow has not yet happened. Only future can tell. Nevertheless, if we examine the recent past, we can have a pretty good idea of what tomorrow will be like; just ask the weather experts about it. After all, customers in a segment today are likely to behave pretty much the same as customers in that same segment did a year ago. So analyzing the past will inform us about the most likely future.
+Now let's find out how this can be implemented.  
 
+We want to do an RFM analysis and a customer segmentation as if we were a year in the past, namely 2014. Thus, every transaction that has happened in the last 365 days should be ignored, as if it never happened; or hasn't happened yet. The SQL query here is as follows:
 
+```python
+q = """
+        SELECT customer_id,
+        MIN(days_since) - 365 AS 'recency',
+        MAX(days_since) - 365 AS 'first_purchase',
+        COUNT(*) AS 'frequency',
+        AVG(purchase_amount) AS 'amount'
+        FROM df
+        WHERE days_since > 365
+        GROUP BY 1"""
 
+customers_2014 = sqldf(q)
+```
 
+The rest, besides the new dataframe name, is the same as in the previous section.  
 
+```python
+customers_2014.loc[customers_2014["recency"] > 365 * 3, "segment"] = "inactive"
+customers_2014["segment"] = customers_2014["segment"].fillna("NA")
+customers_2014.loc[
+    (customers_2014["recency"] <= 365 * 3) & (customers_2014["recency"] > 356 * 2),
+    "segment",
+] = "cold"
+customers_2014.loc[
+    (customers_2014["recency"] <= 365 * 2) & (customers_2014["recency"] > 365 * 1),
+    "segment",
+] = "warm"
+customers_2014.loc[customers_2014["recency"] <= 365, "segment"] = "active"
+customers_2014.loc[
+    (customers_2014["segment"] == "warm")
+    & (customers_2014["first_purchase"] <= 365 * 2),
+    "segment",
+] = "new warm"
+customers_2014.loc[
+    (customers_2014["segment"] == "warm") & (customers_2014["amount"] < 100), "segment"
+] = "warm low value"
+
+customers_2014.loc[
+    (customers_2014["segment"] == "warm") & (customers_2014["amount"] >= 100), "segment"
+] = "warm high value"
+customers_2014.loc[
+    (customers_2014["segment"] == "active") & (customers_2014["first_purchase"] <= 365),
+    "segment",
+] = "new active"
+
+customers_2014.loc[
+    (customers_2014["segment"] == "active") & (customers_2014["amount"] < 100),
+    "segment",
+] = "active low value"
+
+customers_2014.loc[
+    (customers_2014["segment"] == "active") & (customers_2014["amount"] >= 100),
+    "segment",
+] = "active high value"
+
+# Transform segment column datatype from object to category
+customers_2014["segment"] = customers_2014["segment"].astype("category")
+
+# Re-order segments in a better readable way
+sorter = [
+    "inactive",
+    "cold",
+    "warm high value",
+    "warm low value",
+    "new warm",
+    "active high value",
+    "active low value",
+    "new active",
+]
+customers_2014.segment.cat.set_categories(sorter, inplace=True)
+customers_2014.sort_values(["segment"], inplace=True)
+```
+
+Now let's plot the results in the form of a Treemap.
+
+```python
+c2014 = pd.DataFrame(customers_2014["segment"].value_counts())
+
+plt.rcParams["figure.figsize"] = 12, 9
+norm = mpl.colors.Normalize(vmin=min(c2014["segment"]), vmax=max(c2014["segment"]))
+colors = [mpl.cm.Spectral(norm(value)) for value in c2014["segment"]]
+squarify.plot(sizes=c2014["segment"], label=c2014.index, 
+              value=c2014.values, color=colors, alpha=0.6)
+plt.axis("off");
+```
+
+{% include image.html url="/assets/8/c2014.png" description="Market Segments from 2014 in the Form of a Treemap" zoom="100%" %}
 
 ## Scoring Model
 
