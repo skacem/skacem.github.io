@@ -27,3 +27,209 @@ In this tutorial we will develop a typical marketing application. We will predic
 For simplicity sake, we will use linear regression in both models. As it is one of the simplest supervised learning algorithms.  
 Finally, we will combine the two models into one large scoring model.
 
+## RFM Analysis and Customer Segmentation
+
+In this section we will use the same code as in the previous tutorial. The only difference is that we will save the resulting customer segmentation as `customers_2015` rather than just `customers`.  
+As usual, we start by importing the necessary libraries, setting up the notebook environment and reading the data set as a data frame.
+
+```python
+# import needed packages
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import patsy
+import squarify
+import statsmodels.api as sm
+from pandasql import sqldf
+from tabulate import tabulate
+
+# Set up the notebook environment
+pysqldf = lambda q: sqldf(q, globals())
+%precision %.2f
+pd.options.display.float_format = "{:,.2f}".format
+plt.rcParams["figure.figsize"] = 10, 8
+
+# Load text file into a local variable
+columns = ["customer_id", "purchase_amount", "date_of_purchase"]
+df = pd.read_csv("purchases.txt", header=None, sep="\t", names=columns)
+
+# interpret the last column as datetime
+df["date_of_purchase"] = pd.to_datetime(df["date_of_purchase"], format="%Y-%m-%d")
+```
+
+Then we add two variables to our dataframe: `year_of_purchase` and `days_since`.
+
+```python
+# Extract year of purchase and save it as a column
+df["year_of_purchase"] = df["date_of_purchase"].dt.year
+
+# Add a day_since column showing the difference between last purchase and a basedate
+basedate = pd.Timestamp("2016-01-01")
+df["days_since"] = (basedate - df["date_of_purchase"]).dt.days
+```
+
+We now use SQL for the RFM analysis and then segment our customer database accordingly.
+
+```python
+q = """
+        SELECT customer_id,
+        MIN(days_since) AS 'recency',
+        MAX(days_since) AS 'first_purchase',
+        COUNT(*) AS 'frequency',
+        AVG(purchase_amount) AS 'amount'
+        FROM df GROUP BY 1"""
+customers_2015 = sqldf(q)
+```
+
+```python
+# Managerial Segmentation based on RFM analysis
+customers_2015.loc[customers_2015["recency"] > 365 * 3, "segment"] = "inactive"
+customers_2015["segment"] = customers_2015["segment"].fillna("NA")
+customers_2015.loc[
+    (customers_2015["recency"] <= 365 * 3) & (customers_2015["recency"] > 356 * 2),
+    "segment",
+] = "cold"
+customers_2015.loc[
+    (customers_2015["recency"] <= 365 * 2) & (customers_2015["recency"] > 365 * 1),
+    "segment",
+] = "warm"
+customers_2015.loc[customers_2015["recency"] <= 365, "segment"] = "active"
+customers_2015.loc[
+    (customers_2015["segment"] == "warm")
+    & (customers_2015["first_purchase"] <= 365 * 2),
+    "segment",
+] = "new warm"
+customers_2015.loc[
+    (customers_2015["segment"] == "warm") & (customers_2015["amount"] < 100), "segment"
+] = "warm low value"
+customers_2015.loc[
+    (customers_2015["segment"] == "warm") & (customers_2015["amount"] >= 100), "segment"
+] = "warm high value"
+customers_2015.loc[
+    (customers_2015["segment"] == "active") & (customers_2015["first_purchase"] <= 365),
+    "segment",
+] = "new active"
+customers_2015.loc[
+    (customers_2015["segment"] == "active") & (customers_2015["amount"] < 100),
+    "segment",
+] = "active low value"
+customers_2015.loc[
+    (customers_2015["segment"] == "active") & (customers_2015["amount"] >= 100),
+    "segment",
+] = "active high value"
+```
+Once we have the segments populated with corresponding customers we transform the type of the `segment` variable to categorical and reorder the segments, so that it makes more sense.
+
+```python
+# Transform segment column datatype from object to category
+customers_2015["segment"] = customers_2015["segment"].astype("category")
+# Re-order segments in a better readable way
+sorter = [
+    "inactive",
+    "cold",
+    "warm high value",
+    "warm low value",
+    "new warm",
+    "active high value",
+    "active low value",
+    "new active",
+]
+customers_2015.segment.cat.set_categories(sorter, inplace=True)
+customers_2015.sort_values(["segment"], inplace=True)
+```
+
+So let's plot the results as a treemap using `squarify`.
+
+```python
+plt.rcParams["figure.figsize"] = 12, 9
+c2015 = pd.DataFrame(customers_2015["segment"].value_counts())
+norm = mpl.colors.Normalize(vmin=min(c2015["segment"]), vmax=max(c2015["segment"]))
+colors = [mpl.cm.RdYlBu_r(norm(value)) for value in c2015["segment"]]
+squarify.plot(sizes=c2015["segment"], label=c2015.index, 
+              value=c2015.values, color=colors, alpha=0.6)
+plt.axis("off");
+```
+
+{% include image.html url="/assets/8/c2015.png" description="Market Segments as a Treemap" zoom="100%" %}
+
+We will also need to compute the revenue of each customer in 2015 to be able to predict the amount of the next purchase. 
+
+```python
+# Compute revenues generated by customers in 2015 using SQL
+q = """
+        SELECT customer_id, 
+        SUM(purchase_amount) AS 'revenue_2015'
+        FROM df
+        WHERE year_of_purchase = 2015
+        GROUP BY 1
+    """
+revenue_2015 = sqldf(q)
+```
+
+Note that not all customers have made a purchase in 2015.
+
+```python
+print('Number of customers with at least one completed payment:', revenue_2015.shape[0])
+print('Total number of customers as in 2015:', customers_2015.shape[0])
+```
+
+```tex
+Number of customers with at least one completed payment: 5398
+Total number of customers as in 2015: 18417
+```
+
+`revenue_2015` contains only 5,398 observations, while we have 18,417 customers to date. This is because a large portion of our customers were actually inactive in 2015. Nevertheless, we need to include them in our statistics. We do this as we merge the variable `revenue_2015` with the dataframe `customers_2015`. In `SQL` syntax, this corresponds to a left join with `customers_2015` as left table.  Note that this only works if both dataframes have one common index: `Customer_ID`.
+
+{% include image.html url="/assets/8/merge_.png" description="Different Types of SQL JOINs (Source: https://www.w3schools.com)" zoom="60%" %}
+
+
+```python
+# Merge 2015 customers and 2015 revenue, while making sure that customers
+# without purchase in 2015 also appear in the new df
+actual = customers_2015.merge(revenue_2015, how="left", on="customer_id")
+```
+
+And of course we don't want to have `NaN`'s in our dataframe.
+
+```python
+# Replace NaNs in revenue_2015 column with 0s
+actual["revenue_2015"].fillna(0, inplace=True)
+```
+
+Now we want to compute the average revenue generated by each customer segment. As a manager you are interested in knowing to what extent each segment today contributes to today's revenues and this for many obvious reasons. Often, you will find that small segments, in terms of number of customers, generate a significant amount of revenue. Precisely this group of customers is what you want to target in your next marketing campaign.
+
+```python
+actual[["revenue_2015", "segment"]].groupby("segment").mean()
+```
+
+```tex
++-------------------+----------------+
+| segment           |   revenue_2015 |
+|-------------------+----------------|
+| inactive          |         0      |
+| cold              |         0      |
+| warm high value   |         0      |
+| warm low value    |         0      |
+| new warm          |         0      |
+| active high value |       323.569  |
+| active low value  |        52.306  |
+| new active        |        79.1661 |
++-------------------+----------------+
+```
+
+As you can see from above, `active high value` customers generated the highest revenue in 2015. Although they represent only 3% of all customers, they have generated more than 71% of total revenues.  
+And in case you're wondering why there are so many zeros. It's because, by definition, only customers who have purchased at least once in the last 365 days are considered active.
+
+
+### Segmenting a Database Retrospectively
+
+
+## Scoring Model
+
+
+## Calibration Data and 
+
+
+
+
