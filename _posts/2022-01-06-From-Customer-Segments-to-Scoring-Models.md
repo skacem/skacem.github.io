@@ -219,10 +219,10 @@ actual[["revenue_2015", "segment"]].groupby("segment").mean()
 ```
 
 As you can see from above, `active high value` customers generated the highest revenue in 2015. Although they represent only 3% of all customers, they have generated more than 71% of total revenues.  
-And in case you're wondering why there are so many zeros. It's because, by definition, only customers who have purchased at least once in the last 365 days are considered active.
+And in case you're wondering why there are so many zeros. It's because, by definition, only customers who have purchased at least once in the last 365 days are considered `active`.
+## Segmenting a Database Retrospectively
 
 
-### Segmenting a Database Retrospectively
 
 
 ## Scoring Model
