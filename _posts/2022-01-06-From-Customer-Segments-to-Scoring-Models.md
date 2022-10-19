@@ -19,7 +19,7 @@ preview_pic: /assets/8/salesup.png
 Business forecasting is not about accurately predicting the future, nor is it an end in itself. It is a means to help companies manage uncertainty and develop strategies to minimize potential risks and threats or maximize financial returns.  It relies on identifying and estimating past patterns that are then generalized to forecast the future. As such, forecasting has a wide range of business applications and can be useful throughout the value chain of any organization.  
 For instance, forecasting customer purchases allows companies not only to calculate the expected revenue of each segment so they can focus on profitable ones, but also to properly plan inventory and manpower for the next period.  Other business forecasting applications include customer lifetime value, credit card attrition or future revenues. In other words, every business needs forecasting.
 
-In this tutorial we will develop a typical marketing application. We will predict the likelihood that a customer will make a purchase in a near future. And if so, we also want to predict how much s/he will spend. For this, we will first segment our customer database using RFM analysis --I hope you are now familiar with this segmentation method-- and then we will build two distinct models:
+In this tutorial we will develop a typical marketing application. We will predict the likelihood that a customer will make a purchase in a near future. And if so, we also want to predict how much s/he will spend. For this, we will first segment our customer database using RFM analysis --I hope you are by now familiar with this segmentation method-- and then we will build two distinct models:
 
 1. A first model to calculate the probability of purchase
 2. A second model to predict the amount spent  
@@ -220,13 +220,12 @@ actual[["revenue_2015", "segment"]].groupby("segment").mean()
 
 As you can see from above, `active high value` customers generated the highest revenue in 2015. Although they represent only 3% of all customers, they have generated more than 71% of total revenues.  
 As far as resource allocation and how much money you want to invest to maintain good relationships with certain customers, based on what segment they belong to, such information is crucial.  
-
 And in case you're wondering why there are so many zeros. It's because, by definition, only customers who have purchased at least once in the last 365 days are considered `active`.
 
 ## Segmenting a Database Retrospectively
 
 From a business strategy perspective, it is also extremely useful to determine not only the extent to which each segment is contributing to today's revenues, but also to what extent each segment today would likely contribute to tomorrow's revenues. Only then can we achieve a forward-looking analysis of revenue development; namely: from which of today's customers will tomorrow's revenue come?  
-Unfortunately, we cannot answer this question with certainty, as tomorrow has not yet happened. Only future can tell. Nevertheless, if we examine the recent past, we can have a pretty good idea of what tomorrow will be like; just ask the weather experts about it. After all, customers in a segment today are likely to behave pretty much the same as customers in that same segment did a year ago. So analyzing the past will inform us about the most likely future. In other words, analyzing the past helps us to understand the expected future. Now let's find out how this can be implemented.
+Unfortunately, we cannot answer this question with certainty, as tomorrow has not yet happened. Only future can tell. Nevertheless, if we examine the recent past, we can have a pretty good idea of what tomorrow will be like; just ask the weather experts about it. After all, customers in a segment today are likely to behave pretty much the same as customers in that same segment did a year ago. So analyzing the past will inform us about the most likely future. Now let's find out how this can be implemented.
 
 
 
