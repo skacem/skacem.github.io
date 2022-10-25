@@ -30,7 +30,7 @@ Finally, we will combine the two models into one large scoring model.
 ## RFM Analysis and Customer Segmentation
 
 In this section we will use the same code as in the previous tutorial. The only difference is that we will save the resulting customer segmentation as `customers_2015` rather than just `customers`.  
-As usual, we start by importing the necessary libraries, setting up the notebook environment and reading the data set as a data frame.
+As usual, we start by importing the necessary libraries, setting up the notebook environment and reading the data set as a dataframe.
 
 ```python
 # import needed packages
@@ -58,7 +58,7 @@ df = pd.read_csv("purchases.txt", header=None, sep="\t", names=columns)
 df["date_of_purchase"] = pd.to_datetime(df["date_of_purchase"], format="%Y-%m-%d")
 ```
 
-Then we add two variables to our dataframe: `year_of_purchase` and `days_since`.
+Then we add two variables: `year_of_purchase` and `days_since`.
 
 ```python
 # Extract year of purchase and save it as a column
@@ -119,6 +119,7 @@ customers_2015.loc[
     "segment",
 ] = "active high value"
 ```
+
 Once we have the segments populated with corresponding customers we transform the type of the `segment` variable to categorical and reorder the segments, so that it makes more sense.
 
 ```python
@@ -303,7 +304,7 @@ customers_2014.segment.cat.set_categories(sorter, inplace=True)
 customers_2014.sort_values(["segment"], inplace=True)
 ```
 
-Now let's plot the results in the form of a Treemap.
+Now let's plot the results as a Treemap.
 
 ```python
 c2014 = pd.DataFrame(customers_2014["segment"].value_counts())
@@ -316,12 +317,32 @@ squarify.plot(sizes=c2014["segment"], label=c2014.index,
 plt.axis("off");
 ```
 
-{% include image.html url="/assets/8/c2014.png" description="Market Segments from 2014 in the Form of a Treemap" zoom="100%" %}
+{% include image.html url="/assets/8/c2014.png" description="Market Segments from 2014" zoom="100%" %}
 
-## Scoring Model
+As we can see the figures have changed over the last year. Our new customers segment increased by more than 20% and inactive customers have drastically increased through the years so that half of our customer database is now inactive.
 
+```python
+# The number of "new active high" customers has increased between 2014 and 2015.
+# What is the rate of that increase?
 
-## Calibration Data and 
+ne = (customers_2015["segment"] == "active high value").sum()
+ol = (customers_2014["segment"] == "active high value").sum()
+
+print("New customers growth rate: %.0f%%" % round((ne - ol) / ol * 100))
+```
+
+```python
+New customers growth rate: 21%
+```
+
+Performing a horizontal analysis like this is very important to get a better picture of the development and challenges the company has been facing over the years. 
+
+## Building a Predictive Model
+
+RFM are the predictors. So the first step is to extract those predictors. They are variables computed a year ago. This data will be used to predict what happened over the last 12 months. And then we are going to look at what they did in 2015. These are the target variables.
+
+So we start by merging both dataframes together. Namely, customer segments from 2014 with the revenue they generated in 2015, making sure that all customers in the 2014 dataframe remain in the data.
+
 
 
 
