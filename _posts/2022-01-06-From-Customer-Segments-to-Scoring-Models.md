@@ -40,6 +40,7 @@ import numpy as np
 import pandas as pd
 import patsy
 import squarify
+import statsmodels.api as sm
 from pandasql import sqldf
 from tabulate import tabulate
 
@@ -377,10 +378,69 @@ memory usage: 1.2 MB
 
 ### The Likelihood a Customer will be Active in 2015
 
-A powerful and relatively simple technique for calculating the probability of an event is logistic regression. In this section we are going to see how to  use logistic regression to predict the likelihood a customer is going to be active in 2015. For that we are going to use `statsmodels` package, so make sure that you have it installed.
+A powerful and relatively simple technique for calculating the probability of an event is logistic regression. In this section we are going to see how to  use logistic regression to predict the likelihood a customer is going to be active in 2015. For that we are going to use `statsmodels` package, so make sure that you have it installed.  
 
+We start, of course, by importing `statsmodels`. This we have already done at the very top in the code section `imports` and it looks like this:
 
+```python
+import statsmodels.api as sm
+```
 
+Then we define the model we want to apply using the R-Style formula string:
 
+```python
+formula = "active_2015 ~ recency + first_purchase + frequency + avg_amount + max_amount"
+prob_model = sm.Logit.from_formula(formula, in_sample)
+```
 
+This means that `active_2015`, which is our target variable, is a function of the following features: `recency`, `first_purchase`, `frequency`, `avg_amount` and `max_amount`; from the calibration dataframe `in_sample`.
+
+Now we calibrate our model using the `fit()` method and extract the models coefficients as well as the standard deviations of those coefficients. In `statsmodels`,  `fit()` returns an object containing the model coefficients, standard errors, p-values and other performance measures.
+
+```python
+prob_model_fit = prob_model.fit()
+# Extract the model coefficients
+coef = prob_model_fit.params
+# Extract their standard deviations
+std = prob_model_fit.bse
+```
+
+```tex
+Optimization terminated successfully.
+         Current function value: 0.365836
+         Iterations 8
+```
+
+From the results above, we can tell that the model successfully converges after completing only 8 iterations. _Iterations_ refers to the number of times the model runs over the data in an attempt to optimize the model. The default is a maximum number of 35 iterations after which the optimization fails or doesn't converge. The _Current function value_ is the value of the loss function when we use the parameters found after calibration.
+Just because our model converges is no guarantee that the results are accurate. The standard procedure for assessing whether the results of a regression can be trusted is to look at the so-called p-values. We can print them using the `summary()` method.
+
+```python
+print(prob_model_fit.summary())
+```
+
+```tex
+                           Logit Regression Results                           
+==============================================================================
+Dep. Variable:            active_2015   No. Observations:                16905
+Model:                          Logit   Df Residuals:                    16899
+Method:                           MLE   Df Model:                            5
+Date:                Wed, 26 Oct 2021   Pseudo R-squ.:                  0.3214
+Time:                        15:21:32   Log-Likelihood:                -6184.5
+converged:                       True   LL-Null:                       -9113.9
+Covariance Type:            nonrobust   LLR p-value:                     0.000
+==================================================================================
+                     coef    std err          z      P>|z|      [0.025      0.975]
+----------------------------------------------------------------------------------
+Intercept         -0.5331      0.044    -12.087      0.000      -0.620      -0.447
+recency           -0.0020      6e-05    -32.748      0.000      -0.002      -0.002
+first_purchase -1.167e-05   3.93e-05     -0.297      0.766   -8.86e-05    6.53e-05
+frequency          0.2195      0.015     14.840      0.000       0.191       0.249
+avg_amount         0.0004      0.000      1.144      0.253      -0.000       0.001
+max_amount        -0.0002      0.000     -0.574      0.566      -0.001       0.000
+==================================================================================
+```
+
+The p-value is listed above in the first table as **LLR p-value**. Typically, a p-value of 0.005 is considered statistically significant because there is only a 5% or less chance that these results are not valid. Along with the p-value for the entire regression, we can also find the p-values for each feature. They are listed under P>\|z\| in the second table from above.
+
+Now, let's see what the `z` values tell us
 
