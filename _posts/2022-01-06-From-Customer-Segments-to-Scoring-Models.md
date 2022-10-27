@@ -411,7 +411,7 @@ Optimization terminated successfully.
          Iterations 8
 ```
 
-From the results above, we can tell that the model successfully converges after completing only 8 iterations. _Iterations_ refers to the number of times the model runs over the data in an attempt to optimize the model. The default is a maximum number of 35 iterations after which the optimization fails or doesn't converge. The _Current function value_ is the value of the loss function when we use the parameters found after calibration.
+From the results above, we can tell that the model successfully converges after completing only 8 iterations. `Iterations` refers to the number of times the model runs over the data in an attempt to optimize the model. The default is a maximum number of 35 iterations after which the optimization fails or doesn't converge. The `Current function value` is the value of the loss function when we use the parameters found after calibration.
 Just because our model converges is no guarantee that the results are accurate. The standard procedure for assessing whether the results of a regression can be trusted is to look at the so-called p-values. We can print them using the `summary()` method.
 
 ```python
@@ -440,7 +440,7 @@ max_amount        -0.0002      0.000     -0.574      0.566      -0.001       0.0
 ==================================================================================
 ```
 
-The p-value is listed above in the first table as `LLR p-value`. Typically, a p-value of 0.005 is considered statistically significant because there is only a 5% or less chance that these results are not valid. Along with the p-value for the entire regression, we can also find the p-values for each feature. They are listed in the above table under the variable `P>\|z\|`. From these values, we can see that the most important features of our regression model are `recency` and `frequency`.  
+The p-value is listed above in the first table as `LLR p-value`. Typically, a p-value of 0.005 is considered statistically significant because there is only a 5% or less chance that these results are not valid. Along with the p-value for the entire regression, we can also find the p-values for each feature. They are listed in the above table under the variable `P>|z|`. From these values, we can see that the most important features of our regression model are `recency` and `frequency`.  
 From the standardized regression coefficients `z`, which are simply the regression coefficients divided by the standard errors, we can see that the recency parameter is quite large compared to the other parameters and is also negative. That is, the greater the recency or the more days that have elapsed between the last purchase and the current data, the less likely the customer is to make another purchase in the future. Which makes perfect sense.
 
 ```python
@@ -459,4 +459,112 @@ dtype: float64
 ```
 
 So if your last purchase was two or three years ago, it is extremely unlikely that you will make a purchase in the near future. Indeed, the longer the period, the less likely you are to make a purchase. On the other hand, `frequency` is significantly large and positive. This means that the more purchases a customer has made in the past, the more likely s/he will make further purchases in the future. In fact, the ratio between coefficients and standard deviations indicates the extent to which a parameter is significant for our prediction model. As for the other features, they hardly play a role in the prediction, since they are all around zero.
+
+### Predicting the Dollar Value of the Next Purchase  
+
+Now that we have identified the customers who are more likely to make a purchase in 2015, let's put a dollar value on their upcoming transaction. The problem here is that our model can only be calibrated on those customers who actually bought something in 2015. Hence, we have to resample our `in_sample` dataset so that only customers who were active in 2015 are taken into account. Actually, only their customers ID would do.
+
+```python
+# For the monetary model, we select only those who made a purchase
+# Only  index  suffice, since it represents the customer's ID
+z = in_sample[in_sample["active_2015"] == 1].index.tolist()
+
+# Let's print the 5 first customers ID's
+z[:5]
+```
+
+```pyton
+[1, 17, 29, 30, 31]
+```
+
+It looks good. Let's now print some descriptive statistics using `describe()`.
+
+```python
+       customer_id  recency  first_purchase  frequency  avg_amount  \
+count     3,886.00 3,886.00        3,886.00   3,886.00    3,886.00   
+mean    134,906.97   306.35        1,636.16       4.74       67.78   
+std      68,404.30   519.46        1,101.25       3.79      160.06   
+min          80.00     1.00            1.00       1.00        5.00   
+25%      78,590.00    23.00          649.75       2.00       30.00   
+50%     143,550.00    97.00        1,604.00       4.00       40.00   
+75%     194,362.50   328.00        2,666.00       7.00       60.00   
+max     236,660.00 3,544.00        3,647.00      40.00    4,500.00   
+
+       max_amount  revenue_2015  active_2015  
+count    3,886.00      3,886.00     3,886.00  
+mean        88.33         92.30         1.00  
+std        222.15        217.45         0.00  
+min          5.00          5.00         1.00  
+25%         30.00         30.00         1.00  
+50%         50.00         50.00         1.00  
+75%         80.00        100.00         1.00  
+max      4,500.00      4,500.00         1.00  
+```
+
+As expected, we only have customers that were active in 2015.  
+In terms of sales, customers spent between $5 and $4,500 in our store in 2015. Let's now calibrate our monetary model. We start by estimating 2015 spending based on two attributes: the average amount they typically spend and the maximum amount spent. These are the predictors. Since this is not a classification problem but rather a linear prediction problem with continuous target variables, logistic regression would be inappropriate in this case.  
+OLS, short for ordinary least squares, is probably the most commonly used regression model for this type of task. It attempts to find the line of best fit for the given data by minimizing the sum of squared residuals between the prediction line and the actual data.
+
+```python
+# Calibrate the monetary model (version 1)
+amount_model = sm.OLS.from_formula(
+    "revenue_2015 ~ avg_amount + max_amount", in_sample.loc[z]
+)
+amount_model_fit = amount_model.fit()
+```
+
+Let's print a summary of our OLS regression model.
+
+```python
+print(amount_model_fit.summary())
+```
+
+
+```python
+
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:           revenue_2015   R-squared:                       0.605
+Model:                            OLS   Adj. R-squared:                  0.605
+Method:                 Least Squares   F-statistic:                     2979.
+Date:                Thu, 27 Oct 2021   Prob (F-statistic):               0.00
+Time:                        21:10:39   Log-Likelihood:                -24621.
+No. Observations:                3886   AIC:                         4.925e+04
+Df Residuals:                    3883   BIC:                         4.927e+04
+Df Model:                           2                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept     20.7471      2.381      8.713      0.000      16.079      25.415
+avg_amount     0.6749      0.033     20.575      0.000       0.611       0.739
+max_amount     0.2923      0.024     12.367      0.000       0.246       0.339
+==============================================================================
+Omnibus:                     5580.836   Durbin-Watson:                   2.007
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):          8162692.709
+Skew:                           7.843   Prob(JB):                         0.00
+Kurtosis:                     226.980   Cond. No.                         315.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+```
+
+As we can see from the statistical summary, both selected features are statistically significant. Furthermore, the R-squared value is 0.61, which means that 61% of the variation in the output variables is explained by the input variables.  This is not bad at all. In fact, an R-squared value of more than 0.6 indicates a fitting model. And at 60.5%, we are slightly above that figure. That said, let's plot the results to see how good or bad our predictions are.  
+
+```python
+plt.scatter(in_sample.loc[z].revenue_2015, amount_model_fit.fittedvalues);
+```
+
+{% include image.html url="/assets/8/fitted_val1.png" description="Actual vs Predicted Revenues" zoom="85%" %}
+
+That doesn't look good, and the reason is that most of the customers spent quite small amounts. Mostly between 50 and 200 dollars. Only a few outliers have spent large amounts, up to four thousand dollars. However, the model tries to draw a line through this cloud of points where no line would really make sense.  
+ `Statsmodels` provides a number of convenient plot functions to illustrate the regression models in more details. For instance, we use the function `plot_regress_exog` to quickly check the model assumptions with respect to a single regressor, in our case `avg_amount`.
+
+```python
+sm.graphics.plot_regress_exog(amount_model_fit, 'avg_amount');
+```
+
+{% include image.html url="/assets/8/reg_plots1.png" description=" " zoom="90%" %}
+
 
