@@ -418,7 +418,7 @@ Just because our model converges is no guarantee that the results are accurate. 
 print(prob_model_fit.summary())
 ```
 
-```tex
+```python
                            Logit Regression Results                           
 ==============================================================================
 Dep. Variable:            active_2015   No. Observations:                16905
@@ -440,7 +440,23 @@ max_amount        -0.0002      0.000     -0.574      0.566      -0.001       0.0
 ==================================================================================
 ```
 
-The p-value is listed above in the first table as **LLR p-value**. Typically, a p-value of 0.005 is considered statistically significant because there is only a 5% or less chance that these results are not valid. Along with the p-value for the entire regression, we can also find the p-values for each feature. They are listed under P>\|z\| in the second table from above.
+The p-value is listed above in the first table as `LLR p-value`. Typically, a p-value of 0.005 is considered statistically significant because there is only a 5% or less chance that these results are not valid. Along with the p-value for the entire regression, we can also find the p-values for each feature. They are listed in the above table under the variable `P>\|z\|`. From these values, we can see that the most important features of our regression model are `recency` and `frequency`.  
+From the standardized regression coefficients `z`, which are simply the regression coefficients divided by the standard errors, we can see that the recency parameter is quite large compared to the other parameters and is also negative. That is, the greater the recency or the more days that have elapsed between the last purchase and the current data, the less likely the customer is to make another purchase in the future. Which makes perfect sense.
 
-Now, let's see what the `z` values tell us
+```python
+# standardized regression coefficients z
+print(coef/std)
+```
+
+```python
+Intercept        -12.09
+recency          -32.75
+first_purchase    -0.30
+frequency         14.84
+avg_amount         1.14
+max_amount        -0.57
+dtype: float64
+```
+
+So if your last purchase was two or three years ago, it is extremely unlikely that you will make a purchase in the near future. Indeed, the longer the period, the less likely you are to make a purchase. On the other hand, `frequency` is significantly large and positive. This means that the more purchases a customer has made in the past, the more likely s/he will make further purchases in the future. In fact, the ratio between coefficients and standard deviations indicates the extent to which a parameter is significant for our prediction model. As for the other features, they hardly play a role in the prediction, since they are all around zero.
 
