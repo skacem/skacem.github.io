@@ -558,7 +558,7 @@ plt.scatter(in_sample.loc[z].revenue_2015, amount_model_fit.fittedvalues);
 
 {% include image.html url="/assets/8/fitted_val1.png" description="Actual vs Predicted Revenues" zoom="85%" %}
 
-That doesn't look good, and the reason is that most of the customers spent quite small amounts. Mostly between 50 and 200 dollars. Only a few outliers have spent large amounts, up to four thousand dollars. However, the model tries to draw a line through this cloud of points where no line would really make sense.  
+
  `Statsmodels` provides a number of convenient plot functions to illustrate the regression models in more details. For instance, we use the function `plot_regress_exog` to quickly check the model assumptions with respect to a single regressor, in our case `avg_amount`.
 
 ```python
@@ -567,4 +567,148 @@ sm.graphics.plot_regress_exog(amount_model_fit, 'avg_amount');
 
 {% include image.html url="/assets/8/reg_plots1.png" description=" " zoom="90%" %}
 
+That doesn't look good, and the reason is that most of the customers spent quite small amounts. Mostly between 50 and 200 dollars. Only a few outliers have spent large amounts, up to four thousand dollars. However, the model tries to draw a line through this cloud of points where no line would really make sense.  
+
+When dealing with skewed data, it is recommended to perform a logarithmic transformation. This is indeed a convenient method and by far the most commonly used technique for normalizing highly skewed data.  So instead of predicting 2015 revenue based on the average amount and the maximum amount. We will predict the logarithm of 2015 revenues based on the logarithm of the average and the maximum amount. So let's see how it works. 
+
+```python
+# Re-calibrate the monetary model, using a log-transform (version 2)
+amount_model_log = sm.OLS.from_formula(
+    "np.log(revenue_2015) ~ np.log(avg_amount) + np.log(max_amount)", in_sample.loc[z]
+)
+amount_model_log_fit = amount_model_log.fit()
+print(amount_model_log_fit.summary())
+```
+
+```Python
+                             OLS Regression Results                             
+================================================================================
+Dep. Variable:     np.log(revenue_2015)   R-squared:                       0.693
+Model:                              OLS   Adj. R-squared:                  0.693
+Method:                   Least Squares   F-statistic:                     4377.
+Date:                  Fri, 28 Oct 2022   Prob (F-statistic):               0.00
+Time:                          00:31:16   Log-Likelihood:                -2644.6
+No. Observations:                  3886   AIC:                             5295.
+Df Residuals:                      3883   BIC:                             5314.
+Df Model:                             2                                         
+Covariance Type:              nonrobust                                         
+======================================================================================
+                         coef    std err          t      P>|t|      [0.025      0.975]
+--------------------------------------------------------------------------------------
+Intercept              0.3700      0.040      9.242      0.000       0.292       0.448
+np.log(avg_amount)     0.5488      0.042     13.171      0.000       0.467       0.631
+np.log(max_amount)     0.3881      0.038     10.224      0.000       0.314       0.463
+==============================================================================
+Omnibus:                      501.505   Durbin-Watson:                   1.961
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):             3328.833
+Skew:                           0.421   Prob(JB):                         0.00
+Kurtosis:                       7.455   Cond. No.                         42.2
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+```
+
+We can already see that our model slightly improved. In fact, the `R-squared` score got better and the intercept `std err` is now much lower, meaning that we fit the data much better.  
+
+```python
+# Plot the results of the monetary model
+# Plot the results of the monetary model
+plt.scatter(np.log(in_sample.loc[z].revenue_2015), amount_model_log_fit.fittedvalues,
+           alpha=.8, facecolors='none', s=140, edgecolors='b')
+plt.xlabel('Log of the Revenues in 2015')
+plt.ylabel('Log Fitted Values');
+```
+
+{% include image.html url="/assets/8/log_fitted_val.png" description="Results after Log Transformation" zoom="85%" %}
+
+This looks much better than before. We can now imagine a nice line tracing through this point cloud and more accurately predicting 2015 revenue based on the new model we just created. By performing the logarithmic transformation, we weighted the smaller values more and the very large values less, resulting in a quasi-normalized distribution of our data.
+
+```python
+sm.graphics.plot_regress_exog(amount_model_log_fit, 'np.log(avg_amount)');
+```
+
+{% include image.html url="/assets/8/reg_plots2.png" description="Regression Plots after Log Transformation" zoom="90%" %}
+
+
+## Applying the Models to Today's Data
+
+So let's briefly summarize what we've done so far. We have calibrated two models, the first to predict the probability that a customer will be active. For that we used logistic regression. The second; a linear OLS regression model on log transformed data, to predict how much they will spend if they were active in 2015. Now the objective of this section is to use both models to forecast future transactions. So bear with me for a little while.
+
+So we want to look at the behavior of our customers today. For that, we start by extracting exactly the same information that we used to forecast a year ago. That is  frequency, recency, first purchase, average amount and maximum amount for all customers from 2015.  We've already done that somewhere above.
+
+```python
+# Compute RFM as of Today
+q = """
+        SELECT customer_id, 
+        MIN(days_since) AS 'recency', 
+        MAX(days_since) AS 'first_purchase', 
+        COUNT(*) AS 'frequency', 
+        AVG(purchase_amount) AS 'avg_amount', 
+        MAX(purchase_amount) AS 'max_amount' FROM df GROUP BY 1
+"""
+customers_2015 = sqldf(q, globals())
+```
+
+Unlike the previous section, now we do not know who will be active next year and how much they will spend. As a reminder, today is January 1st, 2016 and the task is to predict the activity of customers during this year. For this we are going to apply the two models that we have generated above to our actual data; namely `customers_2015`. Let's see how this works.
+
+We start by predicting the probability that a customer is going to be active during 2016. For that we use the first generated regression model `prob_model_fit`. The prediction is done using the `predict()` method from `statsmodels` and the results are saved under `prob_predicted`.
+
+```python
+# Predict the target variables based on today's data
+# 1st: we predict the probability that a customer is going to be in 2016 active
+customers_2015["prob_predicted"] = prob_model_fit.predict(customers_2015)
+
+# Results summary
+customers_2015.prob_predicted.describe()
+```
+
+```python
+count   18,417.00
+mean         0.22
+std          0.25
+min          0.00
+25%          0.01
+50%          0.11
+75%          0.40
+max          1.00
+Name: prob_predicted, dtype: float64
+```
+
+From above we can see that customers have on average a 22% probability of being active. For some customers, it is absolutely certain that they will be active; these have a probability of almost one. For others, it is absolutely certain that they will not be active; for these, the probability is close to zero. Most customers lie in between.  
+
+Now, we want to use the second regression model to predict the dollar value of customer activity. Recall that we had to use a logarithmic transformation to get around the skewness of the input data. This means we want to take the exponential values of the model output. The results are then saved as a new variable `revenue_predicted` in our dataframe `customers_2015`.  
+
+```python
+# 2nd we predict the revenue
+# Since our model predicts the log(amount) we need to take the exponential of
+# the predicted revenue generated per customer
+customers_2015["revenue_predicted"] = np.exp(amount_model_log_fit.predict(customers_2015))
+
+# Print results summary
+customers_2015.revenue_predicted.describe()
+```
+
+```python
+count   18,417.00
+mean        65.63
+std        147.89
+min          6.54
+25%         29.00
+50%         35.05
+75%         57.30
+max      3,832.95
+Name: revenue_predicted, dtype: float64
+```
+
+
+Finally, we want to assign each customer a score with respect to how likely s/he will be active along with the dollar amount s/he will spend.
+
+```python
+# 3rd: we give a score to each customer which is the conjunction of probability
+# predicted multiplied by the amount.
+customers_2015["score_predicted"] = (
+    customers_2015["prob_predicted"] * customers_2015["revenue_predicted"]
+)
+```
 
