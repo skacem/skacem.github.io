@@ -701,8 +701,9 @@ max      3,832.95
 Name: revenue_predicted, dtype: float64
 ```
 
+Looking at the expected sales of active customers, that is, how much they will spend on average in the coming year, this figure is about $65, while the range here is between $6 and $3,800. And, of course, the minimum value is $6, not zero, because the second regression model assumes that all customers will be active. Therefore, it is necessary to determine the probability that a customer is active and include it in the prediction so that we get an overall measure of the customer's spending in the next year.
 
-Finally, we want to assign each customer a score with respect to how likely s/he will be active along with the dollar amount s/he will spend.
+Thus, the final stage of the prediction consists of assigning each customer a score indicating how likely they are to take action in conjunction with how much money they will spend.
 
 ```python
 # 3rd: we give a score to each customer which is the conjunction of probability
@@ -710,5 +711,55 @@ Finally, we want to assign each customer a score with respect to how likely s/he
 customers_2015["score_predicted"] = (
     customers_2015["prob_predicted"] * customers_2015["revenue_predicted"]
 )
+
+# Print results summary
+customers_2015.score_predicted.describe()
 ```
 
+```python
+count   18,417.00
+mean        18.83
+std         70.21
+min          0.00
+25%          0.46
+50%          4.56
+75%         17.96
+max      2,854.16
+Name: score_predicted, dtype: float64
+```
+
+So the total score is a function of both probability and revenue combined. And the score has a mean value of 18.8. From a managerial perspective, this value is extremely important. It means that each customer in this database will spend an average of $18.8 in the upcoming year. Many will spend nothing, some may spend $333, others $50, but on average it will probably be $18.8.  
+From a marketing perspective, it is better to focus our activities on customers with  high scores, as this means they are likely to be the most profitable for the company.  
+Assuming we want to reach only the customers with a score higher than $50, this can be done as follows:
+
+```python
+# How many customers have an expected revenue of more than $50
+z = customers_2015[customers_2015.score_predicted > 50].index.tolist()
+print(len(z))
+```
+
+```python
+1324
+```
+
+The code fragment above generates a vector of customers with a score above $50, containing a total of 1323 customers. So of the list of 18,000 customers, only about 1,300 have a projected value of $50 or more. These are your target customers. You can get their ID or number by simply adding the following line to your code:
+
+```python
+# Customers with the highest score:
+customers_2015["customer_id"].loc[z]
+```
+
+```python
+1            80
+17          480
+29          830
+30          850
+31          860
+          ...  
+16892    234210
+16895    234240
+16896    234250
+16897    234260
+16903    234320
+Name: customer_id, Length: 3886, dtype: int64
+```
