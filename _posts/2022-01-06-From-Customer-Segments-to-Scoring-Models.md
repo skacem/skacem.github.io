@@ -772,7 +772,10 @@ In this tutorial, we have demonstrated how to predict customers' next year's pur
 With logistic regression, we were able to predict the probability of customer activity in the next financial period. It is a classification algorithm with two outputs; 0 or 1. The results are weighted and the weights are nothing more than the probability that the customer will be active. That is, the larger the weighting, the more likely it is a customer may be active in a given period.  
 Then we used OLS to predict the dollar value of the customers' purchases over the same financial period. Finally, we built the score by linking the two results together. The scores are in Dollar and reflect the customers next years revenues. They can be used as the basis for many strategic decisions, as well as new segmentation guidelines.  
 
- 
+I hope that by now you are convinced of the importance and versatility of RFM analysis, especially when combined with statistical learning. In case you still have doubts or are not sure about integrating it into your business analysis, read my next tutorial.
+
+## References
+
 1. Lilien, Gary L, Arvind Rangaswamy, and Arnaud De Bruyn. 2017. Principles of Marketing Engineering and Analytics. State College, PA: Decisionpro.
 2. Arnaud De Bruyn. [Foundations of marketing analytics](https://www.coursera.org/learn/foundations-marketing-analytics) (MOOC). Coursera. 
 3. Dataset from [Github repo](https://github.com/skacem/Business-Analytics/tree/main/Datasets). Accessed 15 December 2021.
