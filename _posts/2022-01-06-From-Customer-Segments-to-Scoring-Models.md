@@ -742,7 +742,7 @@ print(len(z))
 1324
 ```
 
-The code fragment above generates a vector of customers with a score above $50, containing a total of 1323 customers. So of the list of 18,000 customers, only about 1,300 have a projected value of $50 or more. These are your target customers. You can get their ID or number by simply adding the following line to your code:
+The above code fragment creates a vector of customers that have a score above 50 ($). There are 1,323 customers in total. So out of the list of 18,000 customers, only about 1,300 have a predicted to spend more than $50 throughout 2016. These should be your target customers. You can determine their ID or number by simply adding the following line to your code:
 
 ```python
 # Customers with the highest score:
@@ -763,3 +763,5 @@ customers_2015["customer_id"].loc[z]
 16903    234320
 Name: customer_id, Length: 3886, dtype: int64
 ```
+
+As output we obtain a list of the customer numbers of all those who are expected to spent more that 50$ in our shop. Now only you now whom to target and how.
