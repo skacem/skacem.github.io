@@ -765,3 +765,16 @@ Name: customer_id, Length: 3886, dtype: int64
 ```
 
 As output we obtain a list of the customer numbers of all those who are expected to spent more that 50$ in our shop. Now only you now whom to target and how.
+
+## Conclusion
+
+In this tutorial, we have demonstrated how to predict customers' next year's purchases and the amount of dollars they will spend at your store. Our predictions are based on RFM analysis combined with linear regressions. We used two different linear regression approaches: Logistic Regression and Ordinary Least Squares (OLS) to generate a score for each customer.   
+With logistic regression, we were able to predict the probability of customer activity in the next financial period. It is a classification algorithm with two outputs; 0 or 1. The results are weighted and the weights are nothing more than the probability that the customer will be active. That is, the larger the weighting, the more likely it is a customer may be active in a given period.   
+Then we used OLS to predict the dollar value of the customers' purchases over the same financial period. Finally, we built the score by linking the two results together. The score reflects the customer revenue given activity, and can be used as the basis for many strategic decisions, as well as new segmentation guidelines.  
+The whole process was straightforward and easy to implement. So, I hope I could at least convince you to use RFM analysis in your company.  If not, bear with me until the next tutorial where we will learn how to use the same approach to predict customer lifetime value (CLV).
+
+## References
+ 
+1. Lilien, Gary L, Arvind Rangaswamy, and Arnaud De Bruyn. 2017. Principles of Marketing Engineering and Analytics. State College, PA: Decisionpro.
+2. Arnaud De Bruyn. [Foundations of marketing analytics](https://www.coursera.org/learn/foundations-marketing-analytics) (MOOC). Coursera. 
+3. Dataset from [Github repo](https://github.com/skacem/Business-Analytics/tree/main/Datasets). Accessed 15 December 2021.
