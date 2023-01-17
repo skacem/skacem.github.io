@@ -164,15 +164,51 @@ Well, now we have all the information we need. We have the customers and their s
 # merge both customer segmentation years 
 new_data = customers_2014.merge(customers_2015, how='left', on='customer_id')
 
-new_data.tail()
+new_data.info()
 ```
 
 ```tex
-RESULTS
+<class 'pandas.core.frame.DataFrame'>
+Int64Index: 16905 entries, 0 to 16904
+Data columns (total 11 columns):
+ #   Column            Non-Null Count  Dtype   
+---  ------            --------------  -----   
+ 0   customer_id       16905 non-null  int64   
+ 1   recency_x         16905 non-null  int64   
+ 2   first_purchase_x  16905 non-null  int64   
+ 3   frequency_x       16905 non-null  int64   
+ 4   amount_x          16905 non-null  float64 
+ 5   segment_x         16905 non-null  category
+ 6   recency_y         16905 non-null  int64   
+ 7   first_purchase_y  16905 non-null  int64   
+ 8   frequency_y       16905 non-null  int64   
+ 9   amount_y          16905 non-null  float64 
+ 10  segment_y         16905 non-null  category
+dtypes: category(2), float64(2), int64(7)
+memory usage: 1.3 MB
+```
+Now, we have a large dataset with columns for recency, first purchase, frequency, amount, and segments with an `_x` or `_y` appended to the column name. The `_x` columns represent the data from the 2014 customers and the `_y` columns represent the data from the 2015 customers. 
+
+The two columns that we're  interested in are `segment_x` and `segment_y`, which represent the segments for the customers in 2014 and 2015, respectively.
+
+```python
+# Let's print the obtained segment_x and segment_y columns
+print(tabulate(new_data[['customer_id', 'segment_x', 'segment_y'
+                         ]].tail(), headers='keys', tablefmt='psql')
+      )
 ```
 
-Now, we have a large dataset with columns for recency, first purchase, frequency, amount, and segments with an `_x` or `_y` appended to the column name. The `_x` columns represent the data from the 2014 customers and the `_y` columns represent the data from the 2015 customers. The two columns that we're most interested in are `segment_x` and `segment_y`, which represent the segments for the customers in 2014 and 2015, respectively.
-
+```python
++-------+---------------+-------------+------------------+
+|       |   customer_id | segment_x   | segment_y        |
+|-------+---------------+-------------+------------------|
+| 16900 |        221470 | new active  | new warm         |
+| 16901 |        221460 | new active  | active low value |
+| 16902 |        221450 | new active  | new warm         |
+| 16903 |        221430 | new active  | new warm         |
+| 16904 |        245840 | new active  | new warm         |
++-------+---------------+-------------+------------------+
+```
 
 To further analyze the data, I'm going to create a cross-tabulation (or "occurrence table") that shows how many customers fit into specific segment combinations for both 2014 and 2015. This will allow us to see how many customers moved between segments or stayed in the same segment between the two years.  
 
@@ -183,9 +219,33 @@ transition = pd.crosstab(new_data['segment_x'], new_data['segment_y'])
 print(transition)
 ```
 
-If we examine the results, we can see that we are almost there. The table above closely resembles the transition matrix we discussed earlier. The rows represent the segments that customers belonged to in 2014, and the columns show the different segments that customers moved to in 2015. Each value in the table represents the number of customers who moved from one segment to another between the two years.
+```tex
+segment_y          inactive  cold  warm high value  warm low value  new warm  \
+segment_x                                                                      
+inactive               7227     0                0               0         0   
+cold                   1931     0                0               0         0   
+warm high value           0    75                0               0         0   
+warm low value            0   689                0               0         0   
+new warm                  0  1139                0               0         0   
+active high value         0     0              119               0         0   
+active low value          0     0                0             901         0   
+new active                0     0                0               0       938   
 
-For example, among all the inactive customers in 2014, 7,227 remained inactive in 2015, 35 became active high value customers, and 250 became active low value customers. Additionally, among all the new active customers in 2014, an astounding 938 didn't purchase anything the next year and became new warm customers. That's about two out of three. The others became active high value or active low value customers.
+segment_y          active high value  active low value  
+segment_x                                               
+inactive                          35               250  
+cold                              22               200  
+warm high value                   35                 1  
+warm low value                     1               266  
+new warm                          15                96  
+active high value                354                 2  
+active low value                  22              2088  
+new active                        89               410  
+```
+
+If we examine the results, we can see that we are almost there. The table above closely resembles the transition matrix we discussed earlier. The rows represent the segments that customers belonged to in 2014: `segment_x`. The columns show the different segments that customers moved to in 2015 or `segment_y`. Each value in the table represents the number of customers who moved from one segment to another between the two years.
+
+For example, among all the inactive customers in 2014, 7,227 remained inactive in 2015, 35 became active high value customers, and 250 became active low value customers. Additionally, among all the new active customers in 2014, 938 didn't purchase anything the next year and became new warm customers. That's about two out of three new customers. The others became active high value or active low value customers.
 
 However, we don't really care about the absolute numbers, what we care about are the proportions, likelihoods, and probabilities of shifting from one segment to the next over time. So instead of working with the absolute numbers as represented in the above table, we will divide each row by the row sum. This will give us a table where the sum of each row is equal to one.
 
@@ -194,18 +254,165 @@ transition = transition.apply(lambda x: x/x.sum(), axis=1)
 print(transition)
 ```
 
-Well that looks better. So,  if you were an inactive customer in 2014, you had a 96.2% chance of remaining inactive in 2015. And if you were an active high value customer, you had a 74.5% chance of remaining in that segment and a 25% chance of becoming a warm high value customer next year. 
+```tex
+segment_y          inactive  cold  warm high value  warm low value  new warm  \
+segment_x                                                                      
+inactive               0.96  0.00             0.00            0.00      0.00   
+cold                   0.90  0.00             0.00            0.00      0.00   
+warm high value        0.00  0.68             0.00            0.00      0.00   
+warm low value         0.00  0.72             0.00            0.00      0.00   
+new warm               0.00  0.91             0.00            0.00      0.00   
+active high value      0.00  0.00             0.25            0.00      0.00   
+active low value       0.00  0.00             0.00            0.30      0.00   
+new active             0.00  0.00             0.00            0.00      0.65   
 
-That's actually all we need for now. Next step is to use this transition matrix to make predictions.
+segment_y          active high value  active low value  
+segment_x                                               
+inactive                        0.00              0.03  
+cold                            0.01              0.09  
+warm high value                 0.32              0.01  
+warm low value                  0.00              0.28  
+new warm                        0.01              0.08  
+active high value               0.75              0.00  
+active low value                0.01              0.69  
+new active                      0.06              0.29  
+```
 
-### From Transition Matrix to Migration Model
+Well that looks better. So,  if you were an inactive customer in 2014, you had a 96.2% chance of remaining inactive in 2015. And if you were an active high value customer, you had a 74.5% chance of remaining in that segment and a 25% chance of becoming a warm high value customer next year.  
+
+That's actually all we need for now. The next step is to use this transition matrix to make predictions.
+
+### Using Transition Matrix to Make Predictions
 
 In the previous section we showed how to create a transition matrix. Once we have it, the next step is to estimate the number of customers we will have in each segment in the future. This can be done for any number of years, although most companies will stop after three, five, or at most ten years.  
 To estimate these numbers, we need to consider two things: the transition matrix and the current number of customers in each segment. Remember, the transition matrix shows how customers got to where they are today. We will use the same information to estimate where they will be in the future.
 
 Without going into too much mathematical detail, this process involves multiplying a matrix by a vector. To do this, we multiply the transition matrix by a vector representing the number of customers in each segment to date. The result of this process is then a new vector containing the estimated number of customers in each segment next year. By multiplying this new vector again by the same transition matrix, we can estimate the number of customers in each segment two years from now, and so on.
 
-We will now look at how this can be achieved in Python.
+We will now look at how this can be achieved in Python:
+
+So, we have a transition matrix that shows the likelihood of customers moving from one segment to another over one year. To use this information, we will prepare a matrix or placeholder to store our predictions. The number of rows in this matrix will be the number of segments we have, and the number of columns will be the number of years we are predicting the evolution of segment membership. In this case, we are going to predict over ten periods in the future and include one more for the present. So, we start by creating an empty 8x11 matrix.
+
+The first thing we need to do is to populate the first column with the number of customers in each segment as of the end of 2015. And then, we'll give each row the name of its corresponding segment.
+
+```python
+# Initialize a placeholder matrix with then number of customers in each segment today
+# and after 10 periods.
+# The number of rows is the number of segments we have
+# The number of columns is the number of years we are going to predict - 
+# The evolution of segment membership
+segments = np.zeros(shape=(8,11))
+
+# 1st thing to do is to populate the first columns with then number of
+# customers in each segment at the end of 2015
+segments[:, 0] = customers_2015['segment'].value_counts(sort=False)
+
+# 2nd Give each column the name of its corresponding year 
+# and row the name of its corresponding segment:
+segments = pd.DataFrame(segments, columns=np.arange(2015,2026), index=customers_2015['segment'].values.categories)
+```
+
+As a result, we should see only the 2015 column filled with positive numbers, and all other years showing 0's. Now, we would like to fill out these columns with predictions made using the transition matrix. So, for each column, the segments over that year would be a function of segments of the year before, multiplied by the transition matrix. To do that, we use a loop over all the given years, where each generated column is multiplied with the transition matrix and added to the next column, until we reach the end of the loop, which will be the year 2025.  
+
+```python
+# Compute for each an every period
+for i in range(2016, 2026):
+    segments[i] = segments[i-1].dot(transition).round(0)
+    segments[i].fillna(0, inplace=True)
+    
+# Noneed for float64 since we are rounding the results:
+segments = segments.astype(int)
+```
+
+Now, if you look at the matrix we just created, it contains the segment names, the years, and the number of customers (rounded) in each segment at that time. We rounded the numbers because it doesn't make sense to predict that we'll have 0.4 customer in a segment.
+
+```python
+# print resulting matrix
+print(segments, headers='keys', tablefmt='psql')
+```
+
+```tex
+                   2015   2016   2017   2018   2019   2020   2021   2022  \
+inactive           9158  10517  11539  12636  12940  13185  13386  13542   
+cold               1903   1584   1711    874    821    782    740    709   
+warm high value     119    144    165    160    157    152    149    146   
+warm low value      901    991   1058    989    938    884    844    813   
+new warm            938    987      0      0      0      0      0      0   
+active high value   573    657    639    625    608    594    582    571   
+active low value   3313   3537   3306   3134   2954   2820   2717   2637   
+new active         1512      0      0      0      0      0      0      0   
+
+                    2023   2024   2025  
+inactive           13664  13760  13834  
+cold                 685    665    651  
+warm high value      143    141    139  
+warm low value       789    771    756  
+new warm               0      0      0  
+active high value    562    554    548  
+active low value    2575   2527   2490  
+new active             0      0      0  
+```
+
+Let's now plot the evolution of inactive customers over all the forecasted years as a bar plot.
+
+```python
+# Plot inactive customers over time
+segments.iloc[0].plot(kind='bar')
+```
+
+<div class="imgcap">
+<img src="/assets/9/inactive.png" style="zoom:90%;" alt="inactive customers over the years"/>
+<div class="thecap"> Inactive Customers over the Years</div></div>
+
+These are our predictions. We begin at around 9,158, and then we expect the number of inactive customers to grow quickly and then stabilize around 13,000. You can do that in other segments and see how they change overtime.
+
+If you take a look at the last row in the table above, specifically the number of new active customers, you'll notice that we have 1,512 in 2015 and zeros in all other years. This is because once a customer is already in the database, they cannot become new again. The only way for a customer to become new is to be acquired. In this case, we are only measuring the CLV of those customers who are already in the database. This means that new active customers will eventually become something else, like warm, active, cold, or inactive customers over time. Thus, this segment will remain empty unless we run acquisition campaigns and add new customers to the database.  
+Now, we don't have any forecast of the generated revenues yet, and that's what we're going to do in the next section.
+
+### Computing CLV
+
+Now that we have the number of customers per segment for each year, we just need to convert these figures into dollars or euros. The first step is to assume that the revenue generated by a customer can be fully explained and predicted by the segment to which they belong, whether it's today or ten years from now.  
+For instance, if customers in high-value segment generates on average $600, we'll assume that this figure will not change over the years. In reality, it might go up or down, but without additional information, our best guess is to assume that this figure will remain stable over time. However, we need to take into account the time value of money when calculating CLV, as a dollar received today is worth more than a dollar received in the future. This is where discounting comes in. By discounting future revenues, we can compare them to today's acquisition costs and determine if it's a good investment. So discounting is a way of adjusting the value of money received or paid in the future to its present value. This means that the longer you have to wait to generate revenues from a customer segment, the less valuable they will be for your organization today.  
+
+So let's translate that into a Python code. We start first by computing the average revenue per customer per segment. That we've already done in the previous blog entry and looks as follows:
+
+```python
+# Show average revenue per customer and per segment
+aggregate(x = actual$revenue_2015, by = list(customers_2015$segment), mean)
+```
+
+We save the results under `yearly_revenue` and with it we compute the revenues per segment 
+
+```python
+# Yearly revenue per segment
+# This comes directly from the previous post
+yearly_revenue = [0, 0, 0, 0, 0, 323.57, 52.31, 79.17]
+
+# Compute revenue per segment
+revenue_per_segment = segments.multiply(yearly_revenue, axis='index')
+
+# Compute yearly revenue
+yearly_revenue = revenue_per_segment.sum(axis=0).round(0)
+yearly_revenue
+```
+
+```python
+2015   478,414.00
+2016   397,606.00
+2017   379,698.00
+2018   366,171.00
+2019   351,254.00
+2020   339,715.00
+2021   330,444.00
+2022   322,700.00
+2023   316,545.00
+2024   311,445.00
+2025   307,568.00
+dtype: float64
+```
+
+
+
 
 ## References
 
