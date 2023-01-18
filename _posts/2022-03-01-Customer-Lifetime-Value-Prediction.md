@@ -41,14 +41,14 @@ In summary, it is essential for organizations to adopt both product and customer
 A customer-centric approach is important for building strong relationships with the customer base and fostering trust and loyalty, which can attract repeat purchases, increase word of mouth and prevent customers from turning to competitors. On the other hand, a product-centric approach is also important when it comes to attracting new customers and generating initial interest in a product or service.  
 By using both strategies, retailers can effectively balance the needs of new customer acquisition and customer retention, ultimately leading to long-term success in the marketplace.
 
-## CLV: Motivation and Use Cases
+## Motivation and Use Cases
 
 Imagine your company launches a big campaign to attract new customers. You invest in PR, advertising and email campaigns, buy a lot of online ads, create a special promotion and offer a big discount to first-time buyers. However, after all these efforts, the campaign results in only a small number of new customers and sales that don't even cover the cost of the campaign. Well, you could argue that these new customers will stay with you and continue to buy, making the campaign worthwhile in the long run. But wouldn't it be nice to have a way to measure whether or not that's true? That's where customer lifetime value (CLV) models come in. These models look at past and current customer behavior to predict how much revenue a customer will bring in over time. Only then can you determine if the cost of customer acquisition was worth it.  
 
 CLV models offer a wide range of practical applications. For example, you might compare one acquisition campaign to another. Suppose you are comparing two campaigns, one with a substantial discount and one with a modest discount. The advertising campaign with the greater discount will likely attract more customers, but those customers will be less profitable in the short term and much less loyal in the long term once the discount is removed. After all, the only reason they came in the first place was to take advantage of the discount. Offering a small discount and bringing in fewer customers might be a better strategy, assuming of course, they are more loyal and bring in more money in the long run. But how can you be sure about that, if you can't quantify the long-term value of your customers.  
 CLV is also very useful for existing customers. In fact, one of the best uses of Customer Lifetime Value is to determine which customers or customer segments are more valuable to the future growth of your business. Let's say you have two segments, with customers in segment one contributing an average of $100 per quarter to revenue. Customers in segment two generate an average of $150. At first glance, you might want to put a little more effort into satisfying and retaining the customers in segment two. Perhaps additional resources should be allocated. Make sure they have access to the best customer service possible. Keep an eye on loyalty, and so on. However, an analysis of their lifetime value shows that customers in the first segment are more loyal, stay longer, and regularly spend more money with the company. Customers in the second segment are simply seasonal and not loyal at all. They switch to the competition as soon as they discover a better offer or special promotion, and may only be one-time customers. Comparing lifetime values, customers in the first segment spend an average $5,000 during all they relationship with your company, while customers in segment two spend an average of only $600. Wouldn't it be wonderful if you knew how to calculate these numbers in the first place so you could focus your marketing resources on the most valuable customers over time? What do you think would happen if you didn't?
 
-## CLV and The Migration Model
+## The Migration Model
 
 CLV can be tricky to compute. Some methods are too simplistic to be useful, while others are too complex. In this tutorial, we'll take a middle-of-the-road approach and use segmentation - a concept we've already covered in previous articles - to compute CLV.
 
@@ -58,7 +58,7 @@ Each segmentation is like a snapshot of your customer database. By taking multip
 To make this easier, we will use a tool called a transition matrix, also known as migration model. It is a mathematical representation of the transition probabilities of a Markov chain. It is a square matrix and in this case shows the probability of customers moving from one segment to another. Each row represents the current segment, while each column represents the segment customers were in a year ago.  The sum of each row should equal 1, which means that the probabilities of switching from one state to another are equal to 1. It's important to note that by definition, some transitions may have zero probability, such as a customer moving from active to inactive in just one period. This is normal and expected.  
 Based on the analysis of this matrix, you can predict how customers will behave in the future.
 
-## CLV in Python
+## Forecasting Customer Lifetime Value in Python
 
 Now that we are done with the theory, let's move on to the implementation. In the following we want to implement a CLV model using RFM and a first-order Markov chain. We will reuse the same data as in the previous blog post, as well as the first part of implementation, which includes RFM analysis and customer segmentation for the year 2014.
 The data consists of 51,243 observations across three variables:  
@@ -69,7 +69,7 @@ The data consists of 51,243 observations across three variables:
 
 It includes all sales from January 2, 2005 through December 31, 2015. There are no missing records in the dataset.  
 
-### RFM Analysis and Customer Segmentation for Year 2015
+### RFM Analysis and Customer Segmentation for The Current Year
 
 I assume by now you are familiar with the dataset and customer segmentation techniques, so I won't go into detail here. I'm going to load the dataset, set it up as we've done before, and then I'm going to segment it based on RFM analysis, with the assumption that we're at the end of 2015.  
 
@@ -381,16 +381,24 @@ So let's translate that into a Python code. We start first by computing the aver
 aggregate(x = actual$revenue_2015, by = list(customers_2015$segment), mean)
 ```
 
-We save the results under `yearly_revenue` and with it we compute the revenues per segment 
+Customers who were inactive, cold, warm, by definition generate no revenue at all. The active high value customers on average generate $323 of revenue per year. And then for the active low value and new active, it goes down to $52 and $79. So we're going to just take the data from that analysis and store it, in a variable called `average_revenue`.
 
 ```python
-# Yearly revenue per segment
+# Average yearly revenue per segment
 # This comes directly from the previous post
-yearly_revenue = [0, 0, 0, 0, 0, 323.57, 52.31, 79.17]
+average_revenue = [0, 0, 0, 0, 0, 323.57, 52.31, 79.17]
+```
 
+ Now we take the variable called `segments`, which contains predictions of segment membership over the next 11 years and multiply it by how much revenue each segment generated in average by 2015. As result we get an 8x11 matrix showing a forecast of how much each segment will generate over the next 10 years.
+
+```python
 # Compute revenue per segment
-revenue_per_segment = segments.multiply(yearly_revenue, axis='index')
+revenue_per_segment = segments.multiply(average_revenue, axis='index')
+```
 
+The next step to do is to compute the sum of each column, that is yearly revenues, and we store the result under `yearly_revenue`.  
+
+```python
 # Compute yearly revenue
 yearly_revenue = revenue_per_segment.sum(axis=0).round(0)
 yearly_revenue
@@ -411,9 +419,82 @@ yearly_revenue
 dtype: float64
 ```
 
+We can see that we've generated $478,000 in 2015. However, over time as customers become inactive, this number will decrease, and by 2025 we'll have without discounting only $307,000 in revenue. We can also create a bar plot to visualize this decrease in revenue over time. 
 
+```python
+yearly_revenue.plot(kind='bar')
+```
 
+<div class="imgcap">
+<img src="/assets/9/yearly_revenues.png" style="zoom:90%;" alt="inactive customers over the years"/>
+<div class="thecap"> Yearly Total Revenues From Customer Base</div></div>
 
-## References
+If we want to calculate the cumulative revenue over the years, also known as Customer Equity (CE) we can use the `cumsum` function on the `yearly_revenue` variable.  
 
-[1] Preview pic designed by pch.vector / [Freepik][http://www.freepik.com]
+```python
+# Compute cumulated revenue
+cumulated_revenue = yearly_revenue.cumsum(axis=0)
+print(cumulated_revenue.round(0))
+cumulated_revenue.plot(kind='bar')
+```
+
+<div class="imgcap">
+<img src="/assets/9/cumsum.png" style="zoom:90%;" alt="inactive customers over the years"/>
+<div class="thecap"> Cumulative Revenues over 11 Years</div></div>
+
+As you can see, the cumulative revenue can only increase as we add new revenue each year. However, the slope of the curve will slowly decrease as we lose revenue from different customers each year.
+
+It's important to remember that a dollar ten years from now is not worth the same as a dollar today. That's why we need to discount all of the forecasted revenues. I'll be setting the discount rate at 10% and computing the discount rates for the next 10 years, from 2016 to 2025. We don't need to discount the revenues of 2015, since it's supposed to be the present. The formula for this is:  $$(1 + \text{discount rate})^{-y}$$, where $$y$$  is the number of years until the revenue is received, and times $$-1$$ to say that it is a quotient - a discount.
+
+```python
+# Create a discount factor
+discount_rate = 0.10
+discount = 1 / ((1 + discount_rate) ** np.arange(0,11))
+print(discount)
+```
+
+```python
+[1.         0.90909091 0.82644628 0.7513148  0.68301346 0.62092132
+ 0.56447393 0.51315812 0.46650738 0.42409762 0.38554329]
+```
+
+In the first year, we don't need to discount anything because that's today's money worth in today's dollars. However, after the first year, a dollar would only be worth $0.90, then $0.82, and so on. After ten years, a dollar will only be worth $0.38.  
+Now if we multiply `yearly_revenues` by the discount rates, we get the true value of each forecasted revenue in today's dollars.
+
+```python
+# Compute discounted yearly revenue
+# Future revenues in todays money
+disc_yearly_revenue = yearly_revenue.multiply(discount)
+print(disc_yearly_revenue.round(0))
+```
+
+```python
+2015   478,414.00
+2016   361,460.00
+2017   313,800.00
+2018   275,110.00
+2019   239,911.00
+2020   210,936.00
+2021   186,527.00
+2022   165,596.00
+2023   147,671.00
+2024   132,083.00
+2025   118,581.00
+dtype: float64
+```
+
+As we can see above, the $307,568 in 2025 is equivalent to $118,000 in today's money, which makes a big difference. It's important to remember that money you'll receive in the future is worth less than money you receive today. Only by discounting future revenues, we can compare them to today's acquisition costs and see if it's a good investment. Indeed, discounting adjusts the value of money received or paid in the future to its present value. So even though a future revenue may seem high, it may not be worth as much as it seems when considering the time value of money. Therefore, always remember to discount future dollars!  
+
+When we plot these figures, we can see that the discounted revenue is high in the beginning and then drops dramatically as the years go by, since the further away in the future you get, the less worth the revenue is in today's dollars.
+
+```python
+ax1 = disc_yearly_revenue.plot(kind='bar')
+ax2 = ax1.twiny()
+yearly_revenue.plot(kind='line', ax=ax2)
+```
+
+<div class="imgcap">
+<img src="/assets/9/revenues_discounted.png" style="zoom:90%;" alt="inactive customers over the years"/>
+<div class="thecap"> Discounted vs Non-Discounted Yearly Revenues</div></div>
+
+That's it we are done with CLV. 
