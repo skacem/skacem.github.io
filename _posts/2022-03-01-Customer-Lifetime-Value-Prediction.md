@@ -500,12 +500,12 @@ yearly_revenue.plot(kind='line', ax=ax2)
 
 ## Conclusion
 
-In summary, CLV analysis is a critical aspect for any retailer to understand and implement in order to gain a competitive advantage in today's overcrowded marketplace. By capturing and evaluating CLV, you can determine how much to spend on acquiring new customers, identify and target top future customers, minimize spending on unprofitable customers, and/or build more sustainable and beneficial relationships with your customer base. After all, only by understanding your customers' buying behaviors, preferences, and concerns can you design more targeted marketing campaigns, personalize your value-added services, and thus improve overall customer satisfaction and retention.  
+In summary, CLV analysis is a critical aspect for any retailer to understand and implement in order to gain a competitive advantage in today's overcrowded marketplace. By capturing and evaluating CLV, you can determine how much to spend on acquiring new customers, identify and target top future customers, minimize spending on unprofitable ones, and/or build more sustainable and beneficial relationships with your customer base. After all, only by understanding your customers' buying behaviors, preferences, and concerns can you design more targeted marketing campaigns, personalize your value-added services, and thus improve overall satisfaction and retention.  
 
 Now, aside from being an incredibly important metric for retailers, CLV analysis is relatively easy to integrate into your daily operations thanks to the availability of customer's data and the digital transformation taking place right now. In fact, any serious Customer Relationship Management (CRM) software or e-commerce system already has CLV metrics built in, so you don't even have to implement them yourself.
 As such, this tutorial wasn't only about how to implement CLV, but rather about understanding how it fundamentally works and the competitive advantages it can bring to your business.  
 
-That said, CLV can only deliver those benefits once you stop limiting yourself to short-term transactions and shift your marketing strategies to a customer-centric approach based on building sustainable relationships with your customers.
+That said, CLV can only deliver those benefits once you stop limiting yourself to short-term transactions and shift your marketing strategies to a customer-centric approach based on building sustainable relationships with your customer base.
 
 
 ## References
