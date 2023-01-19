@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: "Customer Lifetime Value Prediction Using RFM-Analysis"
+title: "Forecasting Customer Lifetime Value Using RFM-Analysis and Markov Chain"
 excerpt: " The transactional approach to business and marketing leads most managers to focus on the wrong thing - the next transaction. So they become fixated with marketing mix and core products. Performance is then measured by metrics such as conversion rate, cost per acquisition, sales growth, or market share, and they forget what matters most: the customer. 
 In fact, there is nothing more important, nothing more fundamental to our business than a long-term relationship with our high-value customers. So marketing becomes an interaction aimed at building, maintaining and improving those relationships. And at the heart of customer relationship lies Customer Lifetime Value (CLV). 
 In this tutorial, we'll learn how  to forecast CLV in a non-contractual setting based on RFM-Analysis and first-order Markov chain."
@@ -497,4 +497,24 @@ yearly_revenue.plot(kind='line', ax=ax2)
 <img src="/assets/9/revenues_discounted.png" style="zoom:90%;" alt="inactive customers over the years"/>
 <div class="thecap"> Discounted vs Non-Discounted Yearly Revenues</div></div>
 
-That's it we are done with CLV. 
+
+## Conclusion
+
+In summary, CLV analysis is a critical aspect for any retailer to understand and implement in order to gain a competitive advantage in today's overcrowded marketplace. By capturing and evaluating CLV, you can determine how much to spend on acquiring new customers, identify and target top future customers, minimize spending on unprofitable customers, and/or build more sustainable and beneficial relationships with your customer base. After all, only by understanding your customers' buying behaviors, preferences, and concerns can you design more targeted marketing campaigns, personalize your value-added services, and thus improve overall customer satisfaction and retention.  
+
+Now, aside from being an incredibly important metric for retailers, CLV analysis is relatively easy to integrate into your daily operations thanks to the availability of customer's data and the digital transformation taking place right now. In fact, any serious Customer Relationship Management (CRM) software or e-commerce system already has CLV metrics built in, so you don't even have to implement them yourself.
+As such, this tutorial wasn't only about how to implement CLV, but rather about understanding how it fundamentally works and the competitive advantages it can bring to your business.  
+
+That said, CLV can only deliver those benefits once you stop limiting yourself to short-term transactions and shift your marketing strategies to a customer-centric approach based on building sustainable relationships with your customers.
+
+
+## References
+
+1. Netzer, Oded & Lattin, James. (2008). A Hidden Markov Model of Customer Relationship Dynamics. Marketing Science. 27. 10.1287/mksc.1070.0294.  
+2. Lilien, Gary L, Arvind Rangaswamy, and Arnaud De Bruyn. 2017. Principles of Marketing Engineering and Analytics. State College, PA: Decisionpro.  
+3. Grönroos, Christian. 1991. “The Marketing Strategy Continuum: Towards a MarketingConcept for the 1990s.” Management Decision 29 (1). https://doi.org/10.1108/00251749110139106.
+4. Tarokh, MohammadJafar, and Mahsa EsmaeiliGookeh. n.d. “A New Model to Speculate CLV Based on Markov Chain Model,” 19.
+5. Bendle, Neil T., and Charan K. Bagga. 2017. “The Confusion About CLV in Case-Based Teaching Materials.” Marketing Education Review 27 (1): 27–38. https://doi.org/10.1080/10528008.2016.1255561.
+6. Pfeifer, Phillip E., and Robert L. Carraway. 2000. “Modeling Customer Relationships as Markov Chains.” Journal of Interactive Marketing 14 (2): 43–55. https://doi.org/10.1002/(SICI)1520-6653(200021)14:2<43::AID-DIR4>3.0.CO;2-H.
+7. Arnaud De Bruyn. [Foundations of marketing analytics](https://www.coursera.org/learn/foundations-marketing-analytics) (MOOC). Coursera. 
+8. Dataset from [Github repo](https://github.com/skacem/Business-Analytics/tree/main/Datasets). Accessed 15 December 2021.
