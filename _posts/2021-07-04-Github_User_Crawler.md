@@ -1,5 +1,6 @@
 ---
 layout: post
+category: ml
 comments: true
 title: "Github Crawler"
 excerpt: "In the previous post, we learned the basics of web crawling and developed our first one-page crawler. In this post, we implement something more fun and challenging. Something that every Github user could use: a Github Users Crawler.

@@ -1,0 +1,45 @@
+---
+layout: default
+title: Thoughts
+permalink: /thoughts/
+---
+
+<div class="page">
+  <h1 class="page-title">Thoughts & Reflections</h1>
+  <p class="page-description">Personal reflections, ideas, and musings on various topics.</p>
+  
+  <div class="previews">
+    {% for post in site.posts %}
+      {% if post.category == 'thoughts' or post.categories contains 'thoughts' %}
+      <div class="preview">
+        <h2 class="post-title">
+          <a class="post-link" href="{{ post.url }}">{{ post.title }}</a>
+        </h2>
+        <div class="preview-content">
+          <div class="preview-excerpt">
+            <div class="post-meta">
+              <div class="post-date">
+                <i class="fa fa-calendar-o"></i> {{ post.date | date: '%Y-%m-%d' }}
+              </div>
+              <div class="post-tags">
+                <i class="fa fa-tags"></i>
+                {% for tag in post.tags %}
+                  <span><a href="/tag/{{ tag }}"><code class="highligher"><nobr>{{ tag }}</nobr></code></a></span>
+                {% endfor %}
+              </div>
+            </div>
+            {{ post.excerpt }}
+          </div>
+          {% if post.preview_pic %}
+            <div class="preview-pic">
+              <a href="{{ post.url }}">
+                <img style="margin:auto" src="{{ post.preview_pic }}">
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>

@@ -1,0 +1,41 @@
+---
+layout: post
+category: thoughts
+comments: true
+title: "Your Thought Title Here"
+excerpt: "A brief description of your thought or reflection that will appear in the preview."
+author: "Skander Kacem"
+tags: 
+  - Personal
+  - Reflection
+preview_pic: # Optional: /assets/thoughts/image.jpg
+---
+
+## Your Thought Content Here
+
+Write your personal reflections, ideas, and musings here. This is your space to share thoughts that aren't necessarily technical or ML-related.
+
+You can write about:
+- Life experiences and lessons learned
+- Philosophy and ideas
+- Book reviews or reflections
+- Industry observations
+- Personal projects or hobbies
+- Career insights
+- Or anything else on your mind
+
+### Tips for writing thoughts:
+1. Be authentic - this is your personal space
+2. Use a conversational tone if you prefer
+3. Include images if they help tell your story
+4. Tag appropriately to help readers find related content
+5. Keep the excerpt compelling to draw readers in
+
+---
+
+*Note: To create a new thought post:*
+1. Copy this template
+2. Rename it with the date format: YYYY-MM-DD-Your-Title.md
+3. Move it to the _posts directory (not the thoughts subdirectory)
+4. Update the front matter and content
+5. Commit and push to publish

@@ -1,5 +1,6 @@
 ---
 layout: post
+category: ml
 comments: true
 title: Introduction to Web Scraping with Python
 excerpt: "Data is at the core of any AI project. Sooner or later, as ML practitioner, you will run out of data or get tired of using public available API's. So how do we deal with such an obstacle? By implementing our own spider bot, of course!"

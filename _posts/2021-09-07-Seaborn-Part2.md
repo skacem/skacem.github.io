@@ -1,5 +1,6 @@
 ---
 layout: post
+category: ml
 comments: true
 title: "Plotting with Seaborn - Part 2"
 excerpt: "In this part of the tutorial, we will look at more advanced visualization techniques for exploring multivariate and complex datasets, including conditional small multiples and pairwise data relationships. Namely, 

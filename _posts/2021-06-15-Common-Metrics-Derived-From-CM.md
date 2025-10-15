@@ -1,5 +1,6 @@
 ---
 layout: post
+category: ml
 comments: true
 title: Common Metrics Derived From the Confusion Matrix
 excerpt: "In the previous post we introduced the confusion matrix in the context of hypothesis testing and we showed how such a simple and intuitive concept can be a powerful tool in illustrating the outcomes of classification models. Now, we are going to discuss various performance metrics that are derived from a confusion matrix."

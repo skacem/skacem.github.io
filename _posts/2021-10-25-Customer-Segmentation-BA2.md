@@ -1,5 +1,6 @@
 ---
 layout: post
+category: ml
 comments: true
 title: "Customer Segmentation using RFM Analysis"
 excerpt: "It is impossible to develop a precision marketing strategy without identifying who you want to target. Marketing campaigns tailored to specific customers rely on the ability to accurately categorize those based on their demographic characteristics and buying behavior. Segments should be clearly differentiated from one another according to the maxim: \"Customers are unique, but sometimes similar\".

@@ -1,5 +1,6 @@
 ---
 layout: post
+category: ml
 comments: true
 title: "Forecasting Customer Lifetime Value Using RFM-Analysis and Markov Chain"
 excerpt: " The transactional approach to business and marketing leads most managers to focus on the wrong thing - the next transaction. So they become fixated with marketing mix and core products. Performance is then measured by metrics such as conversion rate, cost per acquisition, sales growth, or market share, and they forget what matters most: the customer. 

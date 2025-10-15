@@ -1,5 +1,6 @@
 ---
 layout: post
+category: ml
 comments: true
 title: "From RFM Analysis to Predictive Scoring Models"
 excerpt: "From a managerial perspective, it is extremely useful to determine not only the contribution of customer segments to today's sales, but also the expected contribution of each segment to future revenues. After all, how can we develop good plans and make informed strategic decisions if we can't  forecast sales and revenues  for the upcoming financial period?

@@ -23,14 +23,9 @@
         </svg>
       </a>
       <div class="trigger">
-
-        {% assign site_pages = site.pages | sort: 'title' %}
-        {% for page in site_pages %}
-          {% if page.title and page.title != "404: Page not found" and page.title != "Skander Kacem"
-             and page.category != 'tag' and page.autogen == nil %}
-            <a class="site-link" href="{{ page.url | prepend: site.baseurl }}">{{ page.title }}</a>
-          {% endif %}
-        {% endfor %}
+        <a class="site-link" href="/ml/">ML</a>
+        <a class="site-link" href="/thoughts/">Thoughts</a>
+        <a class="site-link" href="/about/">About</a>
         <a class="site-link" target="_blank" href=""> </a>
       </div>
     </nav>

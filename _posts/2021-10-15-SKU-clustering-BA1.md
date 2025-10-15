@@ -1,5 +1,6 @@
 ---
 layout: post
+category: ml
 comments: true
 title: "SKU Clustering for Inventory Optimization"
 excerpt: "Any online retailer using an established e-commerce platform is sitting on a treasure trove of data, but typically lacks the skills and people to analyze it efficiently. Only those companies that know how to leverage their collected data have a clear competitive advantage - especially when it comes to marketing, and sales management, as about 95% of the data relates to customers and inventory.
