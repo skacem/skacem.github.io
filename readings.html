@@ -9,23 +9,25 @@ permalink: /readings/
   <p class="page-description">Notes and reflections on books and articles about finance, politics, culture, and philosophy.</p>
 
   <div class="posts-list">
-    {% assign reading_posts = site.posts | where_exp: "post", "post.category == 'readings' or post.categories contains 'readings'" %}
-    {% if reading_posts.size == 0 %}
+    {% assign count = 0 %}
+    {% for post in site.posts %}
+      {% if post.category == 'readings' or post.categories contains 'readings' %}
+        {% assign count = count | plus: 1 %}
+        <div class="post-preview">
+          <h2 class="post-title">
+            <a href="{{ post.url }}">{{ post.title }}</a>
+          </h2>
+          <div class="post-meta">
+            <span class="post-date">{{ post.date | date: "%B %d, %Y" }}</span>
+          </div>
+          <div class="post-excerpt">
+            {{ post.excerpt | truncate: 250 }}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+    {% if count == 0 %}
       <p class="no-posts">No reading notes yet. Check back soon!</p>
-    {% else %}
-      {% for post in reading_posts %}
-      <div class="post-preview">
-        <h2 class="post-title">
-          <a href="{{ post.url }}">{{ post.title }}</a>
-        </h2>
-        <div class="post-meta">
-          <span class="post-date">{{ post.date | date: "%B %d, %Y" }}</span>
-        </div>
-        <div class="post-excerpt">
-          {{ post.excerpt | truncate: 250 }}
-        </div>
-      </div>
-      {% endfor %}
     {% endif %}
   </div>
 </div>
