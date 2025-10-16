@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Github Crawler</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="">
+    <link rel="canonical" href="/ml/2021/07/04/Github_User_Crawler/">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon-96x96.png">
+
+    <!--flattr.com -->
+    <meta name="flattr:id" content="nlxxeo">
+
+    <!-- Stuff added for BibTex dropdown menu -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
+
+        <!--KaTeX-->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js" integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC+Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa" crossorigin="anonymous"></script>
+        <script>
+         document.addEventListener("DOMContentLoaded", function() {
+             renderMathInElement(document.body, {
+                 // ...options...
+             });
+         });
+        </script>
+        
+</head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MJT6KHN3F1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-MJT6KHN3F1');
+</script>
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans&display=swap" rel="stylesheet">
+
+    <body>
+    <a name="top"></a>
+    <header class="site-header">
+  <div class="wrap">
+
+    <div style="float:left; margin-top:10px; margin-right:10px;">
+      <a href="/about/">
+    <img src="/sk.png" width="45">
+  </a>
+  </div>
+
+    <a class="site-title site-link" href="/about/">Skander Kacem</a> <br>
+    <p class="site-subtitle" style="font-style: italic; text-align: center;">Thinking out loud</p>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <div class="trigger">
+        <a class="site-link" href="/thoughts/">Thoughts</a>
+        <a class="site-link" href="/readings/">Readings</a>
+        <a class="site-link" href="/notes/">Notes</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="page-content">
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Github Crawler</h1>
+    <div class="post-meta">
+      <div class="post-date">
+        <i class="fa fa-calendar-o"></i>
+        2021-07-04
+      </div>
+      <div class="post-tags">
+        <i class="fa fa-tags"></i>
+        
+          <span><a href="/tag/Python"><code class="highligher"><nobr>Python</nobr></code></a></span>
+        
+          <span><a href="/tag/Web Crawler"><code class="highligher"><nobr>Web Crawler</nobr></code></a></span>
+        
+          <span><a href="/tag/BeautifulSoup"><code class="highligher"><nobr>BeautifulSoup</nobr></code></a></span>
+        
+      </div>
+    </div>
+  </header>
+
+  <article class="post-content">
+  <p>In the previous post, we learned the basics of web crawling and developed our first one-page crawler. In this post, we implement something more fun and challenging. Something that every Github user could use: a Github Users Crawler.</p>
+
+<p>This project is organized in two sections:</p>
+
+<ol>
+  <li>Importing followers or “followings” of a given user.</li>
+  <li>Extracting some data from each imported user.</li>
+</ol>
+
+<p>In the first section, we will crawl my own Github page to import the users we intend to parse. Because I  have just three followers on my Github, I’m using my following list as a reference, which is about 70 users. In the second part, we extract the data from each user on that list.<br />
+So here we go.</p>
+
+<p><strong>Disclaimer</strong>: This project is intended for Educational Purposes ONLY.</p>
+<h2 id="get-a-list-of-users">GET a List of Users</h2>
+
+<p>The first thing we want to do, is importing the required modules for our code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># the usual four
+</span><span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="n">requests</span>
+<span class="kn">from</span> <span class="n">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span> <span class="k">as</span> <span class="n">bs</span>
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+</code></pre></div></div>
+
+<p>Then we want to define our global constants. Those are usually written in capital letters.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># In order to simulate a browser's user agent
+</span><span class="n">HEADER</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="sh">'</span><span class="s">user-agent</span><span class="sh">'</span><span class="p">:</span> 
+  <span class="sh">'</span><span class="s">Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.82 Safari/537.36</span><span class="sh">'</span><span class="p">,</span>
+  <span class="sh">'</span><span class="s">Cache-Control</span><span class="sh">'</span><span class="p">:</span><span class="sh">'</span><span class="s">no-cache</span><span class="sh">'</span>
+<span class="p">}</span>
+<span class="c1"># and The info we would like to extract from each user
+# We are going to save them as a pandas DataFrame object.
+</span><span class="n">COLUMNS</span>  <span class="o">=</span>  <span class="p">[</span> <span class="sh">'</span><span class="s">Name</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Nickname</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">City</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Work</span><span class="sh">'</span><span class="p">,</span> 
+              <span class="sh">'</span><span class="s">Followers</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Following</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Likes</span><span class="sh">'</span><span class="p">,</span> 
+              <span class="sh">'</span><span class="s">Repos</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Contributions</span><span class="sh">'</span> <span class="p">]</span>
+
+</code></pre></div></div>
+
+<p>Now we can start drafting a function that returns a list of followers from a specified Github page. We need to keep in mind that per page a maximum of 50 users will be displayed. This means that in some cases we will have to iterate through more than one page, depending on the total number of followers:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">def</span> <span class="nf">get_followers</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">what</span><span class="o">=</span><span class="sh">'</span><span class="s">followers</span><span class="sh">'</span><span class="p">):</span>
+    
+    <span class="n">url</span> <span class="o">=</span> <span class="sh">'</span><span class="s">https://github.com/{}?page={}&amp;tab={}</span><span class="sh">'</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="c1"># page number
+</span>        <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="c1"># link to the html of a given page number
+</span>        <span class="n">link</span> <span class="o">=</span> <span class="n">url</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">what</span><span class="p">)</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">HEADER</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">).</span><span class="n">text</span>
+        
+        <span class="c1"># Since there are 50 users per page
+</span>        <span class="c1"># we need to make sure that we got them all
+</span>        <span class="nf">if</span><span class="p">(</span><span class="sh">'</span><span class="s">You’ve reached the end of</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">html</span><span class="p">):</span>
+            <span class="c1"># we reached an empty page
+</span>            <span class="k">break</span>
+            
+        <span class="n">soup</span> <span class="o">=</span> <span class="nf">bs</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="sh">'</span><span class="s">lxml</span><span class="sh">'</span><span class="p">)</span>
+
+        <span class="c1"># Users nickname is wrapped in a span element with the class Link--secondary.
+</span>        <span class="c1"># Here we call .find_all() method, which returns an iterable containing  
+</span>        <span class="c1"># all users nicknames
+</span>        <span class="n">nicknames</span> <span class="o">=</span> <span class="n">soup</span><span class="p">.</span><span class="nf">find_all</span><span class="p">(</span><span class="sh">'</span><span class="s">span</span><span class="sh">'</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="sh">'</span><span class="s">Link--secondary</span><span class="sh">'</span><span class="p">)</span>
+
+        <span class="c1"># Here we iterate through the nickname elements.
+</span>        <span class="c1"># To get rid of the HTML code and return only the text content as a string, 
+</span>        <span class="c1"># we use `.text`.
+</span>        <span class="k">for</span> <span class="n">nickname</span> <span class="ow">in</span> <span class="n">nicknames</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">nickname</span><span class="p">.</span><span class="n">text</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">results</span>
+</code></pre></div></div>
+
+<p>Since I only have three followers, I will be importing the list of my following in here. The good thing about the HTML source code of Github is that it is a pretty clean piece of code. Which remains an exception, because the web in general is a messy place.<br />
+To do this, we simply replace <code class="language-plaintext highlighter-rouge">followers</code> in the URL with <code class="language-plaintext highlighter-rouge">following</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">get_followings</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+    <span class="c1"># Switch followers with following
+</span>    <span class="k">return</span> <span class="nf">get_followers</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">what</span><span class="o">=</span><span class="sh">'</span><span class="s">following</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+<p>Now let’s call the above function and check if everything is working.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">users</span> <span class="o">=</span> <span class="nf">get_followings</span><span class="p">(</span><span class="sh">'</span><span class="s">skacem</span><span class="sh">'</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">users</span><span class="p">))</span>
+</code></pre></div></div>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>67
+</code></pre></div></div>
+
+<p>Yes, the number of users I follow is correct.  All right!
+With that, the first part of the project is done. Now let’s treat ourselves with a coffee break and then resume with second part.</p>
+
+<h2 id="extract-users-information">Extract Users Information</h2>
+
+<p>The first part was quite straightforward. We only had to check the URL and the CSS class that renders the users.<br />
+The second part of the project is a bit more challenging. We need to determine the CSS class of each piece of information we plan to extract. This is usually done using the browser’s Devtools. It takes trial and error to find the DOM path to the specific element in question. Usually there are different paths to target the very same element, the fundamental rules here are “keep it simple” and “practicality beats purity”.</p>
+
+<p>Note, a missing information might disrupt the normal flow of our program and cause it to terminate abruptly by throwing the following exception:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">AttributeError</span><span class="p">:</span> <span class="sh">'</span><span class="s">NoneType</span><span class="sh">'</span> <span class="nb">object</span> <span class="n">has</span> <span class="n">no</span> <span class="n">attribute</span> <span class="sh">'</span><span class="s">text</span><span class="sh">'</span>
+</code></pre></div></div>
+<p>Indeed, you will run quite often into this kind of error, when you are scraping data from the internet.
+To avoid this, we usually catch such an exception and assign <code class="language-plaintext highlighter-rouge">np.NaN</code><sup id="n1"><a href="#note1">1</a></sup> to the corresponding variable.<br />
+That being said, we can start writing a method to extract the needed information of a given user:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">extract_info</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+    <span class="c1"># create bs object
+</span>    <span class="n">user_gh</span> <span class="o">=</span> <span class="n">url</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">user_gh</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">HEADER</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">soup</span> <span class="o">=</span> <span class="nf">bs</span><span class="p">(</span><span class="n">html</span><span class="p">.</span><span class="n">text</span><span class="p">,</span> <span class="sh">'</span><span class="s">lxml</span><span class="sh">'</span><span class="p">)</span>
+    
+    <span class="c1"># Extract the needed info of the given user.
+</span>    <span class="c1"># It turns out that each chunk of data we are looking for has a unique identifier in 
+</span>    <span class="c1"># form of attribute or class. That shows how clean is Github's HTML code.
+</span>    <span class="c1"># So no need for a find_all() or a concatenation of many `.find()`,  
+</span>    <span class="c1"># a unique .find() method will make the job. 
+</span>    <span class="c1"># The .strip() removes the superfluous whitespaces at the beginning and the end of the
+</span>    <span class="c1"># obtained string.
+</span>    <span class="c1"># Not all users entered their full name, city or work. 
+</span>    <span class="c1"># So we need to catch the following exception:
+</span>    <span class="c1"># AttributeError: 'NoneType' object has no attribute 'text'
+</span>    <span class="c1"># We do so by using try and except. 
+</span>    <span class="k">try</span> <span class="p">:</span>
+        <span class="n">full_name</span> <span class="o">=</span> <span class="n">soup</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="sh">'</span><span class="s">span</span><span class="sh">'</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">itemprop</span><span class="sh">'</span><span class="p">:</span><span class="sh">'</span><span class="s">name</span><span class="sh">'</span><span class="p">}).</span><span class="n">text</span><span class="p">.</span><span class="nf">strip</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="c1"># However, I would recommend you to specify the exception accurately,
+</span>        <span class="c1"># and not to write such a general catch method.
+</span>        <span class="n">full_name</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">NAN</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">city</span> <span class="o">=</span> <span class="n">soup</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="sh">'</span><span class="s">span</span><span class="sh">'</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="sh">'</span><span class="s">p-label</span><span class="sh">'</span><span class="p">).</span><span class="n">text</span><span class="p">.</span><span class="nf">strip</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">city</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">NAN</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">work</span> <span class="o">=</span> <span class="n">soup</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="sh">'</span><span class="s">span</span><span class="sh">'</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="sh">'</span><span class="s">p-org</span><span class="sh">'</span><span class="p">).</span><span class="n">text</span><span class="p">.</span><span class="nf">strip</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">work</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">NAN</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">repos</span> <span class="o">=</span> <span class="n">soup</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="sh">'</span><span class="s">span</span><span class="sh">'</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="sh">'</span><span class="s">Counter</span><span class="sh">'</span><span class="p">).</span><span class="n">text</span><span class="p">.</span><span class="nf">strip</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">repos</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">NAN</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">contributions</span> <span class="o">=</span> <span class="n">soup</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="sh">'</span><span class="s">h2</span><span class="sh">'</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="sh">'</span><span class="s">f4 text-normal mb-2</span><span class="sh">'</span><span class="p">).</span><span class="n">text</span><span class="p">.</span><span class="nf">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">contributions</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">NAN</span>
+
+    <span class="n">numbers</span> <span class="o">=</span> <span class="n">soup</span><span class="p">.</span><span class="nf">find_all</span><span class="p">(</span><span class="sh">'</span><span class="s">span</span><span class="sh">'</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="sh">'</span><span class="s">text-bold color-text-primary</span><span class="sh">'</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">followers</span> <span class="o">=</span> <span class="n">numbers</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">text</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">followers</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">NAN</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">following</span> <span class="o">=</span> <span class="n">numbers</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">text</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">following</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">NAN</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">likes</span> <span class="o">=</span> <span class="n">numbers</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="n">text</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">likes</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">NAN</span>
+        
+        
+    <span class="k">return</span> <span class="p">[</span><span class="n">full_name</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">city</span><span class="p">,</span> <span class="n">work</span><span class="p">,</span> <span class="n">followers</span><span class="p">,</span> <span class="n">following</span><span class="p">,</span> <span class="n">likes</span><span class="p">,</span> <span class="n">repos</span><span class="p">,</span> <span class="n">contributions</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>As output we get a list with a total of nine features, some of which could be ‘NaN’ - well, certainly not the users alias.</p>
+
+<p>Finally, we call the <code class="language-plaintext highlighter-rouge">extract_info()</code> function for all users in a <code class="language-plaintext highlighter-rouge">for-loop</code> and then save the output as a <code class="language-plaintext highlighter-rouge">csv</code> file.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># crawl all users and scarape the required information
+</span><span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">users</span><span class="p">:</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="nf">extract_info</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+  <span class="n">results</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nc">DataFrame</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">COLUMNS</span><span class="p">)</span>
+<span class="n">df</span><span class="p">.</span><span class="nf">to_csv</span><span class="p">(</span><span class="sh">'</span><span class="s">github_users_info.csv</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+<p>Let’s check the result:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># display 5 random users
+</span><span class="n">df</span><span class="p">.</span><span class="nf">sample</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div></div>
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th> Name </th>
+      <th> Nickname </th>
+      <th> City </th>
+      <th> Work </th>
+      <th> Followers </th>
+      <th> Following </th>
+      <th> Likes </th>
+      <th> Repos </th>
+      <th> Contributions [2021] </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>58</th>
+      <td>Alexandre Sanlim</td>
+      <td>alexandresanlim</td>
+      <td>Curitiba - PR, Brazil</td>
+      <td>@Avanade</td>
+      <td>281</td>
+      <td>77</td>
+      <td>254</td>
+      <td>31</td>
+      <td>3,020</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>Johannes Gontrum</td>
+      <td>jgontrum</td>
+      <td>Uppsala, Sweden</td>
+      <td>NaN</td>
+      <td>50</td>
+      <td>34</td>
+      <td>275</td>
+      <td>72</td>
+      <td>113</td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td></td>
+      <td>vxunderground</td>
+      <td>International</td>
+      <td>NaN</td>
+      <td>1.6k</td>
+      <td>0</td>
+      <td>10</td>
+      <td>4</td>
+      <td>1,007</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>Rahul Dave</td>
+      <td>rahuldave</td>
+      <td>Somerville, MA</td>
+      <td>Harvard University/univ.ai</td>
+      <td>334</td>
+      <td>1</td>
+      <td>31</td>
+      <td>121</td>
+      <td>93</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Pierian Data</td>
+      <td>Pierian-Data</td>
+      <td>Las Vegas, Nevada</td>
+      <td>Pierian Data Inc.</td>
+      <td>6k</td>
+      <td>0</td>
+      <td>1</td>
+      <td>18</td>
+      <td>7</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Looks good, right?!</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>I hope this brief introduction to BeautifulSoup in combination with Requests has given you an idea of the power and simplicity of web scraping and crawling in Python. Virtually any information can be extracted from any HTML (or XML) file, no matter how clean or messy the source code is, as long as it has some identifying tag surrounding it or nearby. You can start your crawler overnight and come back the next day to find thousands of entries. Just make sure that the normal flow of your crawler is not interrupted by some kind of exceptions. Consequently, the tedious part of the program is to find a robust DOM path to the piece of information in question. There is no secret receipt for this. You can access the same information in different ways. Depending on the quality of the HTML’s code, it is either straightforward or we need some trial and error with the browser’s Developer-Tools to find a way to the targeted element.  However, some knowledge of CSS and JavaScript would be very helpful to this end.</p>
+
+<p>N.B. In case you are interested in experimenting more with the Github crawler, a more useable Python code that summarizes everything we’ve done here can be found in <a href="https://bit.ly/2Um27nF">here</a>.</p>
+
+<hr />
+<p><a name="note1">1</a>: NaN is used as a placeholder for missing data consistently in pandas. No matter if it is a float, integer or string. And we want to save our results as a <code class="language-plaintext highlighter-rouge">pandas.DataFrame</code>.<a href="#n1">↩</a></p>
+
+  </article>
+
+</div>
+
+<center>
+<b>tagged in</b>: [
+
+  
+  <a href="/tag/Python"><code class="highligher-rouge"><nobr>Python</nobr></code></a>
+
+  
+  <a href="/tag/Web Crawler"><code class="highligher-rouge"><nobr>Web Crawler</nobr></code></a>
+
+  
+  <a href="/tag/BeautifulSoup"><code class="highligher-rouge"><nobr>BeautifulSoup</nobr></code></a>
+
+]
+</center>
+
+<br><br>
+<center>
+<div class="share-page">
+    <a href="https://twitter.com/intent/tweet?text=Github Crawler&url=/ml/2021/07/04/Github_User_Crawler/&via=&related=" target="_blank" title="Share on Twitter"> <img alt="Tweet" src="/assets/images/flat_web_icon_set/color/Twitter.png" /></a>
+    <a href="http://www.reddit.com/submit?url=/ml/2021/07/04/Github_User_Crawler/" target="_blank" title="Share on Reddit"><img alt="Reddit" src="/assets/images/flat_web_icon_set/color/Reddit.png" /></a>
+    <a href="http://www.linkedin.com/shareArticle?mini=true&url=/ml/2021/07/04/Github_User_Crawler/&title=Github Crawler&summary=&source=" target="_blank" title="Share on LinkedIn"><img alt="Share on LinkedIn" src="/assets/images/flat_web_icon_set/color/LinkedIn.png" /></a>
+    <a href="https://plus.google.com/share?url=/ml/2021/07/04/Github_User_Crawler/" target="_blank" title="Share on Google+"><img alt="Share on Google+" src="/assets/images/flat_web_icon_set/color/Google+.png"></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/ml/2021/07/04/Github_User_Crawler/&quote=Github Crawler" title="Share on Facebook" target="_blank"><img alt="Share on Facebook" src="/assets/images/flat_web_icon_set/color/Facebook.png" /></a>
+</div>
+</center>
+
+<div>
+  <br>
+  <center>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+    <img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" />
+    </a>
+    <br>
+    Content licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"> CC BY-NC-SA 4.0 International License</a>
+  </center>
+  <br>
+</div>
+
+
+  <div id="disqus_thread"></div>
+<script>
+
+/**
+*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+
+var disqus_config = function () {
+this.page.url = '/ml/2021/07/04/Github_User_Crawler/'; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = /ml/2021/07/04/Github_User_Crawler/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://skacem.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+      </div>
+    </div>
+    <footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <center>
+      <ul>
+        
+          <li><a class="site-link" href="mailto:skanderkacem@gmail.com"><i class="fa fa-envelope-square fa-fw fa-2x"></i></a></li>
+        
+
+        
+
+        
+          <li><a class="site-link" href="https://github.com/skacem"><i class="fa fa-github-square fa-fw fa-2x"></i></a></li>
+        
+
+        
+
+        
+
+        <li><a class="site-link" href="/feed.xml"><i class="fa fa-rss-square fa-fw fa-2x"></i></a></li>
+        <br>
+
+      </center>
+    </div>
+    <div class="footer-bottom"></div>
+  </div>
+</footer>
+    </body>
+</html>

@@ -1,0 +1,90 @@
+---
+layout: default
+title: Readings
+permalink: /readings/
+---
+
+<div class="readings-page">
+  <h1 class="page-title">Readings</h1>
+  <p class="page-description">Notes and reflections on books and articles about finance, politics, culture, and philosophy.</p>
+
+  <div class="posts-list">
+    {% assign reading_posts = site.posts | where_exp: "post", "post.category == 'readings' or post.categories contains 'readings'" %}
+    {% if reading_posts.size == 0 %}
+      <p class="no-posts">No reading notes yet. Check back soon!</p>
+    {% else %}
+      {% for post in reading_posts %}
+      <div class="post-preview">
+        <h2 class="post-title">
+          <a href="{{ post.url }}">{{ post.title }}</a>
+        </h2>
+        <div class="post-meta">
+          <span class="post-date">{{ post.date | date: "%B %d, %Y" }}</span>
+        </div>
+        <div class="post-excerpt">
+          {{ post.excerpt | truncate: 250 }}
+        </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  .readings-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #222;
+  }
+
+  .page-description {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 3rem;
+    font-style: italic;
+  }
+
+  .post-preview {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .post-preview:last-child {
+    border-bottom: none;
+  }
+
+  .post-title a {
+    color: #333;
+    text-decoration: none;
+  }
+
+  .post-title a:hover {
+    color: #0066cc;
+    text-decoration: underline;
+  }
+
+  .post-meta {
+    margin: 0.5rem 0 1rem 0;
+    color: #999;
+    font-size: 0.95rem;
+  }
+
+  .post-excerpt {
+    color: #555;
+    line-height: 1.6;
+  }
+
+  .no-posts {
+    color: #999;
+    font-style: italic;
+    text-align: center;
+    padding: 3rem 0;
+  }
+</style>

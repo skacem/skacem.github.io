@@ -4,47 +4,20 @@ permalink: /
 ---
 
 <div class="home">
-  <section class="intro">
-    <h1>Welcome</h1>
-    <p>I'm Skander Kacem. This is my space for sharing knowledge and thoughts on machine learning, management, engineering, and life.</p>
-  </section>
 
   <section class="content-sections">
     <div class="section-grid">
       <div class="section-card">
-        <h2><a href="/ml/">ML & Statistical Learning</a></h2>
-        <p>Tutorials, insights, and technical deep-dives into ML, data science, and business analytics.</p>
-        <div class="recent-posts">
-          <h3>Recent ML Articles:</h3>
-          {% assign ml_posts = site.posts | where_exp: "post", "post.category == 'ml' or post.categories contains 'ml'" | limit: 3 %}
-          {% if ml_posts.size == 0 %}
-            {% assign ml_posts = site.posts | limit: 3 %}
-          {% endif %}
-          <ul class="post-list-compact">
-            {% for post in ml_posts %}
-              <li>
-                <a href="{{ post.url }}">{{ post.title | truncate: 60 }}</a>
-                <span class="post-date">{{ post.date | date: "%b %d, %Y" }}</span>
-              </li>
-            {% endfor %}
-          </ul>
-          <a href="/ml/" class="view-all">View all ML articles →</a>
-        </div>
-      </div>
-
-      <div class="section-card">
         <h2><a href="/thoughts/">Thoughts</a></h2>
-        <p>Personal reflections, ideas, and musings on various topics.</p>
         <div class="recent-posts">
-          <h3>Recent Thoughts:</h3>
-          {% assign thought_posts = site.posts | where_exp: "post", "post.category == 'thoughts' or post.categories contains 'thoughts'" | limit: 3 %}
+          {% assign thought_posts = site.posts | where_exp: "post", "post.category == 'thoughts' or post.categories contains 'thoughts'" %}
           {% if thought_posts.size == 0 %}
             <p class="no-posts">No thoughts posted yet. Stay tuned!</p>
           {% else %}
           <ul class="post-list-compact">
-            {% for post in thought_posts %}
+            {% for post in thought_posts limit:5 %}
               <li>
-                <a href="{{ post.url }}">{{ post.title | truncate: 60 }}</a>
+                <a href="{{ post.url }}">{{ post.title }}</a>
                 <span class="post-date">{{ post.date | date: "%b %d, %Y" }}</span>
               </li>
             {% endfor %}
@@ -53,37 +26,49 @@ permalink: /
           <a href="/thoughts/" class="view-all">View all thoughts →</a>
         </div>
       </div>
+
+      <div class="section-card">
+        <h2><a href="/notes/">Notes</a></h2>
+        <div class="recent-posts">
+          {% assign tech_posts = site.posts | where_exp: "post", "post.category == 'notes' or post.categories contains 'notes' or post.category == 'technical' or post.categories contains 'technical' or post.category == 'ml' or post.categories contains 'ml'" %}
+          {% if tech_posts.size == 0 %}
+            <p class="no-posts">No notes yet.</p>
+          {% else %}
+          <ul class="post-list-compact">
+            {% for post in tech_posts limit:5 %}
+              <li>
+                <a href="{{ post.url }}">{{ post.title }}</a>
+                <span class="post-date">{{ post.date | date: "%b %d, %Y" }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          <a href="/notes/" class="view-all">View all notes →</a>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h2><a href="/readings/">Readings</a></h2>
+        <div class="recent-posts">
+          {% assign reading_posts = site.posts | where_exp: "post", "post.category == 'readings' or post.categories contains 'readings'" %}
+          {% if reading_posts.size == 0 %}
+            <p class="no-posts">No reading notes yet. Check back soon!</p>
+          {% else %}
+          <ul class="post-list-compact">
+            {% for post in reading_posts limit:5 %}
+              <li>
+                <a href="{{ post.url }}">{{ post.title }}</a>
+                <span class="post-date">{{ post.date | date: "%b %d, %Y" }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          <a href="/readings/" class="view-all">View all readings →</a>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="all-posts">
-    <h2>All Recent Posts</h2>
-    <div class="previews">
-      {% for post in site.posts limit:5 %}
-      <div class="preview">
-        <h3 class="post-title">
-          <a class="post-link" href="{{ post.url }}">{{ post.title }}</a>
-        </h3>
-        <div class="post-meta">
-          <span class="post-date">
-            <i class="fa fa-calendar-o"></i> {{ post.date | date: '%Y-%m-%d' }}
-          </span>
-          <span class="post-category">
-            {% if post.category == 'thoughts' or post.categories contains 'thoughts' %}
-              [Thoughts]
-            {% else %}
-              [ML]
-            {% endif %}
-          </span>
-        </div>
-        <div class="post-excerpt">
-          {{ post.excerpt | truncate: 200 }}
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-    <a href="/posts/" class="view-all">View all posts →</a>
-  </section>
 </div>
 
 <style>
@@ -92,36 +77,37 @@ permalink: /
     margin: 0 auto;
   }
   
-  .intro {
-    margin-bottom: 3rem;
-    text-align: center;
-    padding: 2rem 0;
-    border-bottom: 1px solid #eee;
-  }
   
-  .intro h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+  .content-sections {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
   }
   
   .section-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    margin-bottom: 3rem;
-  }
-  
-  @media (max-width: 768px) {
-    .section-grid {
-      grid-template-columns: 1fr;
-    }
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
   }
   
   .section-card {
-    background: #f9f9f9;
-    padding: 1.5rem;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
+    background: #fafafa;
+    padding: 2rem 2.5rem;
+    border: 1px solid #eee;
+    margin-bottom: 1.5rem;
+  }
+  
+  .section-card:last-child {
+    margin-bottom: 0;
+  }
+  
+  .section-card h2 {
+    margin: 0 0 1.5rem 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: #222;
   }
   
   .section-card h2 a {
@@ -130,91 +116,72 @@ permalink: /
   }
   
   .section-card h2 a:hover {
-    color: #0066cc;
+    color: #555;
+    text-decoration: underline;
   }
   
   .recent-posts {
-    margin-top: 1rem;
-  }
-  
-  .recent-posts h3 {
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-    color: #666;
+    margin-top: 0.5rem;
   }
   
   .post-list-compact {
     list-style: none;
     padding: 0;
-    margin: 0.5rem 0;
+    margin: 0.5rem 0 1rem 0;
   }
   
   .post-list-compact li {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0;
     display: flex;
     justify-content: space-between;
     align-items: baseline;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .post-list-compact li:last-child {
+    border-bottom: none;
   }
   
   .post-list-compact a {
     flex: 1;
     margin-right: 1rem;
-    color: #333;
+    color: #444;
+    text-decoration: none;
+    font-size: 1.6rem;
+    font-weight: 500;
+  }
+  
+  .post-list-compact a:hover {
+    color: #0066cc;
+    text-decoration: underline;
   }
   
   .post-date {
-    font-size: 0.85rem;
-    color: #999;
+    font-size: 1.2rem;
+    color: #777;
     white-space: nowrap;
+    font-weight: 500;
   }
   
   .view-all {
     display: inline-block;
-    margin-top: 0.5rem;
-    color: #0066cc;
+    margin-top: 1rem;
+    color: #666;
+    text-decoration: none;
+    font-size: 1.2rem;
     font-weight: 500;
+  }
+  
+  .view-all:hover {
+    color: #0066cc;
+    text-decoration: underline;
   }
   
   .no-posts {
-    color: #999;
+    color: #9ca3af;
     font-style: italic;
-    margin: 0.5rem 0;
-  }
-  
-  .all-posts {
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid #eee;
-  }
-  
-  .all-posts h2 {
-    margin-bottom: 1.5rem;
-  }
-  
-  .preview {
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  
-  .preview:last-child {
-    border-bottom: none;
-  }
-  
-  .post-meta {
-    margin: 0.5rem 0;
-    color: #666;
-    font-size: 0.9rem;
-  }
-  
-  .post-category {
-    margin-left: 1rem;
-    font-weight: 500;
-    color: #0066cc;
-  }
-  
-  .post-excerpt {
-    margin-top: 0.5rem;
-    color: #555;
+    margin: 1rem 0;
+    text-align: center;
   }
 </style>

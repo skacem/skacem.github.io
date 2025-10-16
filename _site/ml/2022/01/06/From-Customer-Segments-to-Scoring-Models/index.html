@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>From RFM Analysis to Predictive Scoring Models</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="">
+    <link rel="canonical" href="/ml/2022/01/06/From-Customer-Segments-to-Scoring-Models/">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon-96x96.png">
+
+    <!--flattr.com -->
+    <meta name="flattr:id" content="nlxxeo">
+
+    <!-- Stuff added for BibTex dropdown menu -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
+
+        <!--KaTeX-->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js" integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC+Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa" crossorigin="anonymous"></script>
+        <script>
+         document.addEventListener("DOMContentLoaded", function() {
+             renderMathInElement(document.body, {
+                 // ...options...
+             });
+         });
+        </script>
+        
+</head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MJT6KHN3F1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-MJT6KHN3F1');
+</script>
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans&display=swap" rel="stylesheet">
+
+    <body>
+    <a name="top"></a>
+    <header class="site-header">
+  <div class="wrap">
+
+    <div style="float:left; margin-top:10px; margin-right:10px;">
+      <a href="/about/">
+    <img src="/sk.png" width="45">
+  </a>
+  </div>
+
+    <a class="site-title site-link" href="/about/">Skander Kacem</a> <br>
+    <p class="site-subtitle" style="font-style: italic; text-align: center;">Thinking out loud</p>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <div class="trigger">
+        <a class="site-link" href="/thoughts/">Thoughts</a>
+        <a class="site-link" href="/readings/">Readings</a>
+        <a class="site-link" href="/notes/">Notes</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="page-content">
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>From RFM Analysis to Predictive Scoring Models</h1>
+    <div class="post-meta">
+      <div class="post-date">
+        <i class="fa fa-calendar-o"></i>
+        2022-01-06
+      </div>
+      <div class="post-tags">
+        <i class="fa fa-tags"></i>
+        
+          <span><a href="/tag/Business Analytics"><code class="highligher"><nobr>Business Analytics</nobr></code></a></span>
+        
+          <span><a href="/tag/Tutorial"><code class="highligher"><nobr>Tutorial</nobr></code></a></span>
+        
+          <span><a href="/tag/RFM Analysis"><code class="highligher"><nobr>RFM Analysis</nobr></code></a></span>
+        
+          <span><a href="/tag/Customer Segmentation"><code class="highligher"><nobr>Customer Segmentation</nobr></code></a></span>
+        
+      </div>
+    </div>
+  </header>
+
+  <article class="post-content">
+  <h2 id="introduction">Introduction</h2>
+
+<p>Business forecasting is not about accurately predicting the future, nor is it an end in itself. It is a means to help companies manage uncertainty and develop strategies to minimize potential risks and threats or maximize financial returns.  It relies on identifying and estimating past patterns that are then generalized to forecast the future. As such, forecasting has a wide range of business applications and can be useful throughout the value chain of any organization.<br />
+For instance, forecasting customer purchases allows companies not only to calculate the expected revenue of each segment so they can focus on profitable ones, but also to properly plan inventory and manpower for the next period.  Other business forecasting applications include customer lifetime value, credit card attrition or future revenues. In other words, every business needs forecasting.</p>
+
+<p>In this tutorial we will develop a typical marketing application. We will predict the likelihood that a customer will make a purchase in a near future. And if so, we also want to predict how much s/he will spend. For this, we will first segment our customer database using RFM analysis –I hope you are by now familiar with this segmentation method– and then we will build two distinct models:</p>
+
+<ol>
+  <li>A first model to calculate the probability of purchase</li>
+  <li>A second model to predict the amount spent</li>
+</ol>
+
+<p>For simplicity sake, we will use linear regression in both models. As it is one of the simplest supervised learning algorithms.<br />
+Finally, we will combine the two models into one large scoring model.</p>
+
+<h2 id="rfm-analysis-and-customer-segmentation">RFM Analysis and Customer Segmentation</h2>
+
+<p>In this section we will use the same code as in the previous tutorial. The only difference is that we will save the resulting customer segmentation as <code class="language-plaintext highlighter-rouge">customers_2015</code> rather than just <code class="language-plaintext highlighter-rouge">customers</code>.<br />
+As usual, we start by importing the necessary libraries, setting up the notebook environment and reading the data set as a dataframe.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># import needed packages
+</span><span class="kn">import</span> <span class="n">matplotlib</span> <span class="k">as</span> <span class="n">mpl</span>
+<span class="kn">import</span> <span class="n">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="n">patsy</span>
+<span class="kn">import</span> <span class="n">squarify</span>
+<span class="kn">import</span> <span class="n">statsmodels.api</span> <span class="k">as</span> <span class="n">sm</span>
+<span class="kn">from</span> <span class="n">pandasql</span> <span class="kn">import</span> <span class="n">sqldf</span>
+<span class="kn">from</span> <span class="n">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
+
+<span class="c1"># Set up the notebook environment
+</span><span class="n">pysqldf</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">q</span><span class="p">:</span> <span class="nf">sqldf</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="nf">globals</span><span class="p">())</span>
+<span class="o">%</span><span class="n">precision</span> <span class="o">%</span><span class="p">.</span><span class="mi">2</span><span class="n">f</span>
+<span class="n">pd</span><span class="p">.</span><span class="n">options</span><span class="p">.</span><span class="n">display</span><span class="p">.</span><span class="n">float_format</span> <span class="o">=</span> <span class="sh">"</span><span class="s">{:,.2f}</span><span class="sh">"</span><span class="p">.</span><span class="nb">format</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">rcParams</span><span class="p">[</span><span class="sh">"</span><span class="s">figure.figsize</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">8</span>
+
+<span class="c1"># Load text file into a local variable
+</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="sh">"</span><span class="s">customer_id</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">purchase_amount</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">date_of_purchase</span><span class="sh">"</span><span class="p">]</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nf">read_csv</span><span class="p">(</span><span class="sh">"</span><span class="s">purchases.txt</span><span class="sh">"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sh">"</span><span class="se">\t</span><span class="sh">"</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
+
+<span class="c1"># interpret the last column as datetime
+</span><span class="n">df</span><span class="p">[</span><span class="sh">"</span><span class="s">date_of_purchase</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nf">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="sh">"</span><span class="s">date_of_purchase</span><span class="sh">"</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="sh">"</span><span class="s">%Y-%m-%d</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Then we add two variables: <code class="language-plaintext highlighter-rouge">year_of_purchase</code> and <code class="language-plaintext highlighter-rouge">days_since</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Extract year of purchase and save it as a column
+</span><span class="n">df</span><span class="p">[</span><span class="sh">"</span><span class="s">year_of_purchase</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sh">"</span><span class="s">date_of_purchase</span><span class="sh">"</span><span class="p">].</span><span class="n">dt</span><span class="p">.</span><span class="n">year</span>
+
+<span class="c1"># Add a day_since column showing the difference between last purchase and a basedate
+</span><span class="n">basedate</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nc">Timestamp</span><span class="p">(</span><span class="sh">"</span><span class="s">2016-01-01</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">df</span><span class="p">[</span><span class="sh">"</span><span class="s">days_since</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">basedate</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="sh">"</span><span class="s">date_of_purchase</span><span class="sh">"</span><span class="p">]).</span><span class="n">dt</span><span class="p">.</span><span class="n">days</span>
+</code></pre></div></div>
+
+<p>We now use SQL for the RFM analysis and then segment our customer database accordingly.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">q</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+        SELECT customer_id,
+        MIN(days_since) AS </span><span class="sh">'</span><span class="s">recency</span><span class="sh">'</span><span class="s">,
+        MAX(days_since) AS </span><span class="sh">'</span><span class="s">first_purchase</span><span class="sh">'</span><span class="s">,
+        COUNT(*) AS </span><span class="sh">'</span><span class="s">frequency</span><span class="sh">'</span><span class="s">,
+        AVG(purchase_amount) AS </span><span class="sh">'</span><span class="s">amount</span><span class="sh">'</span><span class="s">
+        FROM df GROUP BY 1</span><span class="sh">"""</span>
+<span class="n">customers_2015</span> <span class="o">=</span> <span class="nf">sqldf</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Managerial Segmentation based on RFM analysis
+</span><span class="n">customers_2015</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">recency</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">365</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">inactive</span><span class="sh">"</span>
+<span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">].</span><span class="nf">fillna</span><span class="p">(</span><span class="sh">"</span><span class="s">NA</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">customers_2015</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">recency</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">365</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">recency</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">356</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">cold</span><span class="sh">"</span>
+<span class="n">customers_2015</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">recency</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">365</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">recency</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">365</span> <span class="o">*</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">warm</span><span class="sh">"</span>
+<span class="n">customers_2015</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">recency</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">365</span><span class="p">,</span> <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">active</span><span class="sh">"</span>
+<span class="n">customers_2015</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">warm</span><span class="sh">"</span><span class="p">)</span>
+    <span class="o">&amp;</span> <span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">first_purchase</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">365</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">new warm</span><span class="sh">"</span>
+<span class="n">customers_2015</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">warm</span><span class="sh">"</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">),</span> <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span>
+<span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">warm low value</span><span class="sh">"</span>
+<span class="n">customers_2015</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">warm</span><span class="sh">"</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">),</span> <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span>
+<span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">warm high value</span><span class="sh">"</span>
+<span class="n">customers_2015</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">active</span><span class="sh">"</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">first_purchase</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">365</span><span class="p">),</span>
+    <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">new active</span><span class="sh">"</span>
+<span class="n">customers_2015</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">active</span><span class="sh">"</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">),</span>
+    <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">active low value</span><span class="sh">"</span>
+<span class="n">customers_2015</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">active</span><span class="sh">"</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">),</span>
+    <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">active high value</span><span class="sh">"</span>
+</code></pre></div></div>
+
+<p>Once we have the segments populated with corresponding customers we transform the type of the <code class="language-plaintext highlighter-rouge">segment</code> variable to categorical and reorder the segments, so that it makes more sense.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Transform segment column datatype from object to category
+</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">].</span><span class="nf">astype</span><span class="p">(</span><span class="sh">"</span><span class="s">category</span><span class="sh">"</span><span class="p">)</span>
+<span class="c1"># Re-order segments in a better readable way
+</span><span class="n">sorter</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sh">"</span><span class="s">inactive</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">cold</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">warm high value</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">warm low value</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">new warm</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">active high value</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">active low value</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">new active</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="n">customers_2015</span><span class="p">.</span><span class="n">segment</span><span class="p">.</span><span class="n">cat</span><span class="p">.</span><span class="nf">set_categories</span><span class="p">(</span><span class="n">sorter</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">customers_2015</span><span class="p">.</span><span class="nf">sort_values</span><span class="p">([</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>So let’s plot the results as a treemap using <code class="language-plaintext highlighter-rouge">squarify</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">plt</span><span class="p">.</span><span class="n">rcParams</span><span class="p">[</span><span class="sh">"</span><span class="s">figure.figsize</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">9</span>
+<span class="n">c2015</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nc">DataFrame</span><span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">].</span><span class="nf">value_counts</span><span class="p">())</span>
+<span class="n">norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="p">.</span><span class="n">colors</span><span class="p">.</span><span class="nc">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="nf">min</span><span class="p">(</span><span class="n">c2015</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]),</span> <span class="n">vmax</span><span class="o">=</span><span class="nf">max</span><span class="p">(</span><span class="n">c2015</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]))</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">mpl</span><span class="p">.</span><span class="n">cm</span><span class="p">.</span><span class="nc">RdYlBu_r</span><span class="p">(</span><span class="nf">norm</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">c2015</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]]</span>
+<span class="n">squarify</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">sizes</span><span class="o">=</span><span class="n">c2015</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">c2015</span><span class="p">.</span><span class="n">index</span><span class="p">,</span> 
+              <span class="n">value</span><span class="o">=</span><span class="n">c2015</span><span class="p">.</span><span class="n">values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">axis</span><span class="p">(</span><span class="sh">"</span><span class="s">off</span><span class="sh">"</span><span class="p">);</span>
+</code></pre></div></div>
+
+<figure class="image">
+    <img src="/assets/8/c2015.png" alt="Market Segments as a Treemap" style="zoom:100%" />
+    <figcaption>Market Segments as a Treemap</figcaption>
+  </figure>
+
+<p>We will also need to compute the revenue of each customer in 2015 to be able to predict the amount of the next purchase.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Compute revenues generated by customers in 2015 using SQL
+</span><span class="n">q</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+        SELECT customer_id, 
+        SUM(purchase_amount) AS </span><span class="sh">'</span><span class="s">revenue_2015</span><span class="sh">'</span><span class="s">
+        FROM df
+        WHERE year_of_purchase = 2015
+        GROUP BY 1
+    </span><span class="sh">"""</span>
+<span class="n">revenue_2015</span> <span class="o">=</span> <span class="nf">sqldf</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Note that not all customers have made a purchase in 2015.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">print</span><span class="p">(</span><span class="sh">'</span><span class="s">Number of customers with at least one completed payment:</span><span class="sh">'</span><span class="p">,</span> <span class="n">revenue_2015</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">'</span><span class="s">Total number of customers as in 2015:</span><span class="sh">'</span><span class="p">,</span> <span class="n">customers_2015</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</code></pre></div></div>
+
+<div class="language-tex highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Number of customers with at least one completed payment: 5398
+Total number of customers as in 2015: 18417
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">revenue_2015</code> contains only 5,398 observations, while we have 18,417 customers to date. This is because a large portion of our customers were actually inactive in 2015. Nevertheless, we need to include them in our statistics. We do this as we merge the variable <code class="language-plaintext highlighter-rouge">revenue_2015</code> with the dataframe <code class="language-plaintext highlighter-rouge">customers_2015</code>. In <code class="language-plaintext highlighter-rouge">SQL</code> syntax, this corresponds to a left join with <code class="language-plaintext highlighter-rouge">customers_2015</code> as left table.  Note that this only works if both dataframes have one common index: <code class="language-plaintext highlighter-rouge">Customer_ID</code>.</p>
+
+<figure class="image">
+    <img src="/assets/8/merge_.png" alt="Different Types of SQL JOINs (Source: https://www.w3schools.com)" style="zoom:60%" />
+    <figcaption>Different Types of SQL JOINs (Source: https://www.w3schools.com)</figcaption>
+  </figure>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Merge 2015 customers and 2015 revenue, while making sure that customers
+# without purchase in 2015 also appear in the new df
+</span><span class="n">actual</span> <span class="o">=</span> <span class="n">customers_2015</span><span class="p">.</span><span class="nf">merge</span><span class="p">(</span><span class="n">revenue_2015</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="sh">"</span><span class="s">left</span><span class="sh">"</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="sh">"</span><span class="s">customer_id</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>And of course we don’t want to have <code class="language-plaintext highlighter-rouge">NaN</code>’s in our dataframe.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Replace NaNs in revenue_2015 column with 0s
+</span><span class="n">actual</span><span class="p">[</span><span class="sh">"</span><span class="s">revenue_2015</span><span class="sh">"</span><span class="p">].</span><span class="nf">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Now we want to compute the average revenue generated by each customer segment. As a manager you are interested in knowing to what extent each segment today contributes to today’s revenues and this for many obvious reasons. Often, you will find that small segments, in terms of number of customers, generate a significant amount of revenue. Precisely this group of customers is what you want to target in your next marketing campaign.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">actual</span><span class="p">[[</span><span class="sh">"</span><span class="s">revenue_2015</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]].</span><span class="nf">groupby</span><span class="p">(</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">).</span><span class="nf">mean</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-tex highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+-------------------+----------------+
+| segment           |   revenue<span class="p">_</span>2015 |
+|-------------------+----------------|
+| inactive          |         0      |
+| cold              |         0      |
+| warm high value   |         0      |
+| warm low value    |         0      |
+| new warm          |         0      |
+| active high value |       323.569  |
+| active low value  |        52.306  |
+| new active        |        79.1661 |
++-------------------+----------------+
+</code></pre></div></div>
+
+<p>As you can see from above, <code class="language-plaintext highlighter-rouge">active high value</code> customers generated the highest revenue in 2015. Although they represent only 3% of all customers, they have generated more than 71% of total revenues.<br />
+As far as resource allocation and how much money you want to invest to maintain good relationships with certain customers, based on what segment they belong to, such information is crucial.<br />
+And in case you’re wondering why there are so many zeros. It’s because, by definition, only customers who have purchased at least once in the last 365 days are considered <code class="language-plaintext highlighter-rouge">active</code>.</p>
+
+<h2 id="segmenting-a-database-retrospectively">Segmenting a Database Retrospectively</h2>
+
+<p>From a business strategy perspective, it is also extremely useful to determine not only the extent to which each segment is contributing to today’s revenues, but also to what extent each segment today would likely contribute to tomorrow’s revenues. Only then can we achieve a forward-looking analysis of revenue development; namely: from which of today’s customers will tomorrow’s revenue come?<br />
+Unfortunately, we cannot answer this question with certainty, as tomorrow has not yet happened. Only future can tell. Nevertheless, if we examine the recent past, we can have a pretty good idea of what tomorrow will be like; just ask the weather experts about it. After all, customers in a segment today are likely to behave pretty much the same as customers in that same segment did a year ago. So analyzing the past will inform us about the most likely future.
+Now let’s find out how this can be implemented.</p>
+
+<p>We want to do an RFM analysis and a customer segmentation as if we were a year in the past, namely 2014. Thus, every transaction that has happened in the last 365 days should be ignored, as if it never happened; or hasn’t happened yet. The SQL query here is as follows:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">q</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+        SELECT customer_id,
+        MIN(days_since) - 365 AS </span><span class="sh">'</span><span class="s">recency</span><span class="sh">'</span><span class="s">,
+        MAX(days_since) - 365 AS </span><span class="sh">'</span><span class="s">first_purchase</span><span class="sh">'</span><span class="s">,
+        COUNT(*) AS </span><span class="sh">'</span><span class="s">frequency</span><span class="sh">'</span><span class="s">,
+        AVG(purchase_amount) AS </span><span class="sh">'</span><span class="s">amount</span><span class="sh">'</span><span class="s">
+        FROM df
+        WHERE days_since &gt; 365
+        GROUP BY 1</span><span class="sh">"""</span>
+
+<span class="n">customers_2014</span> <span class="o">=</span> <span class="nf">sqldf</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The rest, besides the new dataframe name, is the same as in the previous section.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">customers_2014</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">recency</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">365</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">inactive</span><span class="sh">"</span>
+<span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">].</span><span class="nf">fillna</span><span class="p">(</span><span class="sh">"</span><span class="s">NA</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">customers_2014</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">recency</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">365</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">recency</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">356</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">cold</span><span class="sh">"</span>
+<span class="n">customers_2014</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">recency</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">365</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">recency</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">365</span> <span class="o">*</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">warm</span><span class="sh">"</span>
+<span class="n">customers_2014</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">recency</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">365</span><span class="p">,</span> <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">active</span><span class="sh">"</span>
+<span class="n">customers_2014</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">warm</span><span class="sh">"</span><span class="p">)</span>
+    <span class="o">&amp;</span> <span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">first_purchase</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">365</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">new warm</span><span class="sh">"</span>
+<span class="n">customers_2014</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">warm</span><span class="sh">"</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">),</span> <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span>
+<span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">warm low value</span><span class="sh">"</span>
+
+<span class="n">customers_2014</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">warm</span><span class="sh">"</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">),</span> <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span>
+<span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">warm high value</span><span class="sh">"</span>
+<span class="n">customers_2014</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">active</span><span class="sh">"</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">first_purchase</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">365</span><span class="p">),</span>
+    <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">new active</span><span class="sh">"</span>
+
+<span class="n">customers_2014</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">active</span><span class="sh">"</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">),</span>
+    <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">active low value</span><span class="sh">"</span>
+
+<span class="n">customers_2014</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">active</span><span class="sh">"</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">amount</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">),</span>
+    <span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">active high value</span><span class="sh">"</span>
+
+<span class="c1"># Transform segment column datatype from object to category
+</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">].</span><span class="nf">astype</span><span class="p">(</span><span class="sh">"</span><span class="s">category</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Re-order segments in a better readable way
+</span><span class="n">sorter</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sh">"</span><span class="s">inactive</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">cold</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">warm high value</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">warm low value</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">new warm</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">active high value</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">active low value</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">new active</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="n">customers_2014</span><span class="p">.</span><span class="n">segment</span><span class="p">.</span><span class="n">cat</span><span class="p">.</span><span class="nf">set_categories</span><span class="p">(</span><span class="n">sorter</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">customers_2014</span><span class="p">.</span><span class="nf">sort_values</span><span class="p">([</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Now let’s plot the results as a Treemap.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">c2014</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nc">DataFrame</span><span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">].</span><span class="nf">value_counts</span><span class="p">())</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="n">rcParams</span><span class="p">[</span><span class="sh">"</span><span class="s">figure.figsize</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">9</span>
+<span class="n">norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="p">.</span><span class="n">colors</span><span class="p">.</span><span class="nc">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="nf">min</span><span class="p">(</span><span class="n">c2014</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]),</span> <span class="n">vmax</span><span class="o">=</span><span class="nf">max</span><span class="p">(</span><span class="n">c2014</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]))</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">mpl</span><span class="p">.</span><span class="n">cm</span><span class="p">.</span><span class="nc">Spectral</span><span class="p">(</span><span class="nf">norm</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">c2014</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]]</span>
+<span class="n">squarify</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">sizes</span><span class="o">=</span><span class="n">c2014</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">c2014</span><span class="p">.</span><span class="n">index</span><span class="p">,</span> 
+              <span class="n">value</span><span class="o">=</span><span class="n">c2014</span><span class="p">.</span><span class="n">values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">axis</span><span class="p">(</span><span class="sh">"</span><span class="s">off</span><span class="sh">"</span><span class="p">);</span>
+</code></pre></div></div>
+
+<figure class="image">
+    <img src="/assets/8/c2014.png" alt="Market Segments from 2014" style="zoom:100%" />
+    <figcaption>Market Segments from 2014</figcaption>
+  </figure>
+
+<p>As we can see the figures have changed over the last year. Our new customers segment increased by more than 20% and inactive customers have drastically increased through the years so that half of our customer database is now inactive.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># The number of "new active high" customers has increased between 2014 and 2015.
+# What is the rate of that increase?
+</span>
+<span class="n">ne</span> <span class="o">=</span> <span class="p">(</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">active high value</span><span class="sh">"</span><span class="p">).</span><span class="nf">sum</span><span class="p">()</span>
+<span class="n">ol</span> <span class="o">=</span> <span class="p">(</span><span class="n">customers_2014</span><span class="p">[</span><span class="sh">"</span><span class="s">segment</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="sh">"</span><span class="s">active high value</span><span class="sh">"</span><span class="p">).</span><span class="nf">sum</span><span class="p">()</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">New customers growth rate: %.0f%%</span><span class="sh">"</span> <span class="o">%</span> <span class="nf">round</span><span class="p">((</span><span class="n">ne</span> <span class="o">-</span> <span class="n">ol</span><span class="p">)</span> <span class="o">/</span> <span class="n">ol</span> <span class="o">*</span> <span class="mi">100</span><span class="p">))</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">New</span> <span class="n">customers</span> <span class="n">growth</span> <span class="n">rate</span><span class="p">:</span> <span class="mi">21</span><span class="o">%</span>
+</code></pre></div></div>
+
+<p>Conducting a horizontal analysis such as the one addressed above is extremely valuable when it comes to gaining a more accurate and well-founded understanding of the evolution and challenges the company has been facing over the years. It enables managers to identify trends and growth patterns, determine the product lifecycle stage the product is currently in, as well as predict what the future may look like.</p>
+
+<h2 id="building-a-predictive-model">Building a Predictive Model</h2>
+
+<p>Forecasting involves building a statistical model by analyzing past and present data trends to predict future behaviors or to suggest actions to take for optimal outcomes. In this example, we decided to use a simple linear regression approach, using the customers’ RFM from 2014 as predictors and the revenue generated by those same customers in 2015 as target variables.</p>
+
+<p>We first start by merging both dataframes: <code class="language-plaintext highlighter-rouge">customers_2014</code> with <code class="language-plaintext highlighter-rouge">revenue_2015</code> while making sure that new customers from 2015 are not included. We are going to call this new dataframe <code class="language-plaintext highlighter-rouge">in_sample</code>; meaning predictors and targets are already known.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Merge 2014 customers and 2015 revenue
+</span><span class="n">in_sample</span> <span class="o">=</span> <span class="n">customers_2014</span><span class="p">.</span><span class="nf">merge</span><span class="p">(</span><span class="n">revenue_2015</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="sh">"</span><span class="s">left</span><span class="sh">"</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="sh">"</span><span class="s">customer_id</span><span class="sh">"</span><span class="p">)</span>
+<span class="c1"># Transform NaN's to 0
+</span><span class="n">in_sample</span><span class="p">[</span><span class="sh">"</span><span class="s">revenue_2015</span><span class="sh">"</span><span class="p">].</span><span class="nf">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Then we create a new variable <code class="language-plaintext highlighter-rouge">active_2015</code>, which indicates if a client made a purchase in 2015 or not and we set its type as <code class="language-plaintext highlighter-rouge">int</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">in_sample</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span><span class="n">in_sample</span><span class="p">[</span><span class="sh">"</span><span class="s">revenue_2015</span><span class="sh">"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="sh">"</span><span class="s">active_2015</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">in_sample</span><span class="p">[</span><span class="sh">"</span><span class="s">active_2015</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">in_sample</span><span class="p">[</span><span class="sh">"</span><span class="s">active_2015</span><span class="sh">"</span><span class="p">].</span><span class="nf">astype</span><span class="p">(</span><span class="sh">"</span><span class="s">int</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">in_sample</span><span class="p">.</span><span class="nf">info</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-tex highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+Int64Index: 16905 entries, 0 to 16904
+Data columns (total 8 columns):
+ #   Column          Non-Null Count  Dtype  
+---  ------          --------------  -----  
+ 0   customer<span class="p">_</span>id     16905 non-null  int64  
+ 1   recency         16905 non-null  int64  
+ 2   first<span class="p">_</span>purchase  16905 non-null  int64  
+ 3   frequency       16905 non-null  int64  
+ 4   avg<span class="p">_</span>amount      16905 non-null  float64
+ 5   max<span class="p">_</span>amount      16905 non-null  float64
+ 6   revenue<span class="p">_</span>2015    16905 non-null  float64
+ 7   active<span class="p">_</span>2015     16905 non-null  int64  
+dtypes: float64(3), int64(5)
+memory usage: 1.2 MB
+</code></pre></div></div>
+
+<h3 id="the-likelihood-a-customer-will-be-active-in-2015">The Likelihood a Customer will be Active in 2015</h3>
+
+<p>A powerful and relatively simple technique for calculating the probability of an event is logistic regression. In this section we are going to see how to  use logistic regression to predict the likelihood a customer is going to be active in 2015. For that we are going to use <code class="language-plaintext highlighter-rouge">statsmodels</code> package, so make sure that you have it installed.</p>
+
+<p>We start, of course, by importing <code class="language-plaintext highlighter-rouge">statsmodels</code>. This we have already done at the very top in the code section <code class="language-plaintext highlighter-rouge">imports</code> and it looks like this:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">statsmodels.api</span> <span class="k">as</span> <span class="n">sm</span>
+</code></pre></div></div>
+
+<p>Then we define the model we want to apply using the R-Style formula string:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">formula</span> <span class="o">=</span> <span class="sh">"</span><span class="s">active_2015 ~ recency + first_purchase + frequency + avg_amount + max_amount</span><span class="sh">"</span>
+<span class="n">prob_model</span> <span class="o">=</span> <span class="n">sm</span><span class="p">.</span><span class="n">Logit</span><span class="p">.</span><span class="nf">from_formula</span><span class="p">(</span><span class="n">formula</span><span class="p">,</span> <span class="n">in_sample</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>This means that <code class="language-plaintext highlighter-rouge">active_2015</code>, which is our target variable, is a function of the following features: <code class="language-plaintext highlighter-rouge">recency</code>, <code class="language-plaintext highlighter-rouge">first_purchase</code>, <code class="language-plaintext highlighter-rouge">frequency</code>, <code class="language-plaintext highlighter-rouge">avg_amount</code> and <code class="language-plaintext highlighter-rouge">max_amount</code>; from the calibration dataframe <code class="language-plaintext highlighter-rouge">in_sample</code>.</p>
+
+<p>Now we calibrate our model using the <code class="language-plaintext highlighter-rouge">fit()</code> method and extract the models coefficients as well as the standard deviations of those coefficients. In <code class="language-plaintext highlighter-rouge">statsmodels</code>,  <code class="language-plaintext highlighter-rouge">fit()</code> returns an object containing the model coefficients, standard errors, p-values and other performance measures.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">prob_model_fit</span> <span class="o">=</span> <span class="n">prob_model</span><span class="p">.</span><span class="nf">fit</span><span class="p">()</span>
+<span class="c1"># Extract the model coefficients
+</span><span class="n">coef</span> <span class="o">=</span> <span class="n">prob_model_fit</span><span class="p">.</span><span class="n">params</span>
+<span class="c1"># Extract their standard deviations
+</span><span class="n">std</span> <span class="o">=</span> <span class="n">prob_model_fit</span><span class="p">.</span><span class="n">bse</span>
+</code></pre></div></div>
+
+<div class="language-tex highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Optimization terminated successfully.
+         Current function value: 0.365836
+         Iterations 8
+</code></pre></div></div>
+
+<p>From the results above, we can tell that the model successfully converges after completing only 8 iterations. <code class="language-plaintext highlighter-rouge">Iterations</code> refers to the number of times the model runs over the data in an attempt to optimize the model. The default is a maximum number of 35 iterations after which the optimization fails or doesn’t converge. The <code class="language-plaintext highlighter-rouge">Current function value</code> is the value of the loss function when we use the parameters found after calibration.
+Just because our model converges is no guarantee that the results are accurate. The standard procedure for assessing whether the results of a regression can be trusted is to look at the so-called p-values. We can print them using the <code class="language-plaintext highlighter-rouge">summary()</code> method.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">print</span><span class="p">(</span><span class="n">prob_model_fit</span><span class="p">.</span><span class="nf">summary</span><span class="p">())</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>                           <span class="n">Logit</span> <span class="n">Regression</span> <span class="n">Results</span>                           
+<span class="o">==============================================================================</span>
+<span class="n">Dep</span><span class="p">.</span> <span class="n">Variable</span><span class="p">:</span>            <span class="n">active_2015</span>   <span class="n">No</span><span class="p">.</span> <span class="n">Observations</span><span class="p">:</span>                <span class="mi">16905</span>
+<span class="n">Model</span><span class="p">:</span>                          <span class="n">Logit</span>   <span class="n">Df</span> <span class="n">Residuals</span><span class="p">:</span>                    <span class="mi">16899</span>
+<span class="n">Method</span><span class="p">:</span>                           <span class="n">MLE</span>   <span class="n">Df</span> <span class="n">Model</span><span class="p">:</span>                            <span class="mi">5</span>
+<span class="n">Date</span><span class="p">:</span>                <span class="n">Wed</span><span class="p">,</span> <span class="mi">26</span> <span class="n">Oct</span> <span class="mi">2021</span>   <span class="n">Pseudo</span> <span class="n">R</span><span class="o">-</span><span class="n">squ</span><span class="p">.:</span>                  <span class="mf">0.3214</span>
+<span class="n">Time</span><span class="p">:</span>                        <span class="mi">15</span><span class="p">:</span><span class="mi">21</span><span class="p">:</span><span class="mi">32</span>   <span class="n">Log</span><span class="o">-</span><span class="n">Likelihood</span><span class="p">:</span>                <span class="o">-</span><span class="mf">6184.5</span>
+<span class="n">converged</span><span class="p">:</span>                       <span class="bp">True</span>   <span class="n">LL</span><span class="o">-</span><span class="n">Null</span><span class="p">:</span>                       <span class="o">-</span><span class="mf">9113.9</span>
+<span class="n">Covariance</span> <span class="n">Type</span><span class="p">:</span>            <span class="n">nonrobust</span>   <span class="n">LLR</span> <span class="n">p</span><span class="o">-</span><span class="n">value</span><span class="p">:</span>                     <span class="mf">0.000</span>
+<span class="o">==================================================================================</span>
+                     <span class="n">coef</span>    <span class="n">std</span> <span class="n">err</span>          <span class="n">z</span>      <span class="n">P</span><span class="o">&gt;|</span><span class="n">z</span><span class="o">|</span>      <span class="p">[</span><span class="mf">0.025</span>      <span class="mf">0.975</span><span class="p">]</span>
+<span class="o">----------------------------------------------------------------------------------</span>
+<span class="n">Intercept</span>         <span class="o">-</span><span class="mf">0.5331</span>      <span class="mf">0.044</span>    <span class="o">-</span><span class="mf">12.087</span>      <span class="mf">0.000</span>      <span class="o">-</span><span class="mf">0.620</span>      <span class="o">-</span><span class="mf">0.447</span>
+<span class="n">recency</span>           <span class="o">-</span><span class="mf">0.0020</span>      <span class="mf">6e-05</span>    <span class="o">-</span><span class="mf">32.748</span>      <span class="mf">0.000</span>      <span class="o">-</span><span class="mf">0.002</span>      <span class="o">-</span><span class="mf">0.002</span>
+<span class="n">first_purchase</span> <span class="o">-</span><span class="mf">1.167e-05</span>   <span class="mf">3.93e-05</span>     <span class="o">-</span><span class="mf">0.297</span>      <span class="mf">0.766</span>   <span class="o">-</span><span class="mf">8.86e-05</span>    <span class="mf">6.53e-05</span>
+<span class="n">frequency</span>          <span class="mf">0.2195</span>      <span class="mf">0.015</span>     <span class="mf">14.840</span>      <span class="mf">0.000</span>       <span class="mf">0.191</span>       <span class="mf">0.249</span>
+<span class="n">avg_amount</span>         <span class="mf">0.0004</span>      <span class="mf">0.000</span>      <span class="mf">1.144</span>      <span class="mf">0.253</span>      <span class="o">-</span><span class="mf">0.000</span>       <span class="mf">0.001</span>
+<span class="n">max_amount</span>        <span class="o">-</span><span class="mf">0.0002</span>      <span class="mf">0.000</span>     <span class="o">-</span><span class="mf">0.574</span>      <span class="mf">0.566</span>      <span class="o">-</span><span class="mf">0.001</span>       <span class="mf">0.000</span>
+<span class="o">==================================================================================</span>
+</code></pre></div></div>
+
+<p>The p-value is listed above in the first table as <code class="language-plaintext highlighter-rouge">LLR p-value</code>. Typically, a p-value of 0.005 is considered statistically significant because there is only a 5% or less chance that these results are not valid. Along with the p-value for the entire regression, we can also find the p-values for each feature. They are listed in the above table under the variable <code class="language-plaintext highlighter-rouge">P&gt;|z|</code>. From these values, we can see that the most important features of our regression model are <code class="language-plaintext highlighter-rouge">recency</code> and <code class="language-plaintext highlighter-rouge">frequency</code>.<br />
+From the standardized regression coefficients <code class="language-plaintext highlighter-rouge">z</code>, which are simply the regression coefficients divided by the standard errors, we can see that the recency parameter is quite large compared to the other parameters and is also negative. That is, the greater the recency or the more days that have elapsed between the last purchase and the current data, the less likely the customer is to make another purchase in the future. Which makes perfect sense.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># standardized regression coefficients z
+</span><span class="nf">print</span><span class="p">(</span><span class="n">coef</span><span class="o">/</span><span class="n">std</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Intercept</span>        <span class="o">-</span><span class="mf">12.09</span>
+<span class="n">recency</span>          <span class="o">-</span><span class="mf">32.75</span>
+<span class="n">first_purchase</span>    <span class="o">-</span><span class="mf">0.30</span>
+<span class="n">frequency</span>         <span class="mf">14.84</span>
+<span class="n">avg_amount</span>         <span class="mf">1.14</span>
+<span class="n">max_amount</span>        <span class="o">-</span><span class="mf">0.57</span>
+<span class="n">dtype</span><span class="p">:</span> <span class="n">float64</span>
+</code></pre></div></div>
+
+<p>So if your last purchase was two or three years ago, it is extremely unlikely that you will make a purchase in the near future. Indeed, the longer the period, the less likely you are to make a purchase. On the other hand, <code class="language-plaintext highlighter-rouge">frequency</code> is significantly large and positive. This means that the more purchases a customer has made in the past, the more likely s/he will make further purchases in the future. In fact, the ratio between coefficients and standard deviations indicates the extent to which a parameter is significant for our prediction model. As for the other features, they hardly play a role in the prediction, since they are all around zero.</p>
+
+<h3 id="predicting-the-dollar-value-of-the-next-purchase">Predicting the Dollar Value of the Next Purchase</h3>
+
+<p>Now that we have identified the customers who are more likely to make a purchase in 2015, let’s put a dollar value on their upcoming transaction. The problem here is that our model can only be calibrated on those customers who actually bought something in 2015. Hence, we have to resample our <code class="language-plaintext highlighter-rouge">in_sample</code> dataset so that only customers who were active in 2015 are taken into account. Actually, only their customers ID would do.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># For the monetary model, we select only those who made a purchase
+# Only  index  suffice, since it represents the customer's ID
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">in_sample</span><span class="p">[</span><span class="n">in_sample</span><span class="p">[</span><span class="sh">"</span><span class="s">active_2015</span><span class="sh">"</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">].</span><span class="n">index</span><span class="p">.</span><span class="nf">tolist</span><span class="p">()</span>
+
+<span class="c1"># Let's print the 5 first customers ID's
+</span><span class="n">z</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
+</code></pre></div></div>
+
+<pre><code class="language-pyton">[1, 17, 29, 30, 31]
+</code></pre>
+
+<p>It looks good. Let’s now print some descriptive statistics using <code class="language-plaintext highlighter-rouge">describe()</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>       <span class="n">customer_id</span>  <span class="n">recency</span>  <span class="n">first_purchase</span>  <span class="n">frequency</span>  <span class="n">avg_amount</span>  \
+<span class="n">count</span>     <span class="mi">3</span><span class="p">,</span><span class="mf">886.00</span> <span class="mi">3</span><span class="p">,</span><span class="mf">886.00</span>        <span class="mi">3</span><span class="p">,</span><span class="mf">886.00</span>   <span class="mi">3</span><span class="p">,</span><span class="mf">886.00</span>    <span class="mi">3</span><span class="p">,</span><span class="mf">886.00</span>   
+<span class="n">mean</span>    <span class="mi">134</span><span class="p">,</span><span class="mf">906.97</span>   <span class="mf">306.35</span>        <span class="mi">1</span><span class="p">,</span><span class="mf">636.16</span>       <span class="mf">4.74</span>       <span class="mf">67.78</span>   
+<span class="n">std</span>      <span class="mi">68</span><span class="p">,</span><span class="mf">404.30</span>   <span class="mf">519.46</span>        <span class="mi">1</span><span class="p">,</span><span class="mf">101.25</span>       <span class="mf">3.79</span>      <span class="mf">160.06</span>   
+<span class="nb">min</span>          <span class="mf">80.00</span>     <span class="mf">1.00</span>            <span class="mf">1.00</span>       <span class="mf">1.00</span>        <span class="mf">5.00</span>   
+<span class="mi">25</span><span class="o">%</span>      <span class="mi">78</span><span class="p">,</span><span class="mf">590.00</span>    <span class="mf">23.00</span>          <span class="mf">649.75</span>       <span class="mf">2.00</span>       <span class="mf">30.00</span>   
+<span class="mi">50</span><span class="o">%</span>     <span class="mi">143</span><span class="p">,</span><span class="mf">550.00</span>    <span class="mf">97.00</span>        <span class="mi">1</span><span class="p">,</span><span class="mf">604.00</span>       <span class="mf">4.00</span>       <span class="mf">40.00</span>   
+<span class="mi">75</span><span class="o">%</span>     <span class="mi">194</span><span class="p">,</span><span class="mf">362.50</span>   <span class="mf">328.00</span>        <span class="mi">2</span><span class="p">,</span><span class="mf">666.00</span>       <span class="mf">7.00</span>       <span class="mf">60.00</span>   
+<span class="nb">max</span>     <span class="mi">236</span><span class="p">,</span><span class="mf">660.00</span> <span class="mi">3</span><span class="p">,</span><span class="mf">544.00</span>        <span class="mi">3</span><span class="p">,</span><span class="mf">647.00</span>      <span class="mf">40.00</span>    <span class="mi">4</span><span class="p">,</span><span class="mf">500.00</span>   
+
+       <span class="n">max_amount</span>  <span class="n">revenue_2015</span>  <span class="n">active_2015</span>  
+<span class="n">count</span>    <span class="mi">3</span><span class="p">,</span><span class="mf">886.00</span>      <span class="mi">3</span><span class="p">,</span><span class="mf">886.00</span>     <span class="mi">3</span><span class="p">,</span><span class="mf">886.00</span>  
+<span class="n">mean</span>        <span class="mf">88.33</span>         <span class="mf">92.30</span>         <span class="mf">1.00</span>  
+<span class="n">std</span>        <span class="mf">222.15</span>        <span class="mf">217.45</span>         <span class="mf">0.00</span>  
+<span class="nb">min</span>          <span class="mf">5.00</span>          <span class="mf">5.00</span>         <span class="mf">1.00</span>  
+<span class="mi">25</span><span class="o">%</span>         <span class="mf">30.00</span>         <span class="mf">30.00</span>         <span class="mf">1.00</span>  
+<span class="mi">50</span><span class="o">%</span>         <span class="mf">50.00</span>         <span class="mf">50.00</span>         <span class="mf">1.00</span>  
+<span class="mi">75</span><span class="o">%</span>         <span class="mf">80.00</span>        <span class="mf">100.00</span>         <span class="mf">1.00</span>  
+<span class="nb">max</span>      <span class="mi">4</span><span class="p">,</span><span class="mf">500.00</span>      <span class="mi">4</span><span class="p">,</span><span class="mf">500.00</span>         <span class="mf">1.00</span>  
+</code></pre></div></div>
+
+<p>As expected, we only have customers that were active in 2015.<br />
+In terms of sales, customers spent between $5 and $4,500 in our store in 2015. Let’s now calibrate our monetary model. We start by estimating 2015 spending based on two attributes: the average amount they typically spend and the maximum amount spent. These are the predictors. Since this is not a classification problem but rather a linear prediction problem with continuous target variables, logistic regression would be inappropriate in this case.<br />
+OLS, short for ordinary least squares, is probably the most commonly used regression model for this type of task. It attempts to find the line of best fit for the given data by minimizing the sum of squared residuals between the prediction line and the actual data.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Calibrate the monetary model (version 1)
+</span><span class="n">amount_model</span> <span class="o">=</span> <span class="n">sm</span><span class="p">.</span><span class="n">OLS</span><span class="p">.</span><span class="nf">from_formula</span><span class="p">(</span>
+    <span class="sh">"</span><span class="s">revenue_2015 ~ avg_amount + max_amount</span><span class="sh">"</span><span class="p">,</span> <span class="n">in_sample</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span><span class="n">z</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">amount_model_fit</span> <span class="o">=</span> <span class="n">amount_model</span><span class="p">.</span><span class="nf">fit</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Let’s print a summary of our OLS regression model.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">print</span><span class="p">(</span><span class="n">amount_model_fit</span><span class="p">.</span><span class="nf">summary</span><span class="p">())</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+                            <span class="n">OLS</span> <span class="n">Regression</span> <span class="n">Results</span>                            
+<span class="o">==============================================================================</span>
+<span class="n">Dep</span><span class="p">.</span> <span class="n">Variable</span><span class="p">:</span>           <span class="n">revenue_2015</span>   <span class="n">R</span><span class="o">-</span><span class="n">squared</span><span class="p">:</span>                       <span class="mf">0.605</span>
+<span class="n">Model</span><span class="p">:</span>                            <span class="n">OLS</span>   <span class="n">Adj</span><span class="p">.</span> <span class="n">R</span><span class="o">-</span><span class="n">squared</span><span class="p">:</span>                  <span class="mf">0.605</span>
+<span class="n">Method</span><span class="p">:</span>                 <span class="n">Least</span> <span class="n">Squares</span>   <span class="n">F</span><span class="o">-</span><span class="n">statistic</span><span class="p">:</span>                     <span class="mf">2979.</span>
+<span class="n">Date</span><span class="p">:</span>                <span class="n">Thu</span><span class="p">,</span> <span class="mi">27</span> <span class="n">Oct</span> <span class="mi">2021</span>   <span class="nc">Prob </span><span class="p">(</span><span class="n">F</span><span class="o">-</span><span class="n">statistic</span><span class="p">):</span>               <span class="mf">0.00</span>
+<span class="n">Time</span><span class="p">:</span>                        <span class="mi">21</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">39</span>   <span class="n">Log</span><span class="o">-</span><span class="n">Likelihood</span><span class="p">:</span>                <span class="o">-</span><span class="mf">24621.</span>
+<span class="n">No</span><span class="p">.</span> <span class="n">Observations</span><span class="p">:</span>                <span class="mi">3886</span>   <span class="n">AIC</span><span class="p">:</span>                         <span class="mf">4.925e+04</span>
+<span class="n">Df</span> <span class="n">Residuals</span><span class="p">:</span>                    <span class="mi">3883</span>   <span class="n">BIC</span><span class="p">:</span>                         <span class="mf">4.927e+04</span>
+<span class="n">Df</span> <span class="n">Model</span><span class="p">:</span>                           <span class="mi">2</span>                                         
+<span class="n">Covariance</span> <span class="n">Type</span><span class="p">:</span>            <span class="n">nonrobust</span>                                         
+<span class="o">==============================================================================</span>
+                 <span class="n">coef</span>    <span class="n">std</span> <span class="n">err</span>          <span class="n">t</span>      <span class="n">P</span><span class="o">&gt;|</span><span class="n">t</span><span class="o">|</span>      <span class="p">[</span><span class="mf">0.025</span>      <span class="mf">0.975</span><span class="p">]</span>
+<span class="o">------------------------------------------------------------------------------</span>
+<span class="n">Intercept</span>     <span class="mf">20.7471</span>      <span class="mf">2.381</span>      <span class="mf">8.713</span>      <span class="mf">0.000</span>      <span class="mf">16.079</span>      <span class="mf">25.415</span>
+<span class="n">avg_amount</span>     <span class="mf">0.6749</span>      <span class="mf">0.033</span>     <span class="mf">20.575</span>      <span class="mf">0.000</span>       <span class="mf">0.611</span>       <span class="mf">0.739</span>
+<span class="n">max_amount</span>     <span class="mf">0.2923</span>      <span class="mf">0.024</span>     <span class="mf">12.367</span>      <span class="mf">0.000</span>       <span class="mf">0.246</span>       <span class="mf">0.339</span>
+<span class="o">==============================================================================</span>
+<span class="n">Omnibus</span><span class="p">:</span>                     <span class="mf">5580.836</span>   <span class="n">Durbin</span><span class="o">-</span><span class="n">Watson</span><span class="p">:</span>                   <span class="mf">2.007</span>
+<span class="nc">Prob</span><span class="p">(</span><span class="n">Omnibus</span><span class="p">):</span>                  <span class="mf">0.000</span>   <span class="n">Jarque</span><span class="o">-</span><span class="nc">Bera </span><span class="p">(</span><span class="n">JB</span><span class="p">):</span>          <span class="mf">8162692.709</span>
+<span class="n">Skew</span><span class="p">:</span>                           <span class="mf">7.843</span>   <span class="nc">Prob</span><span class="p">(</span><span class="n">JB</span><span class="p">):</span>                         <span class="mf">0.00</span>
+<span class="n">Kurtosis</span><span class="p">:</span>                     <span class="mf">226.980</span>   <span class="n">Cond</span><span class="p">.</span> <span class="n">No</span><span class="p">.</span>                         <span class="mf">315.</span>
+<span class="o">==============================================================================</span>
+
+<span class="n">Notes</span><span class="p">:</span>
+<span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="n">Standard</span> <span class="n">Errors</span> <span class="n">assume</span> <span class="n">that</span> <span class="n">the</span> <span class="n">covariance</span> <span class="n">matrix</span> <span class="n">of</span> <span class="n">the</span> <span class="n">errors</span> <span class="ow">is</span> <span class="n">correctly</span> <span class="n">specified</span><span class="p">.</span>
+</code></pre></div></div>
+
+<p>As we can see from the statistical summary, both selected features are statistically significant. Furthermore, the R-squared value is 0.61, which means that 61% of the variation in the output variables is explained by the input variables.  This is not bad at all. In fact, an R-squared value of more than 0.6 indicates a fitting model. And at 60.5%, we are slightly above that figure. That said, let’s plot the results to see how good or bad our predictions are.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">plt</span><span class="p">.</span><span class="nf">scatter</span><span class="p">(</span><span class="n">in_sample</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span><span class="n">z</span><span class="p">].</span><span class="n">revenue_2015</span><span class="p">,</span> <span class="n">amount_model_fit</span><span class="p">.</span><span class="n">fittedvalues</span><span class="p">);</span>
+</code></pre></div></div>
+
+<figure class="image">
+    <img src="/assets/8/fitted_val1.png" alt="Actual vs Predicted Revenues" style="zoom:85%" />
+    <figcaption>Actual vs Predicted Revenues</figcaption>
+  </figure>
+
+<p><code class="language-plaintext highlighter-rouge">Statsmodels</code> provides a number of convenient plot functions to illustrate the regression models in more details. For instance, we use the function <code class="language-plaintext highlighter-rouge">plot_regress_exog</code> to quickly check the model assumptions with respect to a single regressor, in our case <code class="language-plaintext highlighter-rouge">avg_amount</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sm</span><span class="p">.</span><span class="n">graphics</span><span class="p">.</span><span class="nf">plot_regress_exog</span><span class="p">(</span><span class="n">amount_model_fit</span><span class="p">,</span> <span class="sh">'</span><span class="s">avg_amount</span><span class="sh">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<figure class="image">
+    <img src="/assets/8/reg_plots1.png" alt=" " style="zoom:90%" />
+    <figcaption> </figcaption>
+  </figure>
+
+<p>That doesn’t look good, and the reason is that most of the customers spent quite small amounts. Mostly between 50 and 200 dollars. Only a few outliers have spent large amounts, up to four thousand dollars. However, the model tries to draw a line through this cloud of points where no line would really make sense.</p>
+
+<p>When dealing with skewed data, it is recommended to perform a logarithmic transformation. This is indeed a convenient method and by far the most commonly used technique for normalizing highly skewed data.  So instead of predicting 2015 revenue based on the average amount and the maximum amount. We will predict the logarithm of 2015 revenues based on the logarithm of the average and the maximum amount. So let’s see how it works.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Re-calibrate the monetary model, using a log-transform (version 2)
+</span><span class="n">amount_model_log</span> <span class="o">=</span> <span class="n">sm</span><span class="p">.</span><span class="n">OLS</span><span class="p">.</span><span class="nf">from_formula</span><span class="p">(</span>
+    <span class="sh">"</span><span class="s">np.log(revenue_2015) ~ np.log(avg_amount) + np.log(max_amount)</span><span class="sh">"</span><span class="p">,</span> <span class="n">in_sample</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span><span class="n">z</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">amount_model_log_fit</span> <span class="o">=</span> <span class="n">amount_model_log</span><span class="p">.</span><span class="nf">fit</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">amount_model_log_fit</span><span class="p">.</span><span class="nf">summary</span><span class="p">())</span>
+</code></pre></div></div>
+
+<pre><code class="language-Python">                             OLS Regression Results                             
+================================================================================
+Dep. Variable:     np.log(revenue_2015)   R-squared:                       0.693
+Model:                              OLS   Adj. R-squared:                  0.693
+Method:                   Least Squares   F-statistic:                     4377.
+Date:                  Fri, 28 Oct 2022   Prob (F-statistic):               0.00
+Time:                          00:31:16   Log-Likelihood:                -2644.6
+No. Observations:                  3886   AIC:                             5295.
+Df Residuals:                      3883   BIC:                             5314.
+Df Model:                             2                                         
+Covariance Type:              nonrobust                                         
+======================================================================================
+                         coef    std err          t      P&gt;|t|      [0.025      0.975]
+--------------------------------------------------------------------------------------
+Intercept              0.3700      0.040      9.242      0.000       0.292       0.448
+np.log(avg_amount)     0.5488      0.042     13.171      0.000       0.467       0.631
+np.log(max_amount)     0.3881      0.038     10.224      0.000       0.314       0.463
+==============================================================================
+Omnibus:                      501.505   Durbin-Watson:                   1.961
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):             3328.833
+Skew:                           0.421   Prob(JB):                         0.00
+Kurtosis:                       7.455   Cond. No.                         42.2
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+</code></pre>
+
+<p>We can already see that our model slightly improved. In fact, the <code class="language-plaintext highlighter-rouge">R-squared</code> score got better and the intercept <code class="language-plaintext highlighter-rouge">std err</code> is now much lower, meaning that we fit the data much better.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Plot the results of the monetary model
+# Plot the results of the monetary model
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">scatter</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="n">in_sample</span><span class="p">.</span><span class="n">loc</span><span class="p">[</span><span class="n">z</span><span class="p">].</span><span class="n">revenue_2015</span><span class="p">),</span> <span class="n">amount_model_log_fit</span><span class="p">.</span><span class="n">fittedvalues</span><span class="p">,</span>
+           <span class="n">alpha</span><span class="o">=</span><span class="p">.</span><span class="mi">8</span><span class="p">,</span> <span class="n">facecolors</span><span class="o">=</span><span class="sh">'</span><span class="s">none</span><span class="sh">'</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">140</span><span class="p">,</span> <span class="n">edgecolors</span><span class="o">=</span><span class="sh">'</span><span class="s">b</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Log of the Revenues in 2015</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Log Fitted Values</span><span class="sh">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<figure class="image">
+    <img src="/assets/8/log_fitted_val.png" alt="Results after Log Transformation" style="zoom:85%" />
+    <figcaption>Results after Log Transformation</figcaption>
+  </figure>
+
+<p>This looks much better than before. We can now imagine a nice line tracing through this point cloud and more accurately predicting 2015 revenue based on the new model we just created. By performing the logarithmic transformation, we weighted the smaller values more and the very large values less, resulting in a quasi-normalized distribution of our data.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sm</span><span class="p">.</span><span class="n">graphics</span><span class="p">.</span><span class="nf">plot_regress_exog</span><span class="p">(</span><span class="n">amount_model_log_fit</span><span class="p">,</span> <span class="sh">'</span><span class="s">np.log(avg_amount)</span><span class="sh">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<figure class="image">
+    <img src="/assets/8/reg_plots2.png" alt="Regression Plots after Log Transformation" style="zoom:90%" />
+    <figcaption>Regression Plots after Log Transformation</figcaption>
+  </figure>
+
+<h2 id="applying-the-models-to-todays-data">Applying the Models to Today’s Data</h2>
+
+<p>So let’s briefly summarize what we’ve done so far. We have calibrated two models, the first to predict the probability that a customer will be active. For that we used logistic regression. The second; a linear OLS regression model on log transformed data, to predict how much they will spend if they were active in 2015. Now the objective of this section is to use both models to forecast future transactions. So bear with me for a little while.</p>
+
+<p>So we want to look at the behavior of our customers today. For that, we start by extracting exactly the same information that we used to forecast a year ago. That is  frequency, recency, first purchase, average amount and maximum amount for all customers from 2015.  We’ve already done that somewhere above.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Compute RFM as of Today
+</span><span class="n">q</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+        SELECT customer_id, 
+        MIN(days_since) AS </span><span class="sh">'</span><span class="s">recency</span><span class="sh">'</span><span class="s">, 
+        MAX(days_since) AS </span><span class="sh">'</span><span class="s">first_purchase</span><span class="sh">'</span><span class="s">, 
+        COUNT(*) AS </span><span class="sh">'</span><span class="s">frequency</span><span class="sh">'</span><span class="s">, 
+        AVG(purchase_amount) AS </span><span class="sh">'</span><span class="s">avg_amount</span><span class="sh">'</span><span class="s">, 
+        MAX(purchase_amount) AS </span><span class="sh">'</span><span class="s">max_amount</span><span class="sh">'</span><span class="s"> FROM df GROUP BY 1
+</span><span class="sh">"""</span>
+<span class="n">customers_2015</span> <span class="o">=</span> <span class="nf">sqldf</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="nf">globals</span><span class="p">())</span>
+</code></pre></div></div>
+
+<p>Unlike the previous section, now we do not know who will be active next year and how much they will spend. As a reminder, today is January 1st, 2016 and the task is to predict the activity of customers during this year. For this we are going to apply the two models that we have generated above to our actual data; namely <code class="language-plaintext highlighter-rouge">customers_2015</code>. Let’s see how this works.</p>
+
+<p>We start by predicting the probability that a customer is going to be active during 2016. For that we use the first generated regression model <code class="language-plaintext highlighter-rouge">prob_model_fit</code>. The prediction is done using the <code class="language-plaintext highlighter-rouge">predict()</code> method from <code class="language-plaintext highlighter-rouge">statsmodels</code> and the results are saved under <code class="language-plaintext highlighter-rouge">prob_predicted</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Predict the target variables based on today's data
+# 1st: we predict the probability that a customer is going to be in 2016 active
+</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">prob_predicted</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">prob_model_fit</span><span class="p">.</span><span class="nf">predict</span><span class="p">(</span><span class="n">customers_2015</span><span class="p">)</span>
+
+<span class="c1"># Results summary
+</span><span class="n">customers_2015</span><span class="p">.</span><span class="n">prob_predicted</span><span class="p">.</span><span class="nf">describe</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">count</span>   <span class="mi">18</span><span class="p">,</span><span class="mf">417.00</span>
+<span class="n">mean</span>         <span class="mf">0.22</span>
+<span class="n">std</span>          <span class="mf">0.25</span>
+<span class="nb">min</span>          <span class="mf">0.00</span>
+<span class="mi">25</span><span class="o">%</span>          <span class="mf">0.01</span>
+<span class="mi">50</span><span class="o">%</span>          <span class="mf">0.11</span>
+<span class="mi">75</span><span class="o">%</span>          <span class="mf">0.40</span>
+<span class="nb">max</span>          <span class="mf">1.00</span>
+<span class="n">Name</span><span class="p">:</span> <span class="n">prob_predicted</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">float64</span>
+</code></pre></div></div>
+
+<p>From above we can see that customers have on average a 22% probability of being active. For some customers, it is absolutely certain that they will be active; these have a probability of almost one. For others, it is absolutely certain that they will not be active; for these, the probability is close to zero. Most customers lie in between.</p>
+
+<p>Now, we want to use the second regression model to predict the dollar value of customer activity. Recall that we had to use a logarithmic transformation to get around the skewness of the input data. This means we want to take the exponential values of the model output. The results are then saved as a new variable <code class="language-plaintext highlighter-rouge">revenue_predicted</code> in our dataframe <code class="language-plaintext highlighter-rouge">customers_2015</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 2nd we predict the revenue
+# Since our model predicts the log(amount) we need to take the exponential of
+# the predicted revenue generated per customer
+</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">revenue_predicted</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="n">amount_model_log_fit</span><span class="p">.</span><span class="nf">predict</span><span class="p">(</span><span class="n">customers_2015</span><span class="p">))</span>
+
+<span class="c1"># Print results summary
+</span><span class="n">customers_2015</span><span class="p">.</span><span class="n">revenue_predicted</span><span class="p">.</span><span class="nf">describe</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">count</span>   <span class="mi">18</span><span class="p">,</span><span class="mf">417.00</span>
+<span class="n">mean</span>        <span class="mf">65.63</span>
+<span class="n">std</span>        <span class="mf">147.89</span>
+<span class="nb">min</span>          <span class="mf">6.54</span>
+<span class="mi">25</span><span class="o">%</span>         <span class="mf">29.00</span>
+<span class="mi">50</span><span class="o">%</span>         <span class="mf">35.05</span>
+<span class="mi">75</span><span class="o">%</span>         <span class="mf">57.30</span>
+<span class="nb">max</span>      <span class="mi">3</span><span class="p">,</span><span class="mf">832.95</span>
+<span class="n">Name</span><span class="p">:</span> <span class="n">revenue_predicted</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">float64</span>
+</code></pre></div></div>
+
+<p>Looking at the expected sales of active customers, that is, how much they will spend on average in the coming year, this figure is about $65, while the range here is between $6 and $3,800. And, of course, the minimum value is $6, not zero, because the second regression model assumes that all customers will be active. Therefore, it is necessary to determine the probability that a customer is active and include it in the prediction so that we get an overall measure of the customer’s spending in the next year.</p>
+
+<p>Thus, the final stage of the prediction consists of assigning each customer a score indicating how likely they are to take action in conjunction with how much money they will spend.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 3rd: we give a score to each customer which is the conjunction of probability
+# predicted multiplied by the amount.
+</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">score_predicted</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">prob_predicted</span><span class="sh">"</span><span class="p">]</span> <span class="o">*</span> <span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">revenue_predicted</span><span class="sh">"</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="c1"># Print results summary
+</span><span class="n">customers_2015</span><span class="p">.</span><span class="n">score_predicted</span><span class="p">.</span><span class="nf">describe</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">count</span>   <span class="mi">18</span><span class="p">,</span><span class="mf">417.00</span>
+<span class="n">mean</span>        <span class="mf">18.83</span>
+<span class="n">std</span>         <span class="mf">70.21</span>
+<span class="nb">min</span>          <span class="mf">0.00</span>
+<span class="mi">25</span><span class="o">%</span>          <span class="mf">0.46</span>
+<span class="mi">50</span><span class="o">%</span>          <span class="mf">4.56</span>
+<span class="mi">75</span><span class="o">%</span>         <span class="mf">17.96</span>
+<span class="nb">max</span>      <span class="mi">2</span><span class="p">,</span><span class="mf">854.16</span>
+<span class="n">Name</span><span class="p">:</span> <span class="n">score_predicted</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">float64</span>
+</code></pre></div></div>
+
+<p>So the total score is a function of both probability and revenue combined. And the score has a mean value of 18.8. From a managerial perspective, this value is extremely important. It means that each customer in this database will spend an average of $18.8 in the upcoming year. Many will spend nothing, some may spend $333, others $50, but on average it will probably be $18.8.<br />
+From a marketing perspective, it is better to focus our activities on customers with  high scores, as this means they are likely to be the most profitable for the company.<br />
+Assuming we want to reach only the customers with a score higher than $50, this can be done as follows:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># How many customers have an expected revenue of more than $50
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">customers_2015</span><span class="p">[</span><span class="n">customers_2015</span><span class="p">.</span><span class="n">score_predicted</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">].</span><span class="n">index</span><span class="p">.</span><span class="nf">tolist</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="mi">1324</span>
+</code></pre></div></div>
+
+<p>The above code fragment creates a vector of customers that have a score above 50 ($). There are 1,323 customers in total. So out of the list of 18,000 customers, only about 1,300 have a predicted to spend more than $50 throughout 2016. These should be your target customers. You can determine their ID or number by simply adding the following line to your code:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Customers with the highest score:
+</span><span class="n">customers_2015</span><span class="p">[</span><span class="sh">"</span><span class="s">customer_id</span><span class="sh">"</span><span class="p">].</span><span class="n">loc</span><span class="p">[</span><span class="n">z</span><span class="p">]</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="mi">1</span>            <span class="mi">80</span>
+<span class="mi">17</span>          <span class="mi">480</span>
+<span class="mi">29</span>          <span class="mi">830</span>
+<span class="mi">30</span>          <span class="mi">850</span>
+<span class="mi">31</span>          <span class="mi">860</span>
+          <span class="p">...</span>  
+<span class="mi">16892</span>    <span class="mi">234210</span>
+<span class="mi">16895</span>    <span class="mi">234240</span>
+<span class="mi">16896</span>    <span class="mi">234250</span>
+<span class="mi">16897</span>    <span class="mi">234260</span>
+<span class="mi">16903</span>    <span class="mi">234320</span>
+<span class="n">Name</span><span class="p">:</span> <span class="n">customer_id</span><span class="p">,</span> <span class="n">Length</span><span class="p">:</span> <span class="mi">3886</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">int64</span>
+</code></pre></div></div>
+
+<p>As output we obtain a list of the customer numbers of all those who are expected to spent more that 50$ in our shop. Now only you now whom to target and how.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>In this tutorial, we have demonstrated how to predict customers’ next year’s purchases and the amount of dollars they will spend at your store. Our predictions are based on RFM analysis combined with linear regressions. We used two different linear regression approaches: Logistic Regression and Ordinary Least Squares (OLS) to generate a score for each customer. <br />
+With logistic regression, we were able to predict the probability of customer activity in the next financial period. It is a classification algorithm with two outputs; 0 or 1. The results are weighted and the weights are nothing more than the probability that the customer will be active. That is, the larger the weighting, the more likely it is a customer may be active in a given period.<br />
+Then we used OLS to predict the dollar value of the customers’ purchases over the same financial period. Finally, we built the score by linking the two results together. The scores are in Dollar and reflect the customers next years revenues. They can be used as the basis for many strategic decisions, as well as new segmentation guidelines.</p>
+
+<p>I hope that by now you are convinced of the importance and versatility of RFM analysis, especially when combined with statistical learning. In case you still have doubts or are not sure about integrating it into your business analysis, read my next tutorial.</p>
+
+<h2 id="references">References</h2>
+
+<ol>
+  <li>Lilien, Gary L, Arvind Rangaswamy, and Arnaud De Bruyn. 2017. Principles of Marketing Engineering and Analytics. State College, PA: Decisionpro.</li>
+  <li>Arnaud De Bruyn. <a href="https://www.coursera.org/learn/foundations-marketing-analytics">Foundations of marketing analytics</a> (MOOC). Coursera.</li>
+  <li>Dataset from <a href="https://github.com/skacem/Business-Analytics/tree/main/Datasets">Github repo</a>. Accessed 15 December 2021.</li>
+</ol>
+
+  </article>
+
+</div>
+
+<center>
+<b>tagged in</b>: [
+
+  
+  <a href="/tag/Business Analytics"><code class="highligher-rouge"><nobr>Business Analytics</nobr></code></a>
+
+  
+  <a href="/tag/Tutorial"><code class="highligher-rouge"><nobr>Tutorial</nobr></code></a>
+
+  
+  <a href="/tag/RFM Analysis"><code class="highligher-rouge"><nobr>RFM Analysis</nobr></code></a>
+
+  
+  <a href="/tag/Customer Segmentation"><code class="highligher-rouge"><nobr>Customer Segmentation</nobr></code></a>
+
+]
+</center>
+
+<br><br>
+<center>
+<div class="share-page">
+    <a href="https://twitter.com/intent/tweet?text=From RFM Analysis to Predictive Scoring Models&url=/ml/2022/01/06/From-Customer-Segments-to-Scoring-Models/&via=&related=" target="_blank" title="Share on Twitter"> <img alt="Tweet" src="/assets/images/flat_web_icon_set/color/Twitter.png" /></a>
+    <a href="http://www.reddit.com/submit?url=/ml/2022/01/06/From-Customer-Segments-to-Scoring-Models/" target="_blank" title="Share on Reddit"><img alt="Reddit" src="/assets/images/flat_web_icon_set/color/Reddit.png" /></a>
+    <a href="http://www.linkedin.com/shareArticle?mini=true&url=/ml/2022/01/06/From-Customer-Segments-to-Scoring-Models/&title=From RFM Analysis to Predictive Scoring Models&summary=&source=" target="_blank" title="Share on LinkedIn"><img alt="Share on LinkedIn" src="/assets/images/flat_web_icon_set/color/LinkedIn.png" /></a>
+    <a href="https://plus.google.com/share?url=/ml/2022/01/06/From-Customer-Segments-to-Scoring-Models/" target="_blank" title="Share on Google+"><img alt="Share on Google+" src="/assets/images/flat_web_icon_set/color/Google+.png"></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/ml/2022/01/06/From-Customer-Segments-to-Scoring-Models/&quote=From RFM Analysis to Predictive Scoring Models" title="Share on Facebook" target="_blank"><img alt="Share on Facebook" src="/assets/images/flat_web_icon_set/color/Facebook.png" /></a>
+</div>
+</center>
+
+<div>
+  <br>
+  <center>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+    <img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" />
+    </a>
+    <br>
+    Content licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"> CC BY-NC-SA 4.0 International License</a>
+  </center>
+  <br>
+</div>
+
+
+  <div id="disqus_thread"></div>
+<script>
+
+/**
+*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+
+var disqus_config = function () {
+this.page.url = '/ml/2022/01/06/From-Customer-Segments-to-Scoring-Models/'; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = /ml/2022/01/06/From-Customer-Segments-to-Scoring-Models/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://skacem.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+      </div>
+    </div>
+    <footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <center>
+      <ul>
+        
+          <li><a class="site-link" href="mailto:skanderkacem@gmail.com"><i class="fa fa-envelope-square fa-fw fa-2x"></i></a></li>
+        
+
+        
+
+        
+          <li><a class="site-link" href="https://github.com/skacem"><i class="fa fa-github-square fa-fw fa-2x"></i></a></li>
+        
+
+        
+
+        
+
+        <li><a class="site-link" href="/feed.xml"><i class="fa fa-rss-square fa-fw fa-2x"></i></a></li>
+        <br>
+
+      </center>
+    </div>
+    <div class="footer-bottom"></div>
+  </div>
+</footer>
+    </body>
+</html>

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>The Confusion Matrix: Why Accuracy Is a Dangerous Illusion</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="">
+    <link rel="canonical" href="/ml/2021/06/07/Confusion-Matrix/">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon-96x96.png">
+
+    <!--flattr.com -->
+    <meta name="flattr:id" content="nlxxeo">
+
+    <!-- Stuff added for BibTex dropdown menu -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
+
+        <!--KaTeX-->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js" integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC+Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa" crossorigin="anonymous"></script>
+        <script>
+         document.addEventListener("DOMContentLoaded", function() {
+             renderMathInElement(document.body, {
+                 // ...options...
+             });
+         });
+        </script>
+        
+</head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MJT6KHN3F1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-MJT6KHN3F1');
+</script>
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans&display=swap" rel="stylesheet">
+
+    <body>
+    <a name="top"></a>
+    <header class="site-header">
+  <div class="wrap">
+
+    <div style="float:left; margin-top:10px; margin-right:10px;">
+      <a href="/about/">
+    <img src="/sk.png" width="45">
+  </a>
+  </div>
+
+    <a class="site-title site-link" href="/about/">Skander Kacem</a> <br>
+    <p class="site-subtitle" style="font-style: italic; text-align: center;">Thinking out loud</p>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <div class="trigger">
+        <a class="site-link" href="/thoughts/">Thoughts</a>
+        <a class="site-link" href="/readings/">Readings</a>
+        <a class="site-link" href="/notes/">Notes</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="page-content">
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>The Confusion Matrix: Why Accuracy Is a Dangerous Illusion</h1>
+    <div class="post-meta">
+      <div class="post-date">
+        <i class="fa fa-calendar-o"></i>
+        2021-06-07
+      </div>
+      <div class="post-tags">
+        <i class="fa fa-tags"></i>
+        
+          <span><a href="/tag/Machine Learning"><code class="highligher"><nobr>Machine Learning</nobr></code></a></span>
+        
+          <span><a href="/tag/Confusion Matrix"><code class="highligher"><nobr>Confusion Matrix</nobr></code></a></span>
+        
+      </div>
+    </div>
+  </header>
+
+  <article class="post-content">
+  <p>Consider a fraud detection system with 99.9% accuracy. By most standards, this would be considered exceptional performance. Yet if fraudulent transactions constitute only 0.1% of the total, a trivial classifier that labels everything as legitimate achieves identical accuracy while providing zero value. Worse, it creates a false sense of security that could cost millions.</p>
+
+<p>This is the accuracy paradox, and it exposes a fundamental problem with scalar metrics in classification tasks. Accuracy collapses the complexity of model behavior into a single number, obscuring critical information about error distribution and failure modes. The confusion matrix offers a more granular view: rather than asking “how often is the model right?”, it asks “what specific mistakes does the model make, and what are their consequences?”</p>
+
+<p>The distinction matters because in real-world systems, errors are rarely symmetric. Missing a fraudulent transaction differs fundamentally from flagging a legitimate one. Failing to diagnose cancer carries different weight than a false positive. The confusion matrix makes these asymmetries visible and quantifiable.</p>
+
+<h2 id="anatomy-of-classification-errors">Anatomy of Classification Errors</h2>
+
+<p>For binary classification, the confusion matrix is a 2×2 contingency table that cross-tabulates predicted classes against ground truth. The resulting four cells capture every possible outcome:</p>
+
+<div class="imgcap">
+<img src="/assets/1/Confusion_matrix.png" style="zoom:85%;" />
+</div>
+
+<p>Let’s ground this in diagnostic testing, where the implications of different error types are immediately apparent. Consider a COVID-19 PCR test, where the stakes (both individual and epidemiological) make error analysis particularly salient:</p>
+
+<div class="imgcap">
+<img src="/assets/1/Covid_cm.png" style="zoom:85%;" />
+</div>
+
+<p>The four outcomes decompose as follows:</p>
+
+<ul>
+  <li>
+    <p><strong>True Negative (TN)</strong>: Patient is healthy, test correctly returns negative. The null hypothesis (no infection) holds and is correctly retained.</p>
+  </li>
+  <li>
+    <p><strong>True Positive (TP)</strong>: Patient is infected, test correctly returns positive. The alternative hypothesis is correctly accepted.</p>
+  </li>
+  <li>
+    <p><strong>False Positive (FP)</strong>: Patient is healthy, test incorrectly returns positive. This is a Type I error: rejecting a true null hypothesis. In hypothesis testing terms, we’ve claimed an effect that doesn’t exist.</p>
+  </li>
+  <li>
+    <p><strong>False Negative (FN)</strong>: Patient is infected, test incorrectly returns negative. This is a Type II error: failing to reject a false null hypothesis. We’ve missed a real effect.</p>
+  </li>
+</ul>
+
+<p>The matrix is ultimately just a bookkeeping device, but it makes explicit something that aggregate metrics obscure: the structure of failure is as important as its frequency.</p>
+
+<h2 id="the-asymmetry-of-error">The Asymmetry of Error</h2>
+
+<p>The critical insight is that Type I and Type II errors rarely carry equivalent costs. In most real-world applications, the loss functions are fundamentally asymmetric.</p>
+
+<div class="imgcap">
+<img src="https://imgs.xkcd.com/comics/error_types.png" style="zoom:75%;" />
+<div class="thecap"> Source: xkcd </div></div>
+
+<p><strong>Type I errors</strong> (false positives) represent false alarms. Signal detected where only noise exists. In Bayesian terms, we’ve assigned high posterior probability to a hypothesis that’s actually false. The human cognitive bias toward pattern recognition makes us particularly susceptible to this error; our brains evolved to prefer false positives (seeing a predator that isn’t there) over false negatives (missing one that is).</p>
+
+<p><strong>Type II errors</strong> (false negatives) represent missed detections. Signal present but undetected. These are failures of sensitivity, where insufficient statistical power or poor model calibration prevents us from distinguishing effect from noise.</p>
+
+<p>The classic legal framework provides useful intuition:</p>
+<ul>
+  <li>Type I error: Convicting the innocent (the cost of false imprisonment)</li>
+  <li>Type II error: Acquitting the guilty (the cost of unpunished crime)</li>
+</ul>
+
+<div class="imgcap">
+<img src="/assets/1/errortypes.png" style="zoom:45%;" />
+<div class="thecap"> Source: The Essential Guide to Effect Sizes (p. 50) </div></div>
+
+<p>In diagnostic medicine, the calculus becomes even more explicit. A false positive COVID-19 result triggers unnecessary quarantine, costly but reversible. A false negative releases an infectious patient into the population, potentially seeding exponential transmission chains. The expected value of these errors differs by orders of magnitude.</p>
+
+<p>This asymmetry forces us to design systems with deliberate bias. In pandemic response, we accept higher false positive rates to drive down false negatives. In spam filtering, we tolerate missed spam (false negatives) to avoid filtering legitimate email (false positives). In criminal justice, we nominally prioritize avoiding false convictions even at the cost of some false acquittals, though actual practice often fails this principle.</p>
+
+<p>The confusion matrix makes these tradeoffs explicit and measurable. By decomposing aggregate accuracy into its constituent parts, it reveals where our models are biased and whether that bias aligns with our stated priorities.</p>
+
+<h2 id="constructing-a-confusion-matrix-a-practical-example">Constructing a Confusion Matrix: A Practical Example</h2>
+
+<p>Let’s implement this concretely. We’ll simulate a diagnostic test scenario with known error characteristics, then examine how the confusion matrix reveals the underlying performance structure.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="n">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="n">sklearn.metrics</span> <span class="kn">import</span> <span class="n">confusion_matrix</span><span class="p">,</span> <span class="n">classification_report</span>
+<span class="kn">import</span> <span class="n">seaborn</span> <span class="k">as</span> <span class="n">sns</span>
+
+<span class="c1"># Configuration
+</span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+<span class="n">sns</span><span class="p">.</span><span class="nf">set_style</span><span class="p">(</span><span class="sh">'</span><span class="s">white</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>  <span class="c1"># Reproducibility
+</span>
+<span class="c1"># Population parameters
+</span><span class="n">n_patients</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">prevalence</span> <span class="o">=</span> <span class="mf">0.44</span>  <span class="c1"># 44% base rate of infection
+</span><span class="n">n_sick</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">n_patients</span> <span class="o">*</span> <span class="n">prevalence</span><span class="p">)</span>
+<span class="n">n_healthy</span> <span class="o">=</span> <span class="n">n_patients</span> <span class="o">-</span> <span class="n">n_sick</span>
+
+<span class="c1"># Ground truth distribution
+# 0 = healthy (negative), 1 = sick (positive)
+</span><span class="n">y_true</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_healthy</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_sick</span><span class="p">)</span>
+<span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">shuffle</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
+
+<span class="c1"># Simulate test with known sensitivity and specificity
+# Sensitivity (recall): P(test+ | disease+) = 0.95
+# Specificity: P(test- | disease-) = 0.93
+</span><span class="n">sensitivity</span> <span class="o">=</span> <span class="mf">0.95</span>
+<span class="n">specificity</span> <span class="o">=</span> <span class="mf">0.93</span>
+
+<span class="n">y_pred</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">actual</span> <span class="ow">in</span> <span class="n">y_true</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">actual</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># Patient is sick
+</span>        <span class="c1"># Test positive with probability = sensitivity
+</span>        <span class="n">y_pred</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">sensitivity</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># Patient is healthy
+</span>        <span class="c1"># Test negative with probability = specificity
+</span>        <span class="n">y_pred</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="mi">0</span> <span class="k">if</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">specificity</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span>
+
+<span class="c1"># Generate confusion matrix
+</span><span class="n">cm</span> <span class="o">=</span> <span class="nf">confusion_matrix</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Confusion Matrix:</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">cm</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">Matrix structure: [[TN, FP],</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">                    [FN, TP]]</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Confusion Matrix:
+[[26  2]
+ [ 1 21]]
+
+Matrix structure: [[TN, FP],
+                    [FN, TP]]
+</code></pre></div></div>
+
+<p>The matrix encodes considerable information. We have:</p>
+<ul>
+  <li><strong>26 True Negatives</strong>: Healthy patients correctly identified</li>
+  <li><strong>21 True Positives</strong>: Infected patients correctly identified</li>
+  <li><strong>2 False Positives</strong>: Healthy patients incorrectly flagged (Type I errors)</li>
+  <li><strong>1 False Negative</strong>: Infected patient missed (Type II error)</li>
+</ul>
+
+<p>Note the critical false negative. In an epidemic context, this represents a failure of containment. An infectious individual released into the population under the false assurance of a negative test.</p>
+
+<p>Now let’s visualize the matrix with proper context:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">plot_confusion_matrix</span><span class="p">(</span><span class="n">cm</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Visualize confusion matrix with proportional context.
+    
+    Args:
+        cm: Confusion matrix array
+        labels: Class labels
+        ax: Matplotlib axis object (optional)
+    </span><span class="sh">"""</span>
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="p">.</span><span class="nf">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    
+    <span class="c1"># Create DataFrame for cleaner handling
+</span>    <span class="n">df_cm</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nc">DataFrame</span><span class="p">(</span>
+        <span class="n">cm</span><span class="p">,</span> 
+        <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="sh">'</span><span class="s">Actual </span><span class="si">{</span><span class="n">l</span><span class="si">}</span><span class="sh">'</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">],</span>
+        <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="sh">'</span><span class="s">Predicted </span><span class="si">{</span><span class="n">l</span><span class="si">}</span><span class="sh">'</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">]</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Plot with annotations
+</span>    <span class="n">sns</span><span class="p">.</span><span class="nf">heatmap</span><span class="p">(</span><span class="n">df_cm</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="sh">'</span><span class="s">d</span><span class="sh">'</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="sh">'</span><span class="s">Blues</span><span class="sh">'</span><span class="p">,</span> 
+                <span class="n">cbar</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">annot_kws</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">size</span><span class="sh">'</span><span class="p">:</span> <span class="mi">16</span><span class="p">},</span>
+                <span class="n">linewidths</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">linecolor</span><span class="o">=</span><span class="sh">'</span><span class="s">gray</span><span class="sh">'</span><span class="p">)</span>
+    
+    <span class="n">ax</span><span class="p">.</span><span class="nf">set_title</span><span class="p">(</span><span class="sh">'</span><span class="s">Confusion Matrix</span><span class="sh">'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    
+    <span class="c1"># Add summary statistics as text
+</span>    <span class="n">total</span> <span class="o">=</span> <span class="n">cm</span><span class="p">.</span><span class="nf">sum</span><span class="p">()</span>
+    <span class="n">accuracy</span> <span class="o">=</span> <span class="p">(</span><span class="n">cm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">cm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">total</span>
+    <span class="n">ax</span><span class="p">.</span><span class="nf">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">,</span> <span class="sa">f</span><span class="sh">'</span><span class="s">Overall Accuracy: </span><span class="si">{</span><span class="n">accuracy</span><span class="si">:</span><span class="p">.</span><span class="mi">1</span><span class="o">%</span><span class="si">}</span><span class="sh">'</span><span class="p">,</span> 
+            <span class="n">ha</span><span class="o">=</span><span class="sh">'</span><span class="s">center</span><span class="sh">'</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="p">.</span><span class="n">transAxes</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">ax</span>
+
+<span class="nf">plot_confusion_matrix</span><span class="p">(</span><span class="n">cm</span><span class="p">,</span> <span class="p">[</span><span class="sh">'</span><span class="s">Healthy</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Sick</span><span class="sh">'</span><span class="p">])</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">tight_layout</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/1/cm-3499818.png" alt="cm" style="zoom:130%;" /></div>
+
+<h2 id="derived-metrics-information-theoretic-perspectives">Derived Metrics: Information-Theoretic Perspectives</h2>
+
+<p>The confusion matrix serves as the basis for several derived metrics, each emphasizing different aspects of classifier performance. These metrics effectively reweight the matrix elements according to different loss functions and use cases.</p>
+
+<h3 id="precision-predictive-value-of-positive-calls">Precision: Predictive Value of Positive Calls</h3>
+
+<p>Precision measures the reliability of positive predictions—what fraction of positive calls are actually correct:</p>
+
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Precision</mtext><mo>=</mo><mfrac><mrow><mi>T</mi><mi>P</mi></mrow><mrow><mi>T</mi><mi>P</mi><mo>+</mo><mi>F</mi><mi>P</mi></mrow></mfrac><mo>=</mo><mi>P</mi><mo stretchy="false">(</mo><mtext>actual positive</mtext><mo>∣</mo><mtext>predicted positive</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{Precision} = \frac{TP}{TP + FP} = P(\text{actual positive} \mid \text{predicted positive})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord text"><span class="mord">Precision</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.1297em;vertical-align:-0.7693em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3603em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">TP</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">FP</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">TP</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7693em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mopen">(</span><span class="mord text"><span class="mord">actual positive</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">predicted positive</span></span><span class="mclose">)</span></span></span></span></span>
+
+<p>In our example: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mn>21</mn><mrow><mn>21</mn><mo>+</mo><mn>2</mn></mrow></mfrac><mo>=</mo><mn>0.913</mn></mrow><annotation encoding="application/x-tex">\frac{21}{21 + 2} = 0.913</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.2484em;vertical-align:-0.4033em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8451em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">21</span><span class="mbin mtight">+</span><span class="mord mtight">2</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">21</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4033em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.913</span></span></span></span></p>
+
+<p>This is the posterior probability that a patient is truly infected given a positive test result. High precision means low false discovery rate—when the test says positive, it’s probably right. In information theory terms, precision quantifies how much a positive prediction reduces our uncertainty about the true state.</p>
+
+<p>For applications where false positives are costly (e.g., invasive follow-up procedures, wrongful accusations), precision becomes the primary optimization target.</p>
+
+<h3 id="recall-sensitivity-true-positive-rate-completeness-of-detection">Recall (Sensitivity, True Positive Rate): Completeness of Detection</h3>
+
+<p>Recall measures what fraction of actual positives the classifier successfully identifies:</p>
+
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Recall</mtext><mo>=</mo><mfrac><mrow><mi>T</mi><mi>P</mi></mrow><mrow><mi>T</mi><mi>P</mi><mo>+</mo><mi>F</mi><mi>N</mi></mrow></mfrac><mo>=</mo><mi>P</mi><mo stretchy="false">(</mo><mtext>predicted positive</mtext><mo>∣</mo><mtext>actual positive</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{Recall} = \frac{TP}{TP + FN} = P(\text{predicted positive} \mid \text{actual positive})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord text"><span class="mord">Recall</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.1297em;vertical-align:-0.7693em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3603em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">TP</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">FN</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">TP</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7693em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mopen">(</span><span class="mord text"><span class="mord">predicted positive</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">actual positive</span></span><span class="mclose">)</span></span></span></span></span>
+
+<p>In our example: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mn>21</mn><mrow><mn>21</mn><mo>+</mo><mn>1</mn></mrow></mfrac><mo>=</mo><mn>0.955</mn></mrow><annotation encoding="application/x-tex">\frac{21}{21 + 1} = 0.955</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.2484em;vertical-align:-0.4033em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8451em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">21</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">21</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4033em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.955</span></span></span></span></p>
+
+<p>This is the conditional probability that an infected patient tests positive—the test’s sensitivity. High recall means low Type II error rate. In signal detection theory, this relates directly to statistical power: the probability of detecting an effect when one truly exists.</p>
+
+<p>For applications where false negatives are catastrophic (cancer screening, fraud detection, pandemic containment), recall becomes paramount. You’d rather deal with false alarms than miss critical cases.</p>
+
+<h3 id="specificity-the-complement-of-false-positives">Specificity: The Complement of False Positives</h3>
+
+<p>While less commonly emphasized in ML contexts, specificity measures the true negative rate:</p>
+
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Specificity</mtext><mo>=</mo><mfrac><mrow><mi>T</mi><mi>N</mi></mrow><mrow><mi>T</mi><mi>N</mi><mo>+</mo><mi>F</mi><mi>P</mi></mrow></mfrac><mo>=</mo><mi>P</mi><mo stretchy="false">(</mo><mtext>predicted negative</mtext><mo>∣</mo><mtext>actual negative</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{Specificity} = \frac{TN}{TN + FP} = P(\text{predicted negative} \mid \text{actual negative})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord text"><span class="mord">Specificity</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.1297em;vertical-align:-0.7693em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3603em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10903em;">TN</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">FP</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10903em;">TN</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7693em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mopen">(</span><span class="mord text"><span class="mord">predicted negative</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">actual negative</span></span><span class="mclose">)</span></span></span></span></span>
+
+<p>In our example: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mn>26</mn><mrow><mn>26</mn><mo>+</mo><mn>2</mn></mrow></mfrac><mo>=</mo><mn>0.929</mn></mrow><annotation encoding="application/x-tex">\frac{26}{26 + 2} = 0.929</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.2484em;vertical-align:-0.4033em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8451em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">26</span><span class="mbin mtight">+</span><span class="mord mtight">2</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">26</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4033em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.929</span></span></span></span></p>
+
+<p>Specificity and recall form a natural duality. They measure performance on the two classes symmetrically. In medical diagnostics, specificity is often reported alongside sensitivity to fully characterize test performance.</p>
+
+<h3 id="f-score-the-harmonic-mean-as-compromise">F₁ Score: The Harmonic Mean as Compromise</h3>
+
+<p>The F₁ score provides a single metric that balances precision and recall through their harmonic mean:</p>
+
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>F</mi><mn>1</mn></msub><mo>=</mo><mn>2</mn><mo>×</mo><mfrac><mrow><mtext>Precision</mtext><mo>×</mo><mtext>Recall</mtext></mrow><mrow><mtext>Precision</mtext><mo>+</mo><mtext>Recall</mtext></mrow></mfrac><mo>=</mo><mfrac><mrow><mn>2</mn><mi>T</mi><mi>P</mi></mrow><mrow><mn>2</mn><mi>T</mi><mi>P</mi><mo>+</mo><mi>F</mi><mi>P</mi><mo>+</mo><mi>F</mi><mi>N</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">F_1 = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}} = \frac{2TP}{2TP + FP + FN}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.1408em;vertical-align:-0.7693em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">Precision</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord text"><span class="mord">Recall</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">Precision</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord text"><span class="mord">Recall</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7693em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.1297em;vertical-align:-0.7693em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3603em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.13889em;">TP</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">FP</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">FN</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.13889em;">TP</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7693em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span>
+
+<p>In our example: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mo>×</mo><mfrac><mrow><mn>0.913</mn><mo>×</mo><mn>0.955</mn></mrow><mrow><mn>0.913</mn><mo>+</mo><mn>0.955</mn></mrow></mfrac><mo>=</mo><mn>0.934</mn></mrow><annotation encoding="application/x-tex">2 \times \frac{0.913 \times 0.955}{0.913 + 0.955} = 0.934</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.2484em;vertical-align:-0.4033em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8451em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">0.913</span><span class="mbin mtight">+</span><span class="mord mtight">0.955</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">0.913</span><span class="mbin mtight">×</span><span class="mord mtight">0.955</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4033em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.934</span></span></span></span></p>
+
+<p>The harmonic mean penalizes extreme imbalance. A classifier with perfect precision but poor recall (or vice versa) will have a low F₁ score. This makes it useful for model comparison when you need a single number but want to avoid the pitfalls of accuracy.</p>
+
+<p>More generally, the F_β score allows you to weight precision and recall according to your priorities:</p>
+
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>F</mi><mi>β</mi></msub><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><msup><mi>β</mi><mn>2</mn></msup><mo stretchy="false">)</mo><mo>×</mo><mfrac><mrow><mtext>Precision</mtext><mo>×</mo><mtext>Recall</mtext></mrow><mrow><msup><mi>β</mi><mn>2</mn></msup><mo>×</mo><mtext>Precision</mtext><mo>+</mo><mtext>Recall</mtext></mrow></mfrac></mrow><annotation encoding="application/x-tex">F_\beta = (1 + \beta^2) \times \frac{\text{Precision} \times \text{Recall}}{\beta^2 \times \text{Precision} + \text{Recall}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05278em;">β</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.1141em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.2519em;vertical-align:-0.8804em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7401em;"><span style="top:-2.989em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord text"><span class="mord">Precision</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord text"><span class="mord">Recall</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">Precision</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord text"><span class="mord">Recall</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8804em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span>
+
+<p>Setting β &gt; 1 emphasizes recall; β &lt; 1 emphasizes precision.</p>
+
+<p>Let’s compute these metrics programmatically:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">sklearn.metrics</span> <span class="kn">import</span> <span class="n">precision_score</span><span class="p">,</span> <span class="n">recall_score</span><span class="p">,</span> <span class="n">f1_score</span>
+
+<span class="c1"># Calculate metrics
+</span><span class="n">precision</span> <span class="o">=</span> <span class="nf">precision_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+<span class="n">recall</span> <span class="o">=</span> <span class="nf">recall_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+<span class="n">specificity</span> <span class="o">=</span> <span class="n">cm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">cm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">cm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">f1</span> <span class="o">=</span> <span class="nf">f1_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+<span class="n">accuracy</span> <span class="o">=</span> <span class="p">(</span><span class="n">cm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">cm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">cm</span><span class="p">.</span><span class="nf">sum</span><span class="p">()</span>
+
+<span class="c1"># Display with context
+</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Performance Metrics:</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="sh">'</span><span class="s">=</span><span class="sh">'</span><span class="o">*</span><span class="mi">40</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Accuracy:    </span><span class="si">{</span><span class="n">accuracy</span><span class="si">:</span><span class="p">.</span><span class="mi">3</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Precision:   </span><span class="si">{</span><span class="n">precision</span><span class="si">:</span><span class="p">.</span><span class="mi">3</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Recall:      </span><span class="si">{</span><span class="n">recall</span><span class="si">:</span><span class="p">.</span><span class="mi">3</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Specificity: </span><span class="si">{</span><span class="n">specificity</span><span class="si">:</span><span class="p">.</span><span class="mi">3</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">F₁ Score:    </span><span class="si">{</span><span class="n">f1</span><span class="si">:</span><span class="p">.</span><span class="mi">3</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="si">{</span><span class="sh">'</span><span class="s">=</span><span class="sh">'</span><span class="o">*</span><span class="mi">40</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error Analysis:</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">False Positive Rate: </span><span class="si">{</span><span class="mi">1</span><span class="o">-</span><span class="n">specificity</span><span class="si">:</span><span class="p">.</span><span class="mi">3</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">False Negative Rate: </span><span class="si">{</span><span class="mi">1</span><span class="o">-</span><span class="n">recall</span><span class="si">:</span><span class="p">.</span><span class="mi">3</span><span class="n">f</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Performance Metrics:
+========================================
+Accuracy:    0.940
+Precision:   0.913
+Recall:      0.955
+Specificity: 0.929
+F₁ Score:    0.934
+
+========================================
+Error Analysis:
+False Positive Rate: 0.071
+False Negative Rate: 0.045
+</code></pre></div></div>
+
+<p>Notice how these metrics tell a richer story than accuracy alone. While accuracy sits at 94%, the breakdown reveals a test that slightly favors sensitivity over specificity, appropriate for a diagnostic where false negatives are more dangerous than false positives.</p>
+
+<h2 id="metric-selection-as-decision-theory">Metric Selection as Decision Theory</h2>
+
+<p>Choosing which metric to optimize is ultimately a question of loss function design. Each metric encodes implicit assumptions about the relative costs of different error types. The choice depends on the consequences of misclassification in your specific domain.</p>
+
+<p><strong>Optimize for Recall when false negatives dominate the loss function:</strong></p>
+<ul>
+  <li>Medical screening for serious diseases (cancer, genetic disorders)</li>
+  <li>Security applications (intrusion detection, fraud prevention)</li>
+  <li>Epidemic containment (infectious disease testing)</li>
+  <li>Search and rescue operations</li>
+  <li>Any scenario where the cost of a missed detection is catastrophic or irreversible</li>
+</ul>
+
+<p>The implicit assumption: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>Cost</mtext><mo stretchy="false">(</mo><mi>F</mi><mi>N</mi><mo stretchy="false">)</mo><mo>≫</mo><mtext>Cost</mtext><mo stretchy="false">(</mo><mi>F</mi><mi>P</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{Cost}(FN) \gg \text{Cost}(FP)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.10903em;">FN</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≫</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.13889em;">FP</span><span class="mclose">)</span></span></span></span></p>
+
+<p>In these cases, you’re willing to tolerate higher false positive rates to drive down false negatives. The system accepts reduced precision as the price of increased sensitivity.</p>
+
+<p><strong>Optimize for Precision when false positives dominate the loss function:</strong></p>
+<ul>
+  <li>Criminal accusations and legal proceedings</li>
+  <li>Spam filtering (don’t lose important emails)</li>
+  <li>Automated decision systems with limited human review capacity</li>
+  <li>Situations where false alarms erode trust or deplete resources</li>
+  <li>Cases where follow-up investigation is expensive</li>
+</ul>
+
+<p>The implicit assumption: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>Cost</mtext><mo stretchy="false">(</mo><mi>F</mi><mi>P</mi><mo stretchy="false">)</mo><mo>≫</mo><mtext>Cost</mtext><mo stretchy="false">(</mo><mi>F</mi><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{Cost}(FP) \gg \text{Cost}(FN)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.13889em;">FP</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≫</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.10903em;">FN</span><span class="mclose">)</span></span></span></span></p>
+
+<p>Here you’re more conservative with positive predictions, accepting that some true cases will slip through to avoid false accusations or alarm fatigue.</p>
+
+<p><strong>Use F₁ (or F_β) when you need to balance competing concerns:</strong></p>
+<ul>
+  <li>Model comparison across different architectures</li>
+  <li>Benchmarking without domain-specific cost information</li>
+  <li>Multi-objective optimization where both error types matter</li>
+  <li>Situations where the cost ratio isn’t clearly asymmetric</li>
+</ul>
+
+<p><strong>Consider Multi-Threshold Approaches:</strong></p>
+
+<p>In practice, many classifiers output probabilities rather than hard classifications. Rather than committing to a single threshold, you can:</p>
+
+<ol>
+  <li><strong>Generate precision-recall curves</strong> to visualize the tradeoff space</li>
+  <li><strong>Use ROC analysis</strong> to find optimal operating points given cost ratios</li>
+  <li><strong>Implement threshold-dependent decision rules</strong> where different contexts demand different sensitivities</li>
+</ol>
+
+<p>For instance, a COVID-19 test might use a lower threshold (higher sensitivity) during epidemic peaks when containment is critical, and a higher threshold (higher precision) during endemic periods when resources for contact tracing are limited.</p>
+
+<h2 id="conclusion-from-scalar-metrics-to-structural-understanding">Conclusion: From Scalar Metrics to Structural Understanding</h2>
+
+<p>The confusion matrix represents a shift from evaluation-as-summary-statistic to evaluation-as-error-analysis. Rather than reducing model performance to a single number, it preserves the structure of how and where the model fails.</p>
+
+<p>This matters because real-world deployment demands more than knowing your model is “94% accurate.” You need to understand:</p>
+
+<ul>
+  <li><strong>Where the model is biased</strong>: Does it systematically miss certain classes?</li>
+  <li><strong>Whether that bias aligns with your priorities</strong>: Are you missing the cases you most need to catch?</li>
+  <li><strong>How errors will compound in production</strong>: Will false positives overwhelm your review capacity? Will false negatives create downstream failures?</li>
+  <li><strong>How performance degrades under distribution shift</strong>: Which error types increase when deployment data differs from training data?</li>
+</ul>
+
+<p>The confusion matrix answers these questions. It transforms model evaluation from a pass/fail judgment into a diagnostic tool that reveals failure modes and guides improvement.</p>
+
+<p>In the broader context of model development, this granular error analysis enables:</p>
+
+<ol>
+  <li><strong>Targeted data collection</strong>: Identify underrepresented cases driving high error rates</li>
+  <li><strong>Class rebalancing strategies</strong>: Apply cost-sensitive learning or sampling techniques where asymmetric errors demand it</li>
+  <li><strong>Ensemble design</strong>: Combine models that make different types of errors to reduce specific failure modes</li>
+  <li><strong>Threshold calibration</strong>: Find operating points that minimize your actual cost function rather than generic accuracy</li>
+</ol>
+
+<p>Perhaps most importantly, the confusion matrix makes model limitations transparent. When you deploy a 94% accurate model, stakeholders often assume near-perfection. When you show them the confusion matrix and explain that 1 in 20 sick patients will be missed, they can make informed decisions about appropriate use cases and necessary safeguards.</p>
+
+<p>The next time you train a classifier, don’t stop at accuracy. Build the confusion matrix. Calculate the metrics that matter for your application. Understand the structure of your model’s errors. Because in deployed systems, the difference between “94% accurate” and “misses 1 in 20 critical cases” isn’t just semantic. It’s the difference between a useful tool and a dangerous one.</p>
+
+<h2 id="references">References</h2>
+
+<ol>
+  <li><a href="https://classeval.wordpress.com/introduction/basic-evaluation-measures/">Basic Evaluation Measures From the Confusion Matrix</a> by Takaya Saito and Marc Rehmsmeier</li>
+  <li><a href="https://thedataresearch.wordpress.com/2020/04/07/confusion-matrix-explained/">Confusion Matrix Explained</a> by Dynamo</li>
+  <li>Ellis, Paul D. The Essential Guide to Effect Sizes</li>
+  <li>Fawcett, Tom. “An introduction to ROC analysis.” Pattern recognition letters 27.8 (2006): 861-874</li>
+</ol>
+
+  </article>
+
+</div>
+
+<center>
+<b>tagged in</b>: [
+
+  
+  <a href="/tag/Machine Learning"><code class="highligher-rouge"><nobr>Machine Learning</nobr></code></a>
+
+  
+  <a href="/tag/Confusion Matrix"><code class="highligher-rouge"><nobr>Confusion Matrix</nobr></code></a>
+
+]
+</center>
+
+<br><br>
+<center>
+<div class="share-page">
+    <a href="https://twitter.com/intent/tweet?text=The Confusion Matrix: Why Accuracy Is a Dangerous Illusion&url=/ml/2021/06/07/Confusion-Matrix/&via=&related=" target="_blank" title="Share on Twitter"> <img alt="Tweet" src="/assets/images/flat_web_icon_set/color/Twitter.png" /></a>
+    <a href="http://www.reddit.com/submit?url=/ml/2021/06/07/Confusion-Matrix/" target="_blank" title="Share on Reddit"><img alt="Reddit" src="/assets/images/flat_web_icon_set/color/Reddit.png" /></a>
+    <a href="http://www.linkedin.com/shareArticle?mini=true&url=/ml/2021/06/07/Confusion-Matrix/&title=The Confusion Matrix: Why Accuracy Is a Dangerous Illusion&summary=&source=" target="_blank" title="Share on LinkedIn"><img alt="Share on LinkedIn" src="/assets/images/flat_web_icon_set/color/LinkedIn.png" /></a>
+    <a href="https://plus.google.com/share?url=/ml/2021/06/07/Confusion-Matrix/" target="_blank" title="Share on Google+"><img alt="Share on Google+" src="/assets/images/flat_web_icon_set/color/Google+.png"></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/ml/2021/06/07/Confusion-Matrix/&quote=The Confusion Matrix: Why Accuracy Is a Dangerous Illusion" title="Share on Facebook" target="_blank"><img alt="Share on Facebook" src="/assets/images/flat_web_icon_set/color/Facebook.png" /></a>
+</div>
+</center>
+
+<div>
+  <br>
+  <center>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+    <img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" />
+    </a>
+    <br>
+    Content licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"> CC BY-NC-SA 4.0 International License</a>
+  </center>
+  <br>
+</div>
+
+
+  <div id="disqus_thread"></div>
+<script>
+
+/**
+*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+
+var disqus_config = function () {
+this.page.url = '/ml/2021/06/07/Confusion-Matrix/'; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = /ml/2021/06/07/Confusion-Matrix/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://skacem.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+      </div>
+    </div>
+    <footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <center>
+      <ul>
+        
+          <li><a class="site-link" href="mailto:skanderkacem@gmail.com"><i class="fa fa-envelope-square fa-fw fa-2x"></i></a></li>
+        
+
+        
+
+        
+          <li><a class="site-link" href="https://github.com/skacem"><i class="fa fa-github-square fa-fw fa-2x"></i></a></li>
+        
+
+        
+
+        
+
+        <li><a class="site-link" href="/feed.xml"><i class="fa fa-rss-square fa-fw fa-2x"></i></a></li>
+        <br>
+
+      </center>
+    </div>
+    <div class="footer-bottom"></div>
+  </div>
+</footer>
+    </body>
+</html>

@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Plotting with Seaborn - Part 1</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="">
+    <link rel="canonical" href="/ml/2021/08/23/Seaborn/">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon-96x96.png">
+
+    <!--flattr.com -->
+    <meta name="flattr:id" content="nlxxeo">
+
+    <!-- Stuff added for BibTex dropdown menu -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
+
+        <!--KaTeX-->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js" integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC+Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa" crossorigin="anonymous"></script>
+        <script>
+         document.addEventListener("DOMContentLoaded", function() {
+             renderMathInElement(document.body, {
+                 // ...options...
+             });
+         });
+        </script>
+        
+</head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MJT6KHN3F1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-MJT6KHN3F1');
+</script>
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans&display=swap" rel="stylesheet">
+
+    <body>
+    <a name="top"></a>
+    <header class="site-header">
+  <div class="wrap">
+
+    <div style="float:left; margin-top:10px; margin-right:10px;">
+      <a href="/about/">
+    <img src="/sk.png" width="45">
+  </a>
+  </div>
+
+    <a class="site-title site-link" href="/about/">Skander Kacem</a> <br>
+    <p class="site-subtitle" style="font-style: italic; text-align: center;">Thinking out loud</p>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <div class="trigger">
+        <a class="site-link" href="/thoughts/">Thoughts</a>
+        <a class="site-link" href="/readings/">Readings</a>
+        <a class="site-link" href="/notes/">Notes</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="page-content">
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Plotting with Seaborn - Part 1</h1>
+    <div class="post-meta">
+      <div class="post-date">
+        <i class="fa fa-calendar-o"></i>
+        2021-08-23
+      </div>
+      <div class="post-tags">
+        <i class="fa fa-tags"></i>
+        
+          <span><a href="/tag/Visualization"><code class="highligher"><nobr>Visualization</nobr></code></a></span>
+        
+          <span><a href="/tag/Tutorial"><code class="highligher"><nobr>Tutorial</nobr></code></a></span>
+        
+          <span><a href="/tag/Seaborn"><code class="highligher"><nobr>Seaborn</nobr></code></a></span>
+        
+          <span><a href="/tag/Python"><code class="highligher"><nobr>Python</nobr></code></a></span>
+        
+      </div>
+    </div>
+  </header>
+
+  <article class="post-content">
+  <h2 id="seaborn-and-the-python-visualization-landscape">Seaborn and the Python Visualization Landscape</h2>
+
+<p>The python visualization landscape is complex and can be overwhelming. How did it get there?  (see <a href="https://www.youtube.com/watch?v=FytuB8nFHPQ">Jake Vanderplas’ talk</a> at PyCon 2017)</p>
+
+<div class="imgcap">
+<img src="/assets/3/landscape.png" style="zoom:100%;" alt="The python Visualization Landscape" />
+<div class="thecap"> The Python Visualization Landscape by Jake Vanderplas (PyCon 2017)</div></div>
+
+<p>Yet when it comes to data science and machine learning, seaborn is the definitive data visualization library.</p>
+
+<p>Seaborn provides a high-level interface to matplotlib and is compatible with pandas’ data structures. Given a pandas dataframe and a specification of the plot to be created, seaborn automatically converts the data values into visual attributes, internally computes statistical transformations and decorates the plot with informative axis labels and legends.  In other words, seaborn saves you all the work you normally have to do when using matplotlib.  And if you have already used matplotlib, you know how long it sometimes takes to modify even a small part of your plot.</p>
+
+<p>Nevertheless, to take full advantage of both worlds: the high-level API of seaborn and the deep customizability of matplotlib, it is worthwhile to have some knowledge of the concepts and functions of matplotlib.<br />
+But before I cover some important concepts of matplotlib, I would first like to show you the aesthetic difference between the two libraries with a simple example.</p>
+
+<h2 id="seaborn-vs-matplotlib">Seaborn vs. Matplotlib</h2>
+
+<p>This section serves as motivation to learn seaborn. I will use the same random-walk example from Jake Vanderplas’ book [1]. The same code with more comments can be found on the author’s <a href="https://jakevdp.github.io/PythonDataScienceHandbook/04.14-visualization-with-seaborn.html">github</a>.</p>
+
+<p>We start by importing the required python libraries. By convention, seaborn is imported as <code class="language-plaintext highlighter-rouge">sns</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># imports
+</span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="n">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">import</span> <span class="n">seaborn</span> <span class="k">as</span> <span class="n">sns</span>
+
+<span class="c1"># Notebook settings
+# Global figure size
+</span><span class="n">plt</span><span class="p">.</span><span class="n">rcParams</span><span class="p">[</span><span class="sh">'</span><span class="s">figure.figsize</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">4</span>
+</code></pre></div></div>
+
+<p>Then we create some random</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Create random walk data:
+</span><span class="n">rwlk</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nc">RandomState</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">cumsum</span><span class="p">(</span><span class="n">rwlk</span><span class="p">.</span><span class="nf">randn</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+</code></pre></div></div>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Plot the data with matplotlib defaults
+</span><span class="n">plt</span><span class="p">.</span><span class="n">style</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="sh">'</span><span class="s">classic</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">(</span><span class="sh">'</span><span class="s">ABCDEF</span><span class="sh">'</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="sh">'</span><span class="s">upper left</span><span class="sh">'</span><span class="p">);</span>
+</code></pre></div></div>
+<div class="imgcap">
+<img src="/assets/3/rndwlk_mpl.png" style="zoom:90%;" alt="visualization of a simple random-walk with matplotlib pyplot" />
+<div class="thecap">   <br /> </div></div>
+
+<p>It’s remarkable how similar it looks to Matlab. In this aspect, matplotlib has excelled. Not only does it have a Matlab-like interface, but the graphics are also very similar. In my opinion, this is one of the major points that made python so successful today. However, I have to admit that, although the diagrams are complete in terms of information, they are not very visually appealing.</p>
+
+<p>Let’s plot the same data using seaborn with its default settings, to see what I mean.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">set</span><span class="p">()</span>
+<span class="c1"># same plotting code as above
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">(</span><span class="sh">'</span><span class="s">ABCDEF</span><span class="sh">'</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="sh">'</span><span class="s">upper left</span><span class="sh">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/rndwlk_sns.png" style="zoom:90%;" alt="visualization of a simple random-walk with seaborn classic settings" />
+<div class="thecap"> <br /> </div></div>
+
+<p>That looks much better, what do you think?</p>
+
+<p>Before you read on, you might want to take a look at the seaborn <a href="https://seaborn.pydata.org/examples/index.html">gallery</a>. It gives an insight into the different types of plots you can generate with seaborn. The thing to note is the wide range of plots and especially the beautiful and professional look they have. In fact, when plotting with seaborn, you don’t have to do the work twice, by that I mean, the plots you create during your exploratory data analysis could be used to communicate your findings to your stakeholders.<br />
+A key to success in your role as a data scientist is the ability to effectively communicate your findings visually to a variety of audiences. At least, in a way that accommodates engineers and their desire for detail, while being understandable and simple for managers and different levels of leadership.</p>
+
+<h2 id="the-artist-layer">The Artist Layer</h2>
+
+<p>Matplotlib’s architecture consists of three tiers: Backend layer, Artist layer and the scripting layer. The Artist hierarchy is the middle layer of the matplotlib stack and it is the place where much of the heavy lifting happens.</p>
+
+<div class="imgcap">
+<img src="/assets/3/anatomy.png" style="zoom:90%;" alt="Anatomy of a figure" />
+<div class="thecap"> Source: matplotlib.org </div></div>
+
+<p>Every single component from the above pictures is an <code class="language-plaintext highlighter-rouge">Artist</code> instance and can be accessed and modified with matplotlib. Therefore, if you want to learn how to customize your seaborn charts, the artist is a good place to start.</p>
+
+<p>As you will see below, the seaborn diagrams are usually very well designed and do not require any additional fine-tuning of the plots. In fact, you will be most productive if you focus only on seaborn and leave the design of the artist instances to seaborn.</p>
+
+<p>However, before we go any further and to better understand how seaborn works, it is important to understand the concepts behind the following classes; also known as containers: Figure, Axes and Axis.</p>
+
+<h3 id="figure">Figure</h3>
+
+<p>This <code class="language-plaintext highlighter-rouge">Artist</code> class refers to the whole figure that you see. It is possible to have multiple sub-plots (Axes) in the same <code class="language-plaintext highlighter-rouge">Figure</code> instance.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># create a figure with 4 axes 
+</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="p">.</span><span class="nf">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="c1"># Annotate the first subplot
+</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">].</span><span class="nf">annotate</span><span class="p">(</span><span class="sh">'</span><span class="s">This is an Axes</span><span class="sh">'</span><span class="p">,</span> 
+                  <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">r</span><span class="sh">'</span><span class="p">,</span> 
+                  <span class="n">weight</span><span class="o">=</span><span class="sh">'</span><span class="s">bold</span><span class="sh">'</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="sh">'</span><span class="s">center</span><span class="sh">'</span><span class="p">,</span> 
+                  <span class="n">va</span><span class="o">=</span><span class="sh">'</span><span class="s">center</span><span class="sh">'</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="c1"># Set the axis of the second axes to x = y = [0, 3]
+</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">].</span><span class="nf">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="c1"># Title of the figure
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">suptitle</span><span class="p">(</span><span class="sh">'</span><span class="s">One Figure with Four Axes</span><span class="sh">'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">18</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/1f4a.png" style="zoom:100%;" alt="figure object with four axes" />
+<div class="thecap"> <br /></div></div>
+
+<h3 id="axes">Axes</h3>
+<p>In the previous example, we plotted a <code class="language-plaintext highlighter-rouge">Figure</code> object containing four <code class="language-plaintext highlighter-rouge">Axes</code> instances. <code class="language-plaintext highlighter-rouge">Axes</code> object refers to the region of the image with the data space. <code class="language-plaintext highlighter-rouge">Figure</code> can contain multiple Axes, but a given <code class="language-plaintext highlighter-rouge">Axes</code> can only be in one <code class="language-plaintext highlighter-rouge">Figure</code>. <code class="language-plaintext highlighter-rouge">Axes</code> contains two (or three in the case of 3D) <code class="language-plaintext highlighter-rouge">Axis</code> objects [2].</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">print</span><span class="p">(</span><span class="n">fig</span><span class="p">.</span><span class="n">axes</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[&lt;AxesSubplot:&gt;, &lt;AxesSubplot:&gt;, &lt;AxesSubplot:&gt;, &lt;AxesSubplot:&gt;]
+</code></pre></div></div>
+
+<h3 id="axis">Axis</h3>
+<p><code class="language-plaintext highlighter-rouge">Axis</code> instance refers to an actual axis (x-axis/y-axis) in a specific <code class="language-plaintext highlighter-rouge">Axes</code> object.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># print the axis of the first axes from the above figure
+</span><span class="nf">print</span><span class="p">(</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">].</span><span class="nf">axis</span><span class="p">())</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(0.0, 3.0, 0.0, 3.0)
+</code></pre></div></div>
+
+<p>Now that we have reviewed the basics of matplotlib’s Artist layer, lets move on to seaborn plotting functions.</p>
+
+<h2 id="overview-of-seaborn-plotting-functions">Overview of Seaborn Plotting Functions</h2>
+
+<p>In seaborn, each plotting function is either a <strong>Figure-level</strong> function or an <strong>Axes-level</strong> function.  Grasping the difference between both functions is essential.</p>
+
+<h3 id="axes-level-functions">Axes-Level Functions</h3>
+
+<p>An Axes-level function makes self-contained plots and has no effect on the rest of the figure. They behave like most plotting functions in the <code class="language-plaintext highlighter-rouge">matplotlib.pyplot</code> namespace. They plot data onto a single <code class="language-plaintext highlighter-rouge">matplotlib.pyplot.Axes</code> object. Thus, they can coexist perfectly in an object-oriented matplotlib script.</p>
+
+<p>The following example illustrates how seaborn axes-level functions and matplotlib plots can coexist together, in the same figure.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># we start by loading our dataset
+</span><span class="n">penguins</span> <span class="o">=</span> <span class="n">sns</span><span class="p">.</span><span class="nf">load_dataset</span><span class="p">(</span><span class="sh">'</span><span class="s">penguins</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># Then we create a figure with two axes using matplotlib
+</span><span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="p">.</span><span class="nf">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">gridspec_kw</span><span class="o">=</span><span class="nf">dict</span><span class="p">(</span><span class="n">width_ratios</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span>
+<span class="c1"># We use sns to generate the scatter plot on the first subplot
+</span><span class="n">sns</span><span class="p">.</span><span class="nf">scatterplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">penguins</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="sh">"</span><span class="s">flipper_length_mm</span><span class="sh">"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sh">"</span><span class="s">bill_length_mm</span><span class="sh">"</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="sh">"</span><span class="s">species</span><span class="sh">"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># Finally, we use matplotlib to create a bar chart on the second subplot
+</span><span class="n">xy</span> <span class="o">=</span> <span class="nf">dict</span><span class="p">(</span><span class="n">penguins</span><span class="p">[</span><span class="sh">'</span><span class="s">species</span><span class="sh">'</span><span class="p">].</span><span class="nf">value_counts</span><span class="p">())</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nf">bar</span><span class="p">(</span><span class="n">xy</span><span class="p">.</span><span class="nf">keys</span><span class="p">(),</span> <span class="n">xy</span><span class="p">.</span><span class="nf">values</span><span class="p">(),</span> 
+           <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">royalblue</span><span class="sh">'</span><span class="p">,</span><span class="sh">'</span><span class="s">darkseagreen</span><span class="sh">'</span><span class="p">,</span><span class="sh">'</span><span class="s">darkorange</span><span class="sh">'</span><span class="p">]);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/peng1.png" style="zoom:110%;" alt="a matplotlib plot with a seaborn plot in the same figure" />
+<div class="thecap"> <br /> </div></div>
+
+<p>I hope you now have a better understanding of what axes-level functions are and how they co-exist with matplotlib plots.<br />
+In the Exploring seaborn’s Common Types of Plots section, we will introduce the most important axis plots that every data scientist needs in their toolkit.</p>
+
+<h3 id="figure-level-functions">Figure-Level Functions</h3>
+
+<p>Figure-level functions, on the other hand, control the entire figure. They create a new figure every time they are invoked and return a <code class="language-plaintext highlighter-rouge">FacetGrid</code> object that contains one or more subplots.</p>
+
+<p>Each figure-level function corresponds to several axes-level functions that serve similar purposes.</p>
+
+<div class="imgcap">
+<img src="/assets/3/function_overview2.png" style="zoom:75%;" alt="Fugure-level functions versus axes-level functions in seaborn" />
+<div class="thecap"> Figure Adapted from seaborn.pydata.org </div></div>
+
+<p>For example, the <code class="language-plaintext highlighter-rouge">sns.displot()</code> function is the figure-level function for  kernel density estimates (kde).<br />
+To draw a kde plot, on a figure-level, we do as follows:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># We create a displot figure then we set kind="kde"
+</span><span class="n">sns</span><span class="p">.</span><span class="nf">displot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">penguins</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="sh">""</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="sh">"</span><span class="s">species</span><span class="sh">"</span><span class="p">,</span> 
+             <span class="n">multiple</span><span class="o">=</span><span class="sh">"</span><span class="s">stack</span><span class="sh">"</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="sh">"</span><span class="s">kde</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/kde.png" style="zoom:95%;" alt="kernel density estimation plot of penguins dataset generated with seaborn displot" />
+</div>
+
+<p>To get such a visually appealing figure with matplotlib, we need more than just one line of code. However, the most interesting thing about the figure-level functions is not the appearance of the figures, but rather the ability to draw multiple instances of the same plot on different subsets of data. Indeed, they are tailor-made for this use case –More about this in a later section.</p>
+
+<h2 id="exploring-seaborns-common-types-of-plots">Exploring Seaborn’s Common Types of Plots</h2>
+
+<p>In this section I will summarize the most basic plots using different data sets. As you will notice, all the functions listed below, are axes-level functions,  and this for two major reasons:</p>
+
+<ol>
+  <li>This type of plots can be easily integrated as a subplot into matplotlib figures.</li>
+  <li>I prefer to use the figure-level functions for more complex use cases. There will be more about that in a later section.</li>
+</ol>
+
+<p>Remember, however, that the same plot generated using an axes-level function can be obtained using the corresponding figure-level function.</p>
+
+<p>For a more extensive tutorial check <a href="https://seaborn.pydata.org/tutorial.html">seaborn’s official webpage</a>.</p>
+
+<h3 id="bar-plots">Bar Plots</h3>
+
+<p>The bar plot is perhaps the most common chart when it comes to visualizing categorical variables. It consists of plotting a set of bars, with their heights usually reflecting the mean value of the dependent variable.<br />
+To illustrate this, we are going to use the <a href="https://github.com/skacem/TIL/blob/main/data/employee.csv">employee.csv</a> dataset.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># load data
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nf">read_csv</span><span class="p">(</span><span class="sh">'</span><span class="s">data/employee.csv</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Seaborn comes with four default settings that allow you to set the size of the plot and customize your figure depending on the type of your presentation. Those are: <code class="language-plaintext highlighter-rouge">paper</code>, <code class="language-plaintext highlighter-rouge">notebook</code>, <code class="language-plaintext highlighter-rouge">talk</code>, and <code class="language-plaintext highlighter-rouge">poster</code>. The <code class="language-plaintext highlighter-rouge">notebook</code> style is the default. You can switch between those styles by using the command <code class="language-plaintext highlighter-rouge">sns.set_context()</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">set_context</span><span class="p">(</span><span class="sh">"</span><span class="s">notebook</span><span class="sh">"</span><span class="p">,</span> <span class="n">rc</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">figure.figsize</span><span class="sh">"</span><span class="p">:</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">)})</span>
+<span class="n">sns</span><span class="p">.</span><span class="nf">barplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">Department</span><span class="sh">'</span><span class="p">],</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">Age</span><span class="sh">'</span><span class="p">])</span>
+<span class="c1"># change the limits of the y axis
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">45</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">Age pro Department</span><span class="sh">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/bar.png" style="zoom:100%;" alt="Bar plot with seaborn of employees ages per department" />
+</div>
+
+<p>We could also change the color palette of the seaborn plots. Basically, seaborn has six variations of the matplotlib’s color palette:  <code class="language-plaintext highlighter-rouge">deep</code>, <code class="language-plaintext highlighter-rouge">muted</code>, <code class="language-plaintext highlighter-rouge">pastel</code>, <code class="language-plaintext highlighter-rouge">bright</code>, <code class="language-plaintext highlighter-rouge">dark</code>, and <code class="language-plaintext highlighter-rouge">colorblind</code>.</p>
+
+<p>In the next figure we are going to display a set of vertical bars with nested grouping by three variables:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># plotting the chart
+</span><span class="n">sns</span><span class="p">.</span><span class="nf">barplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">Department</span><span class="sh">'</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">Age</span><span class="sh">'</span><span class="p">],</span> 
+            <span class="n">hue</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">BusinessTravel</span><span class="sh">'</span><span class="p">],</span> 
+            <span class="n">palette</span><span class="o">=</span><span class="sh">'</span><span class="s">magma_r</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">Various Departments and their Business Travel Modes</span><span class="sh">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/bar2.png" style="zoom:100%;" alt="bar plot with nested grouping of variables" />
+</div>
+
+<h3 id="count-plots">Count Plots</h3>
+<p>While <code class="language-plaintext highlighter-rouge">sns.barplot()</code> shows point estimates, along with the confidence intervals using bars for each category, <code class="language-plaintext highlighter-rouge">sns.countplot()</code> on the other hand displays the count of each category using bars.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">countplot</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">EducationField</span><span class="sh">'</span><span class="p">])</span>
+<span class="c1"># Change the angles of the text on the x ticks
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">xticks</span><span class="p">(</span><span class="n">rotation</span> <span class="o">=</span> <span class="mi">45</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/count.png" style="zoom:100%;" alt="count plot with total number of employees and their degrees" />
+</div>
+
+<p>As for bar plots, we could also display a set of count bars with hue:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># plotting a count plot with hue
+</span><span class="n">sns</span><span class="p">.</span><span class="nf">countplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">EducationField</span><span class="sh">'</span><span class="p">],</span>
+              <span class="n">hue</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">Attrition</span><span class="sh">'</span><span class="p">],</span>
+              <span class="n">palette</span><span class="o">=</span><span class="sh">'</span><span class="s">colorblind</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">30</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/count2.png" style="zoom:100%;" alt="count plot with hue" />
+</div>
+
+<h3 id="line-plots">Line Plots</h3>
+
+<p>The line plot in seaborn is more advanced than the usual line plots from matplotlib and other visualization libraries. By default, the plot aggregates over multiple <code class="language-plaintext highlighter-rouge">y</code> values at each value of <code class="language-plaintext highlighter-rouge">x</code> and shows an estimate of the central tendency and a confidence interval for the estimate.</p>
+
+<p>We start by plotting a simple line plot:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">lineplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">Department</span><span class="sh">'</span><span class="p">],</span>
+             <span class="n">y</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">Age</span><span class="sh">'</span><span class="p">]);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/line.png" style="zoom:100%;" alt="line plot with estimate of the central tendency and a confidence interval for the estimates" />
+</div>
+
+<p>Let’s now introduce a hue into our plot:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">plt</span><span class="p">.</span><span class="n">style</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="sh">'</span><span class="s">ggplot</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">sns</span><span class="p">.</span><span class="nf">lineplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">Department</span><span class="sh">'</span><span class="p">],</span>
+             <span class="n">y</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">Age</span><span class="sh">'</span><span class="p">],</span>
+             <span class="n">hue</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">EducationField</span><span class="sh">'</span><span class="p">])</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="sh">'</span><span class="s">lower center</span><span class="sh">'</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sh">'</span><span class="s">Education Field</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">Avg Age of Employee in Each Department wrt Education Fields</span><span class="sh">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/line3.png" style="zoom:100%;" alt="seaborn line plot with many lines and central tendency estimates" />
+</div>
+
+<p>The computation of confidence intervals can take a lot of time, particularly when dealing with large datasets. It is possible to disable them, if not needed:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">lineplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">Department</span><span class="sh">'</span><span class="p">],</span>
+             <span class="n">y</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">Age</span><span class="sh">'</span><span class="p">],</span>
+             <span class="n">hue</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">EducationField</span><span class="sh">'</span><span class="p">],</span>
+             <span class="n">ci</span><span class="o">=</span><span class="bp">None</span>
+             <span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="sh">'</span><span class="s">lower center</span><span class="sh">'</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sh">'</span><span class="s">Education Field</span><span class="sh">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/line4.png" style="zoom:100%;" alt="seaborn lineplot with many lines without central tendency estimates" />
+</div>
+
+<h3 id="scatter-plots">Scatter Plots</h3>
+
+<p>Scatter plots are commonly used to visualize bivariate data. They use dots to represent the values in a Cartesian coordinate system, with each coordinate representing one variable. We can add more dimensions to the plot by coding the dots, namely through modifying their colour, shape or/and size.<br />
+In this section we are going to use the penguins dataset from above. It contains body measurement of three penguin species: Adelie, Gentoo and Chinstrap.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">penguins</span> <span class="o">=</span> <span class="n">sns</span><span class="p">.</span><span class="nf">load_dataset</span><span class="p">(</span><span class="sh">'</span><span class="s">penguins</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>We start by visualizing the bill length as a function of the flipper length with the penguin species as hue. To better visualize the plot, we change some of the default settings of the “notebook” plot style.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># use the tick style
+</span><span class="n">sns</span><span class="p">.</span><span class="nf">set_style</span><span class="p">(</span><span class="sh">'</span><span class="s">darkgrid</span><span class="sh">'</span><span class="p">)</span>
+<span class="c1"># change the font and figure size of the notebook
+</span><span class="n">sns</span><span class="p">.</span><span class="nf">set_context</span><span class="p">(</span><span class="sh">"</span><span class="s">notebook</span><span class="sh">"</span><span class="p">,</span> <span class="n">font_scale</span><span class="o">=</span><span class="mf">1.3</span><span class="p">,</span>
+                <span class="n">rc</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">figure.figsize</span><span class="sh">"</span><span class="p">:</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">)})</span>
+<span class="c1"># s: size of the dots
+</span><span class="n">sns</span><span class="p">.</span><span class="nf">scatterplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">penguins</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="sh">"</span><span class="s">flipper_length_mm</span><span class="sh">"</span><span class="p">,</span> 
+                <span class="n">y</span><span class="o">=</span><span class="sh">"</span><span class="s">bill_length_mm</span><span class="sh">"</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="sh">"</span><span class="s">species</span><span class="sh">"</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+<span class="c1"># set x and y labels
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">"</span><span class="s">Flipper Length (mm)</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">"</span><span class="s">Bill Length (mm)</span><span class="sh">"</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/scatter1.png" style="zoom:90%;" alt="seaborn scatter plot of the penguins dataset" />
+</div>
+
+<p>We may add two more dimensions to our diagram. However, this is not recommended as the visualization can become rather confusing.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">markers</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">Male</span><span class="sh">'</span><span class="p">:</span><span class="sh">'</span><span class="s">o</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">Female</span><span class="sh">'</span><span class="p">:</span><span class="sh">'</span><span class="s">X</span><span class="sh">'</span><span class="p">}</span>
+<span class="c1"># change the font and figure size of the notebook
+</span><span class="n">sns</span><span class="p">.</span><span class="nf">set_context</span><span class="p">(</span><span class="sh">"</span><span class="s">notebook</span><span class="sh">"</span><span class="p">,</span> <span class="n">font_scale</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
+                <span class="n">rc</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">figure.figsize</span><span class="sh">"</span><span class="p">:</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">)})</span>
+<span class="n">sns</span><span class="p">.</span><span class="nf">scatterplot</span><span class="p">(</span> <span class="n">x</span><span class="o">=</span><span class="sh">"</span><span class="s">flipper_length_mm</span><span class="sh">"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sh">"</span><span class="s">bill_length_mm</span><span class="sh">"</span><span class="p">,</span> 
+                <span class="n">hue</span><span class="o">=</span><span class="sh">"</span><span class="s">species</span><span class="sh">"</span><span class="p">,</span>  <span class="n">style</span><span class="o">=</span><span class="sh">'</span><span class="s">sex</span><span class="sh">'</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="sh">"</span><span class="s">body_mass_g</span><span class="sh">"</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">penguins</span><span class="p">,</span> <span class="n">markers</span><span class="o">=</span><span class="n">markers</span><span class="p">,</span> 
+                <span class="n">sizes</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">300</span><span class="p">),</span> <span class="n">alpha</span><span class="o">=</span><span class="p">.</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">legend</span><span class="p">(</span><span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="c1"># set x and y labels
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">"</span><span class="s">Flipper Length (mm)</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">"</span><span class="s">Bill Length (mm)</span><span class="sh">"</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/scatter2.png" style="zoom:90%;" alt="seaborn scatterplot with five dimensions" />
+</div>
+
+<p>Sometimes you have no choice but to use a figure-level function to display a simple plot. For the obvious reason that the legend is displayed outside the axes, particularly if the data is scattered over the entire plane, so that there is no optimal place left for it. In my experience, such a case occurs rarely, and in general it means that you are using the wrong visualization for the data in question.<br />
+Let’s however simulate such a case: Imagine that you want to plot the salaries as function of age, department and years at the company for all the employees in their 30s (Who want to da that?!). Your plot using axes-level function would look as follows:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">plt</span><span class="p">.</span><span class="n">rcParams</span><span class="p">[</span><span class="sh">"</span><span class="s">figure.figsize</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">5</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">style</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="sh">'</span><span class="s">fivethirtyeight</span><span class="sh">'</span><span class="p">)</span>
+<span class="c1"># Let's add a size element in the plot
+</span>
+<span class="n">sns</span><span class="p">.</span><span class="nf">scatterplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">Age</span><span class="sh">'</span><span class="p">],</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">MonthlyRate</span><span class="sh">'</span><span class="p">],</span>
+                <span class="n">hue</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">Department</span><span class="sh">'</span><span class="p">],</span>
+                <span class="n">size</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">YearsAtCompany</span><span class="sh">'</span><span class="p">],</span>
+                <span class="n">sizes</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="p">.</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">xlim</span><span class="p">(</span><span class="mf">29.5</span><span class="p">,</span> <span class="mf">45.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">Age vs Monthly Rate</span><span class="sh">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/emp1.png" style="zoom:90%;" alt="scatterplot with dots scattered over the entire axes instance" />
+</div>
+
+<p>As you can see, a lot of information is lost due to the legend, and you definitely can’t remove it. One quick solution would be to use the corresponting figure-level function. That is, in the case of a scatter plot: <code class="language-plaintext highlighter-rouge">sns.relplot(**kwargs, kind="scatter")</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">relplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">Age</span><span class="sh">'</span><span class="p">],</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">MonthlyRate</span><span class="sh">'</span><span class="p">],</span>
+            <span class="n">hue</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">Department</span><span class="sh">'</span><span class="p">],</span>
+            <span class="n">size</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">YearsAtCompany</span><span class="sh">'</span><span class="p">],</span>
+            <span class="n">sizes</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="p">.</span><span class="mi">3</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="sh">"</span><span class="s">scatter</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">height</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">8</span><span class="o">/</span><span class="mi">5</span>
+           <span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">xlim</span><span class="p">(</span><span class="mf">29.5</span><span class="p">,</span> <span class="mf">45.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">Age vs Monthly Rate</span><span class="sh">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/em2.png" style="zoom:90%;" alt="scatterplot using the figure-level function sns.relplot()" />
+</div>
+
+<h3 id="heat-maps">Heat Maps</h3>
+
+<p>A heatmap is a two-dimensional graphical representation of data where the individual values that are contained in a matrix are represented as colors. The heatmap is very useful when it comes to displaying pairwise correlations between every feature of a dataframe. To illustrate this we will load in another pandas data frame example from seaborn for the  survival status of individual passengers on the Titanic.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">titanic</span> <span class="o">=</span> <span class="n">sns</span><span class="p">.</span><span class="nf">load_dataset</span><span class="p">(</span><span class="sh">'</span><span class="s">titanic</span><span class="sh">'</span><span class="p">)</span>
+<span class="c1"># Heat map with seaborn
+</span><span class="n">sns</span><span class="p">.</span><span class="nf">heatmap</span><span class="p">(</span><span class="n">titanic</span><span class="p">.</span><span class="nf">corr</span><span class="p">(),</span>  <span class="n">annot</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="sh">'</span><span class="s">GnBu</span><span class="sh">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/heat1.png" style="zoom:90%;" alt="heat map of the titanic dataframe correlation matrix" />
+</div>
+
+<p>Heat maps are also very useful when it comes to missing data. It is often easier to leave them out and continue working with the remaining data. I think useful information can be found in the reasons for the dropouts, and it is often worth looking at them more closely. In fact, they often provide a better understanding of how the data was collected, and may help reveal certain patterns.<br />
+Let’s take a look at the missing data in the <code class="language-plaintext highlighter-rouge">titanic</code> dataframe:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">heatmap</span><span class="p">(</span><span class="n">titanic</span><span class="p">.</span><span class="nf">isnull</span><span class="p">(),</span><span class="n">yticklabels</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">cbar</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="sh">'</span><span class="s">YlOrRd</span><span class="sh">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/heat2.png" style="zoom:90%;" alt="using heaatmaps to show missing values" />
+</div>
+
+<p>The red dashes represent missing values.<br />
+If you want more insight about the missing data you have, consider installing the <code class="language-plaintext highlighter-rouge">missingno</code> library. It does just that and works flawlessly on top of seaborn and matplotlib.</p>
+<h3 id="histograms">Histograms</h3>
+
+<p>Histograms are another important type of visualization that is widely to analyze the distribution of a variable.<br />
+They provide information about the central tendency, the dispersion and the shape of a variable and can help identify outliers and other anomalies in your data. <br />
+Histograms in seaborn are plotted with <code class="language-plaintext highlighter-rouge">sns.histplot()</code> and it comes with several advanced features.</p>
+
+<p>To plot the flipper length distribution of all penguins along the x axis:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">histplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">penguins</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="sh">"</span><span class="s">flipper_length_mm</span><span class="sh">"</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/hist1.png" style="zoom:90%;" alt="a simple histogram using seaborn" />
+</div>
+
+<p>We can also define the total number of bins and add a kernel density estimate to smooth the histogram and provide more information about the shape of the distribution.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">histplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">penguins</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="sh">"</span><span class="s">flipper_length_mm</span><span class="sh">"</span><span class="p">,</span> 
+             <span class="n">kde</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sh">'</span><span class="s">red</span><span class="sh">'</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">15</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/hist2.png" style="zoom:90%;" alt="a histogram with kde" />
+</div>
+
+<p>You can plot multiple histograms on the same axes using hue mapping:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">histplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">penguins</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="sh">"</span><span class="s">flipper_length_mm</span><span class="sh">"</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="sh">"</span><span class="s">species</span><span class="sh">"</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/hist3.png" style="zoom:90%;" alt="multiple histograms on the same figure" />
+</div>
+
+<p>Overlapping bars can be hard to visualize. An alternative approach would be to plot a step function.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">histplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">penguins</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="sh">"</span><span class="s">flipper_length_mm</span><span class="sh">"</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="sh">"</span><span class="s">species</span><span class="sh">"</span><span class="p">,</span> <span class="n">element</span><span class="o">=</span><span class="sh">"</span><span class="s">step);
+</span></code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/hist4.png" style="zoom:90%;" alt="multiple histograms displayed as steps" />
+</div>
+
+<p>As you can see, seaborn automatically set an alpha value to the plot, to make it more readable.<br />
+If you have variables that differ substantially in size (as in the <code class="language-plaintext highlighter-rouge">tips</code> dataset),  use indepdendent density normalization:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">histplot</span><span class="p">(</span>
+    <span class="n">tips</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="sh">"</span><span class="s">total_bill</span><span class="sh">"</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="sh">"</span><span class="s">day</span><span class="sh">"</span><span class="p">,</span> <span class="n">multiple</span><span class="o">=</span><span class="sh">"</span><span class="s">stack</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">stat</span><span class="o">=</span><span class="sh">"</span><span class="s">density</span><span class="sh">"</span><span class="p">,</span> <span class="n">common_norm</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+    <span class="n">palette</span><span class="o">=</span><span class="sh">'</span><span class="s">pastel</span><span class="sh">'</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/hist5.png" style="zoom:90%;" alt="multiple histograms stacked on the same figure" />
+</div>
+<p>I will stop here, however there is much more you can do with the histogram function from seaborn. You can find a more detailed tutorial on histograms under the following <a href="https://seaborn.pydata.org/generated/seaborn.histplot.html">link</a>.</p>
+
+<h3 id="box-plots">Box Plots</h3>
+<p>Box plots allow to visually assess a lot of information and in a very compact way. They  usually show the central tendency, the amount of variation in the data as well as the presence of gaps, outliers or unusual data points. That makes them perfect when it comes to comparing the the underlying probability distribution between several variables.
+First let’s load the <code class="language-plaintext highlighter-rouge">tips</code> dataset. Seaborn includes 18 datasets, that you can easily load as pandas dataframe  using the <code class="language-plaintext highlighter-rouge">sns.load_dataset()</code> function. You can list all the available datasets using  <code class="language-plaintext highlighter-rouge">sns.get_dataset_names()</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">tips</span> <span class="o">=</span> <span class="n">sns</span><span class="p">.</span><span class="nf">load_dataset</span><span class="p">(</span><span class="sh">'</span><span class="s">tips</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>This dataset captures the amount of tips in a restaurant as a function of a number of factors, including total bill, day of the week, whether the person was a smoker, and so on.</p>
+
+<p>The next code shows how to generate a box plot with hue.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">boxplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="sh">"</span><span class="s">day</span><span class="sh">"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sh">"</span><span class="s">total_bill</span><span class="sh">"</span><span class="p">,</span> 
+            <span class="n">data</span><span class="o">=</span><span class="n">tips</span><span class="p">,</span> 
+            <span class="n">hue</span><span class="o">=</span><span class="sh">"</span><span class="s">smoker</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">palette</span><span class="o">=</span><span class="sh">'</span><span class="s">coolwarm</span><span class="sh">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/box.png" style="zoom:90%;" alt="Boxplots with hu" />
+</div>
+
+<p>Box plots were originally introduced and popularised by the American mathematician John Wilder Turkey more than 40 years ago. They were designed to be calculated and drawn by hand. As statistics are now being performed by computers, it has become much easier to create more complex variations of this plot such as:</p>
+
+<ul>
+  <li><a href="https://cran.r-project.org/web/packages/beanplot/vignettes/beanplot.pdf">Bean plots</a></li>
+  <li><a href="https://blog.bioturing.com/2018/05/16/5-reasons-you-should-use-a-violin-graph/">Violin plots</a></li>
+  <li><a href="http://vita.had.co.nz/papers/letter-value-plot.html">Letter-value plots</a></li>
+</ul>
+
+<p>These variations attempt to convey more information about the distribution, while maintaining the compact size of the box plots.</p>
+
+<h2 id="exploring-seaborns-more-advanced-type-of-plots">Exploring Seaborn’s More Advanced Type of Plots</h2>
+
+<h3 id="letter-value-plots-boxplots-for-large-data">Letter-Value Plots: Boxplots for Large Data</h3>
+
+<blockquote>
+  <p>Conventional boxplots are useful displays for conveying rough information about the central 50% and the extent of data. For small-sized data sets (n &lt; 200), detailed estimates of tail behavior beyond the quartiles may not be trustworthy, so the information provided by boxplots is appropriately somewhat vague beyond the quartiles, and the expected number of “outliers” of size n is often less than 10. Larger data sets (n ~ 10,000-100,000) afford more precise estimates of quantiles beyond the quartiles, but conventional boxplots do not show this information about the tails, and, in addition, show large numbers of extreme, but not unexpected, observations. – Heike Hofmann [6]</p>
+</blockquote>
+
+<p>The letter-value plots, also known as “boxenplots” provide a better representation of the distribution of the data than the usual box plots, particularly when the data consists of more than 10,000 observations with many outliers.</p>
+
+<p>To clearly illustrate the benefits of this type of plot we will be using the diamond dataset from seaborn since it contains over 50,000 observations.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># load the diamonds dataframe
+</span><span class="n">diamonds</span> <span class="o">=</span> <span class="n">sns</span><span class="p">.</span><span class="nf">load_dataset</span><span class="p">(</span><span class="sh">'</span><span class="s">diamonds</span><span class="sh">'</span><span class="p">)</span>
+<span class="c1"># use a matplotlib style
+</span><span class="n">plt</span><span class="p">.</span><span class="n">style</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="sh">'</span><span class="s">fivethirtyeight</span><span class="sh">'</span><span class="p">)</span>
+<span class="c1"># clarity ranking
+</span><span class="n">clarity_ranking</span> <span class="o">=</span> <span class="p">[</span><span class="sh">"</span><span class="s">I1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">SI2</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">SI1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">VS2</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">VS1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">VVS2</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">VVS1</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">IF</span><span class="sh">"</span><span class="p">]</span>
+<span class="n">sns</span><span class="p">.</span><span class="nf">boxenplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="sh">"</span><span class="s">clarity</span><span class="sh">"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sh">"</span><span class="s">carat</span><span class="sh">"</span><span class="p">,</span>
+              <span class="n">color</span><span class="o">=</span><span class="sh">"</span><span class="s">b</span><span class="sh">"</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">clarity_ranking</span><span class="p">,</span>
+              <span class="n">scale</span><span class="o">=</span><span class="sh">"</span><span class="s">linear</span><span class="sh">"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">diamonds</span><span class="p">,</span>
+             <span class="n">palette</span><span class="o">=</span><span class="sh">'</span><span class="s">RdBu</span><span class="sh">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/boxen.png" style="zoom:85%;" alt="letter-value plots of a large dataset" />
+</div>
+
+<p>As reference here is what we get with a boxplot.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">boxplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="sh">"</span><span class="s">clarity</span><span class="sh">"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sh">"</span><span class="s">carat</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="sh">"</span><span class="s">b</span><span class="sh">"</span><span class="p">,</span> 
+            <span class="n">order</span><span class="o">=</span><span class="n">clarity_ranking</span><span class="p">,</span> 
+            <span class="n">data</span><span class="o">=</span><span class="n">diamonds</span><span class="p">,</span>
+            <span class="n">palette</span><span class="o">=</span><span class="sh">'</span><span class="s">RdBu</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/boxen2.png" style="zoom:85%;" alt="boxplot with seaborn for a large dataset" />
+</div>
+
+<h3 id="violin-plots">Violin Plots</h3>
+
+<p>A Violin Plot is used to visualise the distribution of the data and its probability density. It has the shape of a violin.
+To compare different variables, their violin plots are palced side by side and they can be used to visualize both quantitative as well as qualitative variables. They are intuitive and easy to read. The shape of the violin displays the distribution shape of the data. It actually contains all data points. This make it excellent to visualize obsevations with a small size. The dot and the bars inside the violin represent the same summary statistics as box plots.</p>
+
+<div class="imgcap">
+<img src="/assets/3/xkcd.png" style="zoom:90%;" alt="Suggestiveness of visualization types" />
+<div class="thecap"> Source: xkcd.org  </div></div>
+
+<p>Another cool feature about violins is that you can illustrate a second-order categorical variable in a single violin, instead of drawing separate violins for each group within a category. This is possible due to the symmetrical shape of the violin diagram. As one half of the violin is actually redundant.<br />
+Let me show you what I mean:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="sh">"</span><span class="s">whitegrid</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="p">.</span><span class="nf">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="c1"># Show each distribution with both violins and points
+</span><span class="n">sns</span><span class="p">.</span><span class="nf">violinplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="sh">"</span><span class="s">day</span><span class="sh">"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sh">"</span><span class="s">total_bill</span><span class="sh">"</span><span class="p">,</span> 
+               <span class="n">hue</span><span class="o">=</span><span class="sh">"</span><span class="s">smoker</span><span class="sh">"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">tips</span><span class="p">,</span> 
+               <span class="n">inner</span><span class="o">=</span><span class="sh">"</span><span class="s">box</span><span class="sh">"</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> 
+               <span class="n">palette</span><span class="o">=</span><span class="sh">"</span><span class="s">Set3_r</span><span class="sh">"</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">l</span>
+               <span class="n">inewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">sns</span><span class="p">.</span><span class="nf">despine</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="p">.</span><span class="nf">set_xlabel</span><span class="p">(</span><span class="sh">"</span><span class="s">Day</span><span class="sh">"</span><span class="p">,</span><span class="n">size</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">.</span><span class="nf">set_ylabel</span><span class="p">(</span><span class="sh">"</span><span class="s">Total Bill ($)</span><span class="sh">"</span><span class="p">,</span><span class="n">size</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">.</span><span class="nf">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sh">'</span><span class="s">Smoker?</span><span class="sh">'</span> <span class="p">)</span>
+<span class="n">f</span><span class="p">.</span><span class="nf">suptitle</span><span class="p">(</span><span class="sh">'</span><span class="s">Total Bills by Day of the Week</span><span class="sh">'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/vio1.png" style="zoom:85%;" alt="Violin plot of total bills from the tips dataset" />
+</div>
+
+<p>So let’s try to read the information contained in the image above:</p>
+
+<ol>
+  <li>The pink region reflects the distribution shape of the total bills paid by smokers.</li>
+  <li>The red area shows the total bills paid by non-smokers.</li>
+  <li>And the bars within the violins are nothing more but a boxplot over all the total bills.</li>
+</ol>
+
+<p>You can easily display the five-number summary of the smokers and non-smokers bills instead of the total bills:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Show each distribution with both violins and points
+</span><span class="n">sns</span><span class="p">.</span><span class="nf">violinplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="sh">"</span><span class="s">day</span><span class="sh">"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sh">"</span><span class="s">total_bill</span><span class="sh">"</span><span class="p">,</span> 
+               <span class="n">hue</span><span class="o">=</span><span class="sh">"</span><span class="s">smoker</span><span class="sh">"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">tips</span><span class="p">,</span> 
+               <span class="n">inner</span><span class="o">=</span><span class="sh">"</span><span class="s">quart</span><span class="sh">"</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> 
+               <span class="n">palette</span><span class="o">=</span><span class="sh">"</span><span class="s">Set3_r</span><span class="sh">"</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
+               <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">sns</span><span class="p">.</span><span class="nf">despine</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="p">.</span><span class="nf">set_xlabel</span><span class="p">(</span><span class="sh">"</span><span class="s">Day</span><span class="sh">"</span><span class="p">,</span><span class="n">size</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">.</span><span class="nf">set_ylabel</span><span class="p">(</span><span class="sh">"</span><span class="s">Total Bill ($)</span><span class="sh">"</span><span class="p">,</span><span class="n">size</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">.</span><span class="nf">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sh">'</span><span class="s">Smoker?</span><span class="sh">'</span> <span class="p">)</span>
+<span class="n">f</span><span class="p">.</span><span class="nf">suptitle</span><span class="p">(</span><span class="sh">'</span><span class="s">Total Bills by Day of the Week</span><span class="sh">'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/vio2.png" style="zoom:85%;" alt="Violin plot of total bills from the tips dataset" />
+</div>
+
+<p>Cool right?<br />
+I guess by now you too agree with xkcd comic.</p>
+
+<h3 id="regression-plots">Regression Plots</h3>
+
+<p>In simple terms, linear regression attempts to capture the relationship between two or more variables by drawing a straight line that encompasses most of the information from the observed data.<br />
+Regplot always draws a line of best fit, regardless of how large the statistical relationship is or whether it exists at all.  The data is usually depicted as a scatter plot, with the variable on the y-axis being the dependent variable and the variables (one or more) on the x-axis being the independent variables.</p>
+
+<p>For the first example we are using the <code class="language-plaintext highlighter-rouge">penguins</code> dataset.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mpg</span> <span class="o">=</span> <span class="n">sns</span><span class="p">.</span><span class="nf">load_dataset</span><span class="p">(</span><span class="sh">'</span><span class="s">penguins</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">sns</span><span class="p">.</span><span class="nf">set_theme</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="sh">"</span><span class="s">whitegrid</span><span class="sh">"</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="sh">"</span><span class="s">colorblind</span><span class="sh">"</span><span class="p">)</span>
+<span class="c1"># plot bill length vs depth
+</span><span class="n">sns</span><span class="p">.</span><span class="nf">regplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">penguins</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="sh">'</span><span class="s">bill_length_mm</span><span class="sh">'</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sh">'</span><span class="s">bill_depth_mm</span><span class="sh">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/reg1.png" style="zoom:85%;" alt="penguins dataset. Linear regression bill length vs depth" />
+</div>
+
+<p>As we can see from above, there is some negative linear relationship between both depicted variables, bill length and bill depth. <br />
+The disadvantage of <code class="language-plaintext highlighter-rouge">regplot()</code> is that it has no hue parameter and only draws a single regression line per plot. So if we want to examine the observed behavior for each penguin species, we will be using the <code class="language-plaintext highlighter-rouge">lmplot()</code> function. It is a figure-level function that combines <code class="language-plaintext highlighter-rouge">regplot()</code> and <code class="language-plaintext highlighter-rouge">FacetGrid</code> (more on this in the second part of the tutorial)`. So let’s do it.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">lmplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">penguins</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="sh">'</span><span class="s">bill_length_mm</span><span class="sh">'</span><span class="p">,</span> 
+           <span class="n">y</span><span class="o">=</span><span class="sh">'</span><span class="s">bill_depth_mm</span><span class="sh">'</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="sh">'</span><span class="s">species</span><span class="sh">'</span><span class="p">,</span>
+           <span class="n">height</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">8</span><span class="o">/</span><span class="mi">6</span><span class="p">,</span> 
+           <span class="n">palette</span><span class="o">=</span><span class="sh">'</span><span class="s">cool</span><span class="sh">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/reg0.png" style="zoom:85%;" alt="penguins dataset. Linear regression bill length vs depth with hue" />
+</div>
+
+<p>Interesting! We now see that, contrary to the previous assumptions, there is a strong positive linear relationship between both variables.
+Well, this is a known phenomenon in probablity and statistics, called the <a href="https://en.wikipedia.org/wiki/Simpson%27s_paradox">simpson’s paradox</a>.</p>
+
+<p>Another cool feature about <code class="language-plaintext highlighter-rouge">regplot()</code> is we can change the order of the regression to model nonlinear relationships.   To illustrate this we will load in the <code class="language-plaintext highlighter-rouge">mpg</code> dataset. It is about the fuel consumption in miles per gallon (mpg) for different kind of cars.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">regplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">mpg</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="sh">'</span><span class="s">horsepower</span><span class="sh">'</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sh">'</span><span class="s">mpg</span><span class="sh">'</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/reg2.png" style="zoom:85%;" alt="mpg dataset. second-order linear regression" />
+</div>
+
+<p>Keep in mind that increasing the order of the regression model is not necessarily a good idea, as we risk over-fitting the data.</p>
+
+<p>We can also plot logistic regressions using <code class="language-plaintext highlighter-rouge">regplot</code>. This time we are going to generate our own data.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Some random data with y = 0 or 1
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">).</span><span class="nf">astype</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nb">float</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="nf">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">x</span><span class="p">[</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="p">.</span><span class="mi">8</span>
+<span class="n">x</span><span class="p">[</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span><span class="p">.</span><span class="mi">5</span>
+<span class="c1"># To plot a logistic regression we set logistice=True
+</span><span class="n">sns</span><span class="p">.</span><span class="nf">regplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">logistic</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/mpg.png" style="zoom:85%;" alt="mpg dataset. second-order linear regression" />
+</div>
+
+<p>So, <code class="language-plaintext highlighter-rouge">regplot()</code> is well suited if we want to plot a simple linear regression model as part of a matplotlib figure. Otherwise, it is preferable to use the <code class="language-plaintext highlighter-rouge">lmplot()</code> function.</p>
+
+<h2 id="complementary-plotting-functions">Complementary Plotting Functions</h2>
+
+<p>The plotting functions discussed below are usually used in combination with other plots. When overlaid on the appropriate diagrams, they provide additional insight into the variables being visualised, without being cumbersome.</p>
+
+<h3 id="strip-plots">Strip Plots</h3>
+
+<p>Strip plots are a good complement to a box or violin plot in cases where you want to show all observations along with some representation of the underlying distribution.
+Strip plot always treats one of the variables as categorical and draws data at ordinal positions (0, 1, … n) on the relevant axis, even when the data has a numeric or date type.</p>
+
+<p>Let’s go back to the <code class="language-plaintext highlighter-rouge">titanic</code> dataset again.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">plt</span><span class="p">.</span><span class="n">rcParams</span><span class="p">[</span><span class="sh">"</span><span class="s">figure.figsize</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">5</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">style</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="sh">'</span><span class="s">fivethirtyeight</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="n">params</span> <span class="o">=</span> <span class="nf">dict</span><span class="p">(</span><span class="n">edgecolor</span><span class="o">=</span><span class="sh">'</span><span class="s">gray</span><span class="sh">'</span><span class="p">,</span>
+              <span class="n">palette</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">#91bfdb</span><span class="sh">'</span><span class="p">,</span><span class="sh">'</span><span class="s">#fc8d59</span><span class="sh">'</span><span class="p">],</span>
+              <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+              <span class="n">jitter</span><span class="o">=</span><span class="mf">0.25</span>
+             <span class="p">)</span>
+
+<span class="n">sns</span><span class="p">.</span><span class="nf">stripplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">titanic</span><span class="p">,</span> 
+              <span class="n">x</span><span class="o">=</span><span class="sh">'</span><span class="s">pclass</span><span class="sh">'</span><span class="p">,</span>
+              <span class="n">hue</span><span class="o">=</span><span class="sh">'</span><span class="s">sex</span><span class="sh">'</span><span class="p">,</span>
+              <span class="n">y</span><span class="o">=</span><span class="sh">'</span><span class="s">age</span><span class="sh">'</span><span class="p">,</span>
+              <span class="o">**</span><span class="n">params</span><span class="p">);</span>
+</code></pre></div></div>
+<div class="imgcap">
+<img src="/assets/3/strip1.png" style="zoom:85%;" alt="strip plot titanic" />
+</div>
+
+<p>Now in combination with a violin plot.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">plt</span><span class="p">.</span><span class="n">rcParams</span><span class="p">[</span><span class="sh">"</span><span class="s">figure.figsize</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">6</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="p">.</span><span class="nf">stripplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">titanic</span><span class="p">[</span><span class="sh">'</span><span class="s">pclass</span><span class="sh">'</span><span class="p">],</span>
+                  <span class="n">y</span><span class="o">=</span><span class="n">titanic</span><span class="p">[</span><span class="sh">'</span><span class="s">age</span><span class="sh">'</span><span class="p">],</span>
+                  <span class="n">edgecolor</span><span class="o">=</span><span class="sh">'</span><span class="s">gray</span><span class="sh">'</span><span class="p">,</span>
+                  <span class="n">palette</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">#fc8d59</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">wheat</span><span class="sh">'</span><span class="p">],</span>
+                  <span class="n">dodge</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                  <span class="n">hue</span><span class="o">=</span><span class="n">titanic</span><span class="p">[</span><span class="sh">'</span><span class="s">survived</span><span class="sh">'</span><span class="p">],</span>
+                  <span class="n">jitter</span><span class="o">=</span><span class="p">.</span><span class="mi">15</span><span class="p">)</span>
+
+<span class="n">sns</span><span class="p">.</span><span class="nf">violinplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">titanic</span><span class="p">[</span><span class="sh">'</span><span class="s">pclass</span><span class="sh">'</span><span class="p">],</span>
+              <span class="n">y</span><span class="o">=</span><span class="n">titanic</span><span class="p">[</span><span class="sh">'</span><span class="s">age</span><span class="sh">'</span><span class="p">],</span>
+              <span class="n">palette</span><span class="o">=</span><span class="sh">'</span><span class="s">Accent</span><span class="sh">'</span><span class="p">,</span>
+              <span class="n">dodge</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+              <span class="n">hue</span><span class="o">=</span><span class="n">titanic</span><span class="p">[</span><span class="sh">'</span><span class="s">survived</span><span class="sh">'</span><span class="p">]);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/strip2.png" style="zoom:85%;" alt="strip plot overlay violin plot" />
+</div>
+
+<h3 id="swarm-plots">Swarm Plots</h3>
+
+<p>Swarm plots are similar to strip plots, only the points are adjusted so to represent the distribution of the data. As for the strip plots, swarm plots can be drawn on their own, or as complement to a box plot.</p>
+
+<p>We first show the swarm plot on its own.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">swarmplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">titanic</span><span class="p">[</span><span class="sh">'</span><span class="s">pclass</span><span class="sh">'</span><span class="p">],</span>
+               <span class="n">palette</span><span class="o">=</span><span class="sh">'</span><span class="s">icefire_r</span><span class="sh">'</span><span class="p">,</span>
+              <span class="n">y</span><span class="o">=</span><span class="n">titanic</span><span class="p">[</span><span class="sh">'</span><span class="s">age</span><span class="sh">'</span><span class="p">]);</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/swarm1.png" style="zoom:85%;" alt="swarm plot also known as cobra plot" />
+</div>
+
+<p>Now in combination with a box plot:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sns</span><span class="p">.</span><span class="nf">swarmplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">titanic</span><span class="p">,</span> 
+              <span class="n">x</span><span class="o">=</span><span class="sh">'</span><span class="s">pclass</span><span class="sh">'</span><span class="p">,</span>
+              <span class="n">palette</span><span class="o">=</span><span class="sh">'</span><span class="s">PuBu</span><span class="sh">'</span><span class="p">,</span>
+              <span class="n">hue</span><span class="o">=</span><span class="sh">'</span><span class="s">survived</span><span class="sh">'</span><span class="p">,</span>
+               <span class="n">y</span><span class="o">=</span><span class="sh">'</span><span class="s">age</span><span class="sh">'</span><span class="p">);</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="p">.</span><span class="nf">boxplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">titanic</span><span class="p">[</span><span class="sh">'</span><span class="s">pclass</span><span class="sh">'</span><span class="p">],</span>
+                 <span class="n">palette</span><span class="o">=</span><span class="sh">"</span><span class="s">Accent</span><span class="sh">"</span><span class="p">,</span>
+                 <span class="n">y</span><span class="o">=</span><span class="n">titanic</span><span class="p">[</span><span class="sh">'</span><span class="s">age</span><span class="sh">'</span><span class="p">]);</span> 
+
+<span class="c1"># adding transparency to colors
+</span><span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">ax</span><span class="p">.</span><span class="n">artists</span><span class="p">:</span>
+    <span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">patch</span><span class="p">.</span><span class="nf">get_facecolor</span><span class="p">()</span>
+    <span class="n">patch</span><span class="p">.</span><span class="nf">set_facecolor</span><span class="p">((</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="p">.</span><span class="mi">5</span><span class="p">))</span>
+</code></pre></div></div>
+
+<div class="imgcap">
+<img src="/assets/3/swarm2.png" style="zoom:85%;" alt="swarm plot in a boxplot" />
+</div>
+
+<h3 id="rug-plots">Rug Plots</h3>
+
+<p>A rugplot is a simple plot that displays a one-dimensional distribution of data in form of short vertical lines along the x-axis for every data point in a given variable.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="p">.</span><span class="nf">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">))</span>
+
+<span class="c1"># Make the rugplot
+</span><span class="n">sns</span><span class="p">.</span><span class="nf">rugplot</span><span class="p">(</span><span class="n">ax</span> <span class="o">=</span> <span class="n">axs</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">tips</span><span class="p">[</span><span class="sh">'</span><span class="s">total_bill</span><span class="sh">'</span><span class="p">],</span> 
+            <span class="n">height</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> 
+            <span class="n">color</span> <span class="o">=</span> <span class="n">sns</span><span class="p">.</span><span class="n">xkcd_rgb</span><span class="p">[</span><span class="sh">"</span><span class="s">pale red</span><span class="sh">"</span><span class="p">])</span> <span class="p">;</span>
+</code></pre></div></div>
+<div class="imgcap">
+<img src="/assets/3/rug.png" style="zoom:85%;" alt="rug plot" />
+</div>
+
+<h2 id="to-sum-up">To Sum Up</h2>
+
+<p>In this tutorial we covered some of the common visualization techniques using mainly axes-level functions such as bar charts, histograms, scatter plots, etc.<br />
+We also showed how simple it is to create elegant and professional visuals with just one line of code.  In fact, seaborn not only takes care of the layout, but also internally performs the semantic mapping and statistical aggregation required to create informative graphics.<br />
+Your only concern is to understand the various elements of your plots, rather than wasting  time on the technicalities of generating them.</p>
+
+<h2 id="references">References</h2>
+
+<p>[1] VanderPlas, Jake. 2016. Python Data Science Handbook. O’Reilly Media, Inc.<br />
+[2] <a href="https://www.tutorialspoint.com/matplotlib/matplotlib_axes_class.htm">Matplotlib - Axes Class</a><br />
+[3] Desai, Meet. <a href="towardsdatascience.com/matplotlib-seaborn-pandas-an-ideal-amalgamation-for-statistical-data-visualisation-f619c8e8baa3.">“Matplotlib + Seaborn + Pandas”</a> Medium, Towards Data Science, 30 Oct. 2019<br />
+[4] Waskom, M. L., (2021). seaborn: statistical data visualization. Journal of Open Source Software, 6(60), 3021, https://doi.org/10.21105/joss.03021<br />
+[5] Gureckis, Todd. 2020. <a href="http://gureckislab.org/courses/spring20/labincp/intro">Lab in Cognition and Perception</a><br />
+[6] Heike Hofmann, Hadley Wickham &amp; Karen Kafadar (2017) Letter-Value Plots: Boxplots for Large Data, Journal of Computational and Graphical Statistics, 26:3, 469-477, DOI: 10.1080/10618600.2017.1305277<br />
+[7] Notebook und Datasets used in this article: <a href="https://github.com/skacem/TIL/blob/main/seaborn_intro.ipynb">Github</a></p>
+
+  </article>
+
+</div>
+
+<center>
+<b>tagged in</b>: [
+
+  
+  <a href="/tag/Visualization"><code class="highligher-rouge"><nobr>Visualization</nobr></code></a>
+
+  
+  <a href="/tag/Tutorial"><code class="highligher-rouge"><nobr>Tutorial</nobr></code></a>
+
+  
+  <a href="/tag/Seaborn"><code class="highligher-rouge"><nobr>Seaborn</nobr></code></a>
+
+  
+  <a href="/tag/Python"><code class="highligher-rouge"><nobr>Python</nobr></code></a>
+
+]
+</center>
+
+<br><br>
+<center>
+<div class="share-page">
+    <a href="https://twitter.com/intent/tweet?text=Plotting with Seaborn - Part 1&url=/ml/2021/08/23/Seaborn/&via=&related=" target="_blank" title="Share on Twitter"> <img alt="Tweet" src="/assets/images/flat_web_icon_set/color/Twitter.png" /></a>
+    <a href="http://www.reddit.com/submit?url=/ml/2021/08/23/Seaborn/" target="_blank" title="Share on Reddit"><img alt="Reddit" src="/assets/images/flat_web_icon_set/color/Reddit.png" /></a>
+    <a href="http://www.linkedin.com/shareArticle?mini=true&url=/ml/2021/08/23/Seaborn/&title=Plotting with Seaborn - Part 1&summary=&source=" target="_blank" title="Share on LinkedIn"><img alt="Share on LinkedIn" src="/assets/images/flat_web_icon_set/color/LinkedIn.png" /></a>
+    <a href="https://plus.google.com/share?url=/ml/2021/08/23/Seaborn/" target="_blank" title="Share on Google+"><img alt="Share on Google+" src="/assets/images/flat_web_icon_set/color/Google+.png"></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/ml/2021/08/23/Seaborn/&quote=Plotting with Seaborn - Part 1" title="Share on Facebook" target="_blank"><img alt="Share on Facebook" src="/assets/images/flat_web_icon_set/color/Facebook.png" /></a>
+</div>
+</center>
+
+<div>
+  <br>
+  <center>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+    <img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" />
+    </a>
+    <br>
+    Content licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"> CC BY-NC-SA 4.0 International License</a>
+  </center>
+  <br>
+</div>
+
+
+  <div id="disqus_thread"></div>
+<script>
+
+/**
+*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+
+var disqus_config = function () {
+this.page.url = '/ml/2021/08/23/Seaborn/'; // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = /ml/2021/08/23/Seaborn/; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://skacem.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+      </div>
+    </div>
+    <footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <center>
+      <ul>
+        
+          <li><a class="site-link" href="mailto:skanderkacem@gmail.com"><i class="fa fa-envelope-square fa-fw fa-2x"></i></a></li>
+        
+
+        
+
+        
+          <li><a class="site-link" href="https://github.com/skacem"><i class="fa fa-github-square fa-fw fa-2x"></i></a></li>
+        
+
+        
+
+        
+
+        <li><a class="site-link" href="/feed.xml"><i class="fa fa-rss-square fa-fw fa-2x"></i></a></li>
+        <br>
+
+      </center>
+    </div>
+    <div class="footer-bottom"></div>
+  </div>
+</footer>
+    </body>
+</html>
