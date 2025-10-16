@@ -7,23 +7,25 @@ source "https://rubygems.org"
 #
 # This will help ensure the proper Jekyll version is running.
 # Happy Jekylling!
-gem "jekyll"
+# gem "jekyll"
 # This is the default theme for new Jekyll sites. You may change this to anything you like.
 gem "minima"
 # If you want to use GitHub Pages, remove the "gem "jekyll"" above and
 # uncomment the line below. To upgrade, run `bundle update github-pages`.
-# gem "github-pages", group: :jekyll_plugins
+gem "github-pages", group: :jekyll_plugins
 # If you have any plugins, put them here!
+# Note: GitHub Pages only supports certain plugins
+# Unsupported plugins are commented out
 group :jekyll_plugins do
-	gem "jekyll-scholar"
+	# gem "jekyll-scholar"  # Not supported by GitHub Pages
 	gem "jekyll-sitemap"
 	gem "jekyll-feed"
-	gem "jekyll-katex"
-    gem "kramdown-syntax-coderay"
-    gem "kramdown-math-katex"
+	# gem "jekyll-katex"  # Not supported by GitHub Pages
+    # gem "kramdown-syntax-coderay"  # Not supported by GitHub Pages
+    # gem "kramdown-math-katex"  # Not supported by GitHub Pages
 	gem "jekyll-paginate"
 	gem "jemoji"
-	gem 'jekyll-paginate-v2', github: 'sverrirs/jekyll-paginate-v2'
+	# gem 'jekyll-paginate-v2', github: 'sverrirs/jekyll-paginate-v2'  # Not supported by GitHub Pages
 
 end
 

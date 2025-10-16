@@ -16,7 +16,7 @@ markdown: kramdown
 permalink: pretty
 
 kramdown:
-  math_engine: katex
+  math_engine: mathjax
   auto_ids: true
   footnote_nr: 1
   entity_output: as_char
@@ -31,10 +31,10 @@ markdown: kramdown
 #permalink: pretty
 
 plugins:
-  - jekyll-katex
   - jemoji
-  - jekyll-paginate-v2
+  - jekyll-paginate
   - jekyll-sitemap
+  - jekyll-feed
 
 emoji:
   src: "https://github.githubassets.com/images/icons/"
