@@ -6,13 +6,14 @@ title: "From RFM Analysis to Predictive Scoring Models"
 excerpt: "From a managerial perspective, it is extremely useful to determine not only the contribution of customer segments to today's sales, but also the expected contribution of each segment to future revenues. After all, how can we develop good plans and make informed strategic decisions if we can't  forecast sales and revenues  for the upcoming financial period?
 In this tutorial, we'll learn how to predict next year's customer activity and dollar value based on RFM analysis."
 author: "Skander Kacem"
-tags: 
+tags:
     - Business Analytics
     - Tutorial
     - RFM Analysis
     - Customer Segmentation
 katex: true
 preview_pic: /assets/8/salesup.png
+featured: true
 ---
 
 ## Introduction

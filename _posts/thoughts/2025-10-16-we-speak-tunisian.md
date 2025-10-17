@@ -9,6 +9,7 @@ tags:
   - Culture
   - Tunisia
   - Identity
+featured: true
 ---
 
 The language of the Tunisian people is denied recognition, not only as an official language, but as a language at all. It is dismissed as "darija," a mere slang. The central thesis of this analysis is that Tunisians should advocate for the official status of their own language. The common misconception that Tunisian is a dialect of Arabic is as historically and linguistically flawed as claiming that French or Spanish are simply dialects of Latin. Indeed, the linguistic distance between Tunisian and Peninsular Arabic exceeds that of recognized separate languages like German and Danish. This essay will deconstruct the baseless justifications for maintaining Arabic's official status. Ultimately, we must be honest with ourselves; we are not Arabs, though that is a larger discussion beyond the scope of this immediate argument.

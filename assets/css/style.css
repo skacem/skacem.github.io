@@ -584,13 +584,20 @@ header h1 {
   align-self: flex-start;
 }
 
+  .site-title {
+    float: none;
+    display: block;
+    line-height: normal;
+  }
+
   .site-subtitle {
     display: block;
     position: relative;
-    padding-top: 0;
+    padding-top: 5px;
     margin-left: 0;
     font-size: 14px;
     text-align: center;
+    clear: both;
   }
 
 }

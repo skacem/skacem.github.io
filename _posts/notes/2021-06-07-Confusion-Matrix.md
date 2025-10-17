@@ -5,11 +5,12 @@ comments: true
 title: "The Confusion Matrix: Why Accuracy Is a Dangerous Illusion"
 excerpt: "A 99% accurate model can be worse than useless. The confusion matrix reveals the structure of your model's errors, showing not just how often it fails, but how those failures compound in real-world systems where different mistakes carry vastly different costs."
 author: "Skander Kacem"
-tags: 
-  - Machine Learning 
+tags:
+  - Machine Learning
   - Confusion Matrix
 katex: true
 preview_pic: /assets/0/Confusion_matrix.png
+featured: true
 
 ---
 

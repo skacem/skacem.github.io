@@ -5,13 +5,14 @@ comments: true
 title: "Customer Segmentation and Profiling: A Managerial Approach"
 excerpt: "In the last tutorial, we introduced how to segment customers databases using hierarchical cluster analysis. The approach is quite simple and does not require any parameters other than the number of clusters we want to obtain. However, in practice, this method is not very efficient, as we have no control over how the clusters are formed.  And what is the point of segmentation, if we do not understand how the segments differ or if we cannot treat each market segment appropriately. In this tutorial, we will develop a non-statistical segmentation also known as managerial segmentation."
 author: "Skander Kacem"
-tags: 
+tags:
     - Business Analytics
     - Tutorial
     - Managerial Segmentation
     - Customer Segmentation
 katex: true
 preview_pic: /assets/7/manager_seg.png
+featured: true
 ---
 
 ## Introduction
