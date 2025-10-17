@@ -10,14 +10,18 @@ pagination:
     <h1>{{ page.title }}</h1>
     <div class="post-meta">
       <div class="post-date">
-        <i class="fa fa-calendar-o"></i>
-        {{ page.date | date: '%Y-%m-%d' }}
+        📅 {{ page.date | date: '%Y-%m-%d' }}
+      </div>
+      <div class="post-reading-time">
+        {% assign words = content | number_of_words %}
+        {% assign reading_time = words | divided_by: 200 %}
+        {% if reading_time == 0 %}
+          {% assign reading_time = 1 %}
+        {% endif %}
+        🕐 {{ reading_time }} min read
       </div>
       <div class="post-tags">
-        <i class="fa fa-tags"></i>
-        {% for tag in page.tags %}
-          <span><a href="/tag/{{ tag }}"><code class="highligher"><nobr>{{ tag }}</nobr></code></a></span>
-        {% endfor %}
+        🏷️ {% for tag in page.tags %}<span><a href="/tag/{{ tag }}"><code class="highligher"><nobr>{{ tag }}</nobr></code></a></span>{% endfor %}
       </div>
     </div>
   </header>

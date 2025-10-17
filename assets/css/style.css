@@ -82,6 +82,10 @@ a:focus, a:hover {
   margin-right: 14px;
   display: inline;
 }
+.post-meta .post-reading-time {
+  margin-right: 14px;
+  display: inline;
+}
 .post-meta .post-tags {
   display: inline;
   text-decoration: none;
