@@ -588,16 +588,18 @@ header h1 {
     float: none;
     display: block;
     line-height: normal;
+    text-align: center;
+    margin-bottom: 3px;
   }
 
   .site-subtitle {
     display: block;
-    position: relative;
-    padding-top: 5px;
-    margin-left: 0;
-    font-size: 14px;
+    position: static;
+    padding: 0;
+    margin: 0;
+    font-size: 13px;
     text-align: center;
-    clear: both;
+    line-height: normal;
   }
 
 }
