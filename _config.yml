@@ -12,6 +12,13 @@ gscholar:
 researchgate: Skander-Kacem
 timezone: Europe/Berlin
 
+# Giscus comments (uses GitHub Discussions)
+giscus:
+  repo: "skacem/skacem.github.io"
+  repo_id: "REPO_ID_HERE"  # Get this from https://giscus.app
+  category: "General"
+  category_id: "CATEGORY_ID_HERE"  # Get this from https://giscus.app
+
 markdown: kramdown
 permalink: pretty
 
