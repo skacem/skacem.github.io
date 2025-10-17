@@ -9,10 +9,7 @@ author: "Skander Kacem"
 tags:
     - Business Analytics
     - Tutorial
-    - RFM Analysis
-    - Customer Segmentation
 katex: true
-preview_pic: /assets/8/salesup.png
 featured: true
 ---
 

@@ -10,10 +10,7 @@ author: "Skander Kacem"
 tags:
     - Business Analytics
     - Tutorial
-    - RFM Analysis
-    - CLV
 katex: true
-preview_pic: /assets/9/clv.png
 featured: true
 ---
 

@@ -7,11 +7,9 @@ excerpt: "A 99% accurate model can be worse than useless. The confusion matrix r
 author: "Skander Kacem"
 tags:
   - Machine Learning
-  - Confusion Matrix
+  - Tutorial
 katex: true
-preview_pic: /assets/0/Confusion_matrix.png
 featured: true
-
 ---
 
 Consider a fraud detection system with 99.9% accuracy. By most standards, this would be considered exceptional performance. Yet if fraudulent transactions constitute only 0.1% of the total, a trivial classifier that labels everything as legitimate achieves identical accuracy while providing zero value. Worse, it creates a false sense of security that could cost millions.

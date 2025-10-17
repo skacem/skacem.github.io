@@ -8,8 +8,6 @@ In this tutorial, we will learn how to segment your customers database using RFM
 author: "Skander Kacem"
 tags: 
     - Business Analytics
-    - Tutorial
-    - Hierarchical Cluster Analysis
     - Customer Segmentation
 katex: true
 preview_pic: /assets/6/customers.png

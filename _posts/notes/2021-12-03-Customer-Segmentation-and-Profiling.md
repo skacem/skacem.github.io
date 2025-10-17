@@ -8,10 +8,7 @@ author: "Skander Kacem"
 tags:
     - Business Analytics
     - Tutorial
-    - Managerial Segmentation
-    - Customer Segmentation
 katex: true
-preview_pic: /assets/7/manager_seg.png
 featured: true
 ---
 

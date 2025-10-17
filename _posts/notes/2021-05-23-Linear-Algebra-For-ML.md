@@ -5,12 +5,10 @@ comments: true
 title: "Linear Algebra for Machine Learning"
 excerpt: "Linear algebra and statistics form the foundation of machine learning. When you understand these topics, you gain insight into how algorithms actually work, and you can even create your own."
 author: "Skander Kacem"
-tags: 
-  - Machine Learning 
-  - MOOC
+tags:
+  - ML
   - Math
 katex: true
-preview_pic: /assets/0/linalg.jpg
 
 ---
 
