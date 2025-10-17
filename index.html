@@ -14,7 +14,7 @@ permalink: /
             {% assign count = 0 %}
             {% for post in site.posts %}
               {% if post.category == 'thoughts' or post.categories contains 'thoughts' %}
-                {% if count < 5 %}
+                {% if post.featured == true %}
                   <li>
                     <a href="{{ post.url }}">{{ post.title }}</a>
                     <span class="post-date">{{ post.date | date: "%b %d, %Y" }}</span>
@@ -38,7 +38,7 @@ permalink: /
             {% assign count = 0 %}
             {% for post in site.posts %}
               {% if post.category == 'notes' or post.categories contains 'notes' or post.category == 'technical' or post.categories contains 'technical' or post.category == 'ml' or post.categories contains 'ml' %}
-                {% if count < 5 %}
+                {% if post.featured == true %}
                   <li>
                     <a href="{{ post.url }}">{{ post.title }}</a>
                     <span class="post-date">{{ post.date | date: "%b %d, %Y" }}</span>
@@ -62,7 +62,7 @@ permalink: /
             {% assign count = 0 %}
             {% for post in site.posts %}
               {% if post.category == 'readings' or post.categories contains 'readings' %}
-                {% if count < 5 %}
+                {% if post.featured == true %}
                   <li>
                     <a href="{{ post.url }}">{{ post.title }}</a>
                     <span class="post-date">{{ post.date | date: "%b %d, %Y" }}</span>
