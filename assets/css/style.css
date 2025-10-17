@@ -585,7 +585,12 @@ header h1 {
 }
 
   .site-subtitle {
-    display: none;
+    display: block;
+    position: relative;
+    padding-top: 0;
+    margin-left: 0;
+    font-size: 14px;
+    text-align: center;
   }
 
 }
