@@ -4,32 +4,43 @@ pagination:
   enabled: true
 ---
 
-<div class="post">
+{% assign words = content | number_of_words %}
+{% assign reading_time = words | divided_by: 200 %}
+{% if reading_time == 0 %}
+  {% assign reading_time = 1 %}
+{% endif %}
 
-  <header class="post-header">
-    <h1>{{ page.title }}</h1>
-    <div class="post-meta">
-      <div class="post-date">
-        📅 {{ page.date | date: '%Y-%m-%d' }}
-      </div>
-      <div class="post-reading-time">
-        {% assign words = content | number_of_words %}
-        {% assign reading_time = words | divided_by: 200 %}
-        {% if reading_time == 0 %}
-          {% assign reading_time = 1 %}
-        {% endif %}
-        🕐 {{ reading_time }} min read
-      </div>
-      <div class="post-tags">
-        🏷️ {% for tag in page.tags %}<span><a href="/tag/{{ tag }}"><code class="highligher"><nobr>{{ tag }}</nobr></code></a></span>{% endfor %}
-      </div>
+<div class="post-with-toc">
+  <!-- Table of Contents Sidebar (only for posts > 5 min) -->
+  {% if reading_time > 5 %}
+  <aside class="toc-sidebar" id="toc-sidebar">
+    <div class="toc-container">
+      <h3 class="toc-title">📑 Contents</h3>
+      <nav id="toc-nav"></nav>
     </div>
-  </header>
+  </aside>
+  {% endif %}
 
-  <article class="post-content">
-  {{ content }}
-  </article>
+  <div class="post">
+    <header class="post-header">
+      <h1>{{ page.title }}</h1>
+      <div class="post-meta">
+        <div class="post-date">
+          📅 {{ page.date | date: '%Y-%m-%d' }}
+        </div>
+        <div class="post-reading-time">
+          🕐 {{ reading_time }} min read
+        </div>
+        <div class="post-tags">
+          🏷️ {% for tag in page.tags %}<span><a href="/tag/{{ tag }}"><code class="highligher"><nobr>{{ tag }}</nobr></code></a></span>{% endfor %}
+        </div>
+      </div>
+    </header>
 
+    <article class="post-content">
+    {{ content }}
+    </article>
+  </div>
 </div>
 
 <center>
@@ -48,3 +59,251 @@ pagination:
 {% if page.comments %}
   {% include comments.html %}
 {% endif %}
+
+<!-- Table of Contents: CSS Styles -->
+<style>
+  /* Main container for post with TOC */
+  .post-with-toc {
+    display: flex;
+    position: relative;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Sidebar styling */
+  .toc-sidebar {
+    position: sticky;
+    top: 80px;
+    left: 0;
+    width: 280px;
+    height: fit-content;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    padding-right: 30px;
+    flex-shrink: 0;
+  }
+
+  .toc-container {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  .toc-title {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #212529;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 10px;
+  }
+
+  /* TOC navigation list */
+  #toc-nav {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  #toc-nav ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+  }
+
+  #toc-nav li {
+    margin: 0;
+    padding: 0;
+  }
+
+  #toc-nav a {
+    display: block;
+    padding: 6px 12px;
+    color: #495057;
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 1.4;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+    margin: 2px 0;
+  }
+
+  #toc-nav a:hover {
+    color: #0066cc;
+    background: #e9ecef;
+    border-left-color: #0066cc;
+  }
+
+  /* Active/current section highlighting */
+  #toc-nav a.active {
+    color: #0066cc;
+    font-weight: 600;
+    background: #e7f1ff;
+    border-left-color: #0066cc;
+  }
+
+  /* Nested heading levels (H3, H4, etc.) */
+  #toc-nav .toc-h2 { padding-left: 12px; }
+  #toc-nav .toc-h3 { padding-left: 28px; font-size: 13px; }
+  #toc-nav .toc-h4 { padding-left: 44px; font-size: 12px; }
+
+  /* Main post content */
+  .post-with-toc .post {
+    flex: 1;
+    min-width: 0;
+    max-width: 850px;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Responsive: hide TOC on smaller screens */
+  @media screen and (max-width: 1200px) {
+    .toc-sidebar {
+      display: none;
+    }
+
+    .post-with-toc {
+      display: block;
+    }
+
+    .post-with-toc .post {
+      max-width: 850px;
+      margin: 0 auto;
+    }
+  }
+
+  /* Custom scrollbar for TOC */
+  .toc-sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .toc-sidebar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+
+  .toc-sidebar::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+  }
+
+  .toc-sidebar::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+</style>
+
+<!-- Table of Contents: JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const tocNav = document.getElementById('toc-nav');
+
+  // Only run if TOC container exists (i.e., post is > 5 min)
+  if (!tocNav) return;
+
+  // Get all headings from the post content
+  const postContent = document.querySelector('.post-content');
+  const headings = postContent.querySelectorAll('h2, h3, h4');
+
+  if (headings.length === 0) {
+    // No headings found, hide the TOC
+    const tocSidebar = document.getElementById('toc-sidebar');
+    if (tocSidebar) tocSidebar.style.display = 'none';
+    return;
+  }
+
+  // Generate TOC from headings
+  const tocList = document.createElement('ul');
+
+  headings.forEach((heading, index) => {
+    // Add ID to heading if it doesn't have one
+    if (!heading.id) {
+      heading.id = 'heading-' + index;
+    }
+
+    const listItem = document.createElement('li');
+    const link = document.createElement('a');
+
+    link.textContent = heading.textContent;
+    link.href = '#' + heading.id;
+    link.className = 'toc-' + heading.tagName.toLowerCase();
+    link.setAttribute('data-target', heading.id);
+
+    // Smooth scroll on click
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.getElementById(heading.id);
+      if (target) {
+        const yOffset = -80; // Offset for fixed header
+        const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+
+        // Update URL without jumping
+        history.pushState(null, null, '#' + heading.id);
+      }
+    });
+
+    listItem.appendChild(link);
+    tocList.appendChild(listItem);
+  });
+
+  tocNav.appendChild(tocList);
+
+  // Scroll Spy: Highlight current section
+  let observerOptions = {
+    root: null,
+    rootMargin: '-80px 0px -80% 0px',
+    threshold: 0
+  };
+
+  let observer = new IntersectionObserver(function(entries) {
+    entries.forEach(entry => {
+      const id = entry.target.id;
+      const tocLink = tocNav.querySelector(`a[data-target="${id}"]`);
+
+      if (entry.isIntersecting) {
+        // Remove active class from all links
+        tocNav.querySelectorAll('a').forEach(link => {
+          link.classList.remove('active');
+        });
+        // Add active class to current link
+        if (tocLink) {
+          tocLink.classList.add('active');
+        }
+      }
+    });
+  }, observerOptions);
+
+  // Observe all headings
+  headings.forEach(heading => {
+    observer.observe(heading);
+  });
+
+  // Fallback scroll spy for browsers without IntersectionObserver
+  if (!('IntersectionObserver' in window)) {
+    window.addEventListener('scroll', function() {
+      let scrollPosition = window.scrollY + 100;
+
+      headings.forEach(heading => {
+        const headingTop = heading.offsetTop;
+        const headingBottom = headingTop + heading.offsetHeight;
+
+        if (scrollPosition >= headingTop && scrollPosition < headingBottom) {
+          tocNav.querySelectorAll('a').forEach(link => {
+            link.classList.remove('active');
+          });
+
+          const tocLink = tocNav.querySelector(`a[data-target="${heading.id}"]`);
+          if (tocLink) {
+            tocLink.classList.add('active');
+          }
+        }
+      });
+    });
+  }
+});
+</script>
