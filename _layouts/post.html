@@ -109,8 +109,6 @@ pagination:
     left: 0;
     width: 280px;
     height: fit-content;
-    max-height: calc(100vh - 100px);
-    overflow-y: auto;
     padding-right: 30px;
     flex-shrink: 0;
   }
@@ -121,6 +119,8 @@ pagination:
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
   }
 
   .toc-title {
@@ -210,21 +210,21 @@ pagination:
   }
 
   /* Custom scrollbar for TOC */
-  .toc-sidebar::-webkit-scrollbar {
+  .toc-container::-webkit-scrollbar {
     width: 6px;
   }
 
-  .toc-sidebar::-webkit-scrollbar-track {
+  .toc-container::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 3px;
   }
 
-  .toc-sidebar::-webkit-scrollbar-thumb {
+  .toc-container::-webkit-scrollbar-thumb {
     background: #888;
     border-radius: 3px;
   }
 
-  .toc-sidebar::-webkit-scrollbar-thumb:hover {
+  .toc-container::-webkit-scrollbar-thumb:hover {
     background: #555;
   }
 
