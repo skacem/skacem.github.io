@@ -2,320 +2,471 @@
 layout: post
 category: ml
 comments: true
-title: "Plotting with Seaborn - Part 2"
-excerpt: "In this part of the tutorial, we will look at more advanced visualization techniques for exploring multivariate and complex datasets, including conditional small multiples and pairwise data relationships. Namely, 
-when exploring multidimensional data, it is useful to draw multiple instances of the same representation for different subsets of your data. This type of representation is also known as \"faceting\" and is related to the idea of small multiples. In this way, a lot of information can be presented in a compact and comparable way. While this may sound intuitive, it is very tedious to create, well unless you use the figure-level functions provided by seaborn."
+title: "Plotting with Seaborn - Part 2: Distributions & Statistical Plots"
 author: "Skander Kacem"
-tags: 
+tags:
     - Visualization
     - Tutorial
     - Seaborn
     - Python
 katex: true
-preview_pic: /assets/0/seabornp2.png
 ---
 
+## Beyond the Basics
 
-In this part of the tutorial, we will look at more advanced visualization techniques for exploring multivariate and complex datasets, including conditional small multiples and pairwise data relationships. Namely, 
-when exploring multidimensional data, it is useful to draw multiple instances of the same representation for different subsets of your data. This type of representation is also known as faceting and is related to the idea of small multiples.  
+In Part 1, you mastered the essential toolkit: bar plots for comparisons, count plots for frequencies, line plots for trends, scatter plots for relationships, and heat maps for matrix data. These five plot types handle most everyday visualization needs.
 
-## Faceting
+But data science goes deeper than just displaying values. You need to understand distributions. Are your variables normally distributed or skewed? Where are the outliers? How do different groups compare statistically? These questions require a different set of tools.
 
-One powerful technique in data visualization, particularly when exploring multidimensional datasets, is to create multiple versions of the same plot with several subsets of that data alongside each other, sharing the same scale and axis.  This allows a lot of information to be presented compactly and in a comparable way.  
+In this tutorial, we'll explore Seaborn's statistical visualization capabilities. You'll learn to analyze distributions with histograms, compare groups with box plots, handle large datasets with letter-value plots, reveal complex distribution shapes with violin plots, and model relationships with regression analysis. By the end, you'll be conducting visual statistical analysis, not just creating pretty pictures.
 
-<div class="imgcap">
-<img src="/assets/4/Horse_in_Motion.jpg" style="zoom:50%;" alt="The horse in motion by Eadweard Muybridge as one of the first small multiple technique"/>
-<div class="thecap"> The Horse in Motion by Eadweard Muybridge</div></div>
+Let's dive into the world of distributions.
 
+## Histograms: Understanding Distributions
 
-It is related to the idea of ["small multiples"](https://en.wikipedia.org/wiki/Small_multiple) (also known as trellis or lattice) first introduced by Eadweard Muybridge, around 1880, and popularized by Edward Tufte [1].
+If you want to understand a single variable's distribution, you start with a histogram. It's that fundamental. Histograms bin your data and show how many observations fall into each bin, revealing the shape, center, and spread of your distribution.
 
-> At the heart of quantitative reasoning is a single question: *Compared to what?* Small multiple designs, multivariate and data bountiful, answer directly by visually enforcing comparisons of changes, of the differences among objects, of the scope of alternatives. For a wide range of problems in data presentation, small multiples are the best design solution. -- Edward Tufte, 1990
+They answer questions like: Is this normally distributed? Are there outliers? Is the data skewed? These aren't academic questions - they directly impact which statistical methods you can validly apply.
 
-While this may sound intuitive, it is very tedious to produce unless you use the right visualization library.   
-One of the most powerful aspects of the seaborn  is how easy it is to create these types of plots. With a single command, you can split a given plot into many related plots using: `FacetGrid()`, `JointGrid()` or `PairGrid()`.
-
-In the following we'll put these seaborn's classes in action, and see why they are so useful.
-
-## Faceting with Seaborn
-
-### FacetGrid
-
-The most basic utility provided by seaborn for faceting is the `FacetGrid`. It is an object that specifies how to split the layout of the data to be visualized. It partitions a figure into a matrix of axes defined by row and column faceting variables. It is most useful when you have two discrete variables, and all combinations of the variables exist in the data..  A third dimension can be added by specifying a hue parameter.
-
-For example, suppose that we're interested in comparing male and female penguins of each specie in some way. To do this, we start by importing the required modules, setting the notebook environment and loading the penguins dataset as pandas DataFrame:
+Let's start simple with our penguin data:
 
 ```python
-# Import the required libraries
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Set the notebook environment
-%precision %.3f
-pd.options.display.float_format = '{:,.3f}'.format
-plt.rcParams["figure.figsize"] = 9,5
-pd.set_option('display.width', 100)
-plt.rcParams.update({'font.size': 22})
-plt.style.use('fivethirtyeight')
-
-# Load the penguins dataset
 penguins = sns.load_dataset('penguins')
+
+sns.histplot(data=penguins, x="flipper_length_mm");
 ```
 
-Then we create an instance of the `FacetGrid` class with our data, telling it that we want to break the `sex` and `species` variables, by `row` and `col`. Since we have 3 species, we obtain a 2x3-grid of facets ready for us to plot something on them.  
+<img src="/assets/3/hist1.png" alt="a simple histogram using seaborn" width="700">
+
+You can see the distribution is roughly bell-shaped, maybe slightly left-skewed, with most flippers between 190 and 220 mm.
+
+To understand the shape better, you can overlay a kernel density estimate - a smooth curve representing the underlying probability distribution:
 
 ```python
-g = sns.FacetGrid(penguins, row='sex', col='species', aspect=1.75)
-g.set_titles(row_template='{row_name}', col_template='{col_name} Penguins');
+sns.histplot(data=penguins, x="flipper_length_mm",
+             kde=True, color='red', bins=15);
 ```
 
-<div class="imgcap">
-<img src="/assets/4/facetGrid1.png" style="zoom:90%;" alt="3x2 matrix of grids generated with FacetGrid"/>
-<div class="thecap"> </div></div>
+<img src="/assets/3/hist2.png" alt="a histogram with kde" width="700">
 
-Each facet is labeled at the top. The overall layout minimizes the duplication of axis labels and other scales.  
+The KDE curve shows you what the "true" distribution might look like if you had infinite data. It's particularly useful for spotting multiple peaks (multimodality) that might not be obvious from bars alone.
 
-We then use the `FacetGrid.map()` method to plot the data on the instantiated grid object.
+Now, what if you want to compare distributions across groups? The `hue` parameter creates overlaid histograms:
 
 ```python
-plt.style.use('bmh')
-
-# Create a figure with 6 facet grids
-g = sns.FacetGrid(penguins, row='sex', col='species', aspect=1.75)
-g.set_titles(row_template='{row_name}', col_template='{col_name} Penguins');
-
-# plot a histogram  in each facet
-g.map(sns.histplot, 'body_mass_g', binwidth=200, kde=True)
-
-# set x, y labels
-g.set_axis_labels('Body Mass (g)', "Count")
+sns.histplot(data=penguins, x="flipper_length_mm", 
+             hue="species");
 ```
 
-<div class="imgcap">
-<img src="/assets/4/facetGrid2.png" style="zoom:120%;" alt="3x2 scatter matrix  generated with FacetGrid using penguins dataset"/>
-<div class="thecap"> </div></div>
+<img src="/assets/3/hist3.png" alt="multiple histograms on the same figure" width="700">
 
-Now, the function we pass to the `map` method doesn't have to be a seaborn or matplotlib plotting function. It can handle any type of function as long as it meets the following requirements:
-
-1. It must plot on the "currently active" matplotlib `axes`. This applies to functions in the `matplotlib.pyplot` namespace. In fact you can call `matplotlib.pyplot.gca()` to get a reference to the current `axes` if you intend to use their methods.
-2. It must accept the data that it plots as arguments.
-3. It must have a generic dictionary of `**kwargs` and pass it along to the underlying plotting function.
-
-So let's define our own custom function according to the above requirements. The function is supposed to compute the average of a given variable and add it as a dashed line to the currently active `axes`.
+The overlapping bars can be hard to read though. An alternative is the step function approach:
 
 ```python
-def add_mean(data, var, **kwargs):
-
-    # 1. requirement
-    # Calculate mean for each group
-    m = np.mean(data[var])
-    
-    # 2. requirement
-    # Get current axis
-    ax = plt.gca()
-    
-    # 3. requirement
-    # Add line at group mean
-    ax.axvline(m, color='maroon', lw=3, ls='--', **kwargs)
-    
-    # Annotate group mean
-    x_pos=0.6
-    if m > 5000: x_pos=0.2
-    ax.text(x_pos, 0.7, f'mean={m:.0f}', 
-            transform=ax.transAxes,  
-            color='maroon', fontweight='bold', 
-            fontsize=14)
-
+sns.histplot(data=penguins, x="flipper_length_mm", 
+             hue="species", element="step");
 ```
 
-Let's go ahead and plot the same figure as above, but without the histograms and on top of that we will be adding our own custom function.
+<img src="/assets/3/hist4.png" alt="multiple histograms displayed as steps" width="700">
 
-```python
-g = sns.FacetGrid(penguins, row='sex', col='species', hue='species', height=6, aspect=1)
+Much clearer! Seaborn automatically applies some transparency to help with visibility, but the step function makes comparison even easier.
 
-g.map(sns.kdeplot, 'body_mass_g', lw=3, shade=True)
-g.map_dataframe(add_mean, var='body_mass_g')
-g.set_axis_labels('Body Mass (g)', "Count")
-g.add_legend()
-```
+### Advanced Technique: Independent Normalization
 
-As you might notice, instead of using the `map()` method to call our custom function, we used the `map_dataframe()` method.
-
-<div class="imgcap">
-<img src="/assets/4/facetGrid3_1.png" style="zoom:90%;" alt="kde as small multiple with mean annotation generated with FacetGrid "/>
-<div class="thecap"> </div></div>
-
-As you can see, `FacetGrid` is simple yet powerful.  In just a few lines and without thinking about the layout and the appearance, you can elegantly convey a great deal of information. In my opinion, this is a vastly under-used technique in visualization and should actually be part of every exploratory data analysis, whether your goal is a report or a model.
-
-`FacetGrid` serves as a backbone for the following figure-level functions: `relplot()`, `catplot()`, `lmplot()` and `displot()`. In fact, it is strongly recommended to use one of these functions instead of using `FacetGrid` directly, particularly if you are using seaborn functions that infer semantic mappings from the dataset within your facets.
-
-### PairGrid
-
-`PairGrid` is another class provided by seaborn for faceting. It shows pairwise relationships between data elements. Unlike `FacetGrid`, it uses different variable pairs for each facet.  
-
-The usage of `PairGrid` is similar to `FacetGrid`. We start by calling the `PairGrid` constructor in order to initialize the facet grid and then call the plotting functions.  In the following example we are going to use the iris dataset. To demonstrate the flexibility of `PairGrid`, I will use different different kind of plots with extra many arguments. The `PairGrid` object provides three plotting methods for different axes groups: `map_diag()`, `map_upper()` and `map_lower()`.
-
-```python
-# Load the iris dataset
-iris = sns.load_dataset('iris')
-
-# Set the plotting style
-plt.style.use('seaborn-paper')
-
-# Initiate the PairGrid instance
-g = sns.PairGrid(iris, diag_sharey=False, hue="species", palette="Set2")
-
-# Scatter plots on the upper triangle
-g.map_upper(sns.scatterplot)
-
-# Histplot with kde on the diagonal
-g.map_diag(sns.histplot, hue=None, legend=False, color='darksalmon', 
-           kde=True, bins=8, lw=.3)
-
-# Kde without hue parameter on the lower triangle 
-g.map_lower(sns.kdeplot,  shade=True, lw=1, 
-            shade_lowest=False, n_levels=6, 
-            zorder=0, alpha=.7, hue=None,
-            color='mediumaquamarine')
-
-g.add_legend();
-```
-
-<div class="imgcap">
-<img src="/assets/4/pairGrid2.png" style="zoom:100%;" alt="Penguins Pairgrid using different plotting functions"/>
-<div class="thecap"> </div></div>
-
-It is important to understand the difference between a `FacetGrid` and a `PairGrid`:
-
->In the former, each facet shows the same relationship conditioned on different levels of other variables. In the latter, each plot shows a different relationship (although the upper and lower triangles will have mirrored plots). Using PairGrid can give you a very quick, very high-level summary of interesting relationships in your dataset.
-
-`PairGrid` serves as the backbone to the high-level interface `pairplot()` and it is recommended to use it, unless you need more flexibility.
-
-### JointGrid
-
-`JointGrid` is another facet class from seaborn. It combines univariate plots such as histograms, rug plots, and KDE plots with bivariate plots such as scatter and regression.  
-Let's create a `JointGrid` instance without plots, to see how it looks like.
-
-```python
-g = sns.JointGrid(data=[])
-```
-
-<div class="imgcap">
-<img src="/assets/4/jointGrid1.png" style="zoom:90%;" alt="JointGrid default layout"/>
-<div class="thecap"> </div></div>
-
-The middle, large axes, referred to as joint axes, is intended for bivariate plots such as scatter and regression. The other two axes, known as marginal axes, are meant for univariate plots.  
-The simplest plot method, `plot()`, takes a pair of functions: one for the joint axes and one for the two marginal axes.
+Here's a more advanced technique. Sometimes you're comparing variables with dramatically different scales - imagine comparing the number of purchases (hundreds) with dollar amounts (thousands). Raw counts become incomparable. The solution is independent normalization:
 
 ```python
 tips = sns.load_dataset('tips')
-g = sns.JointGrid(x="total_bill", y="tip", data=tips, hue="time", palette="magma")
-g.plot(sns.scatterplot, sns.histplot)
+
+sns.histplot(tips, x="total_bill", hue="day", 
+             multiple="stack",
+             stat="density", common_norm=False,
+             palette='pastel');
 ```
 
-<div class="imgcap">
-<img src="/assets/4/jointGrid2.png" style="zoom:100%;" alt="JointGrid with tips dataset and time as hue parameter"/>
-<div class="thecap"> </div></div>
+<img src="/assets/3/hist5.png" alt="multiple histograms stacked on the same figure" width="700">
 
-If you prefer to use different arguments for each function then you should use the following `JointGrid` class methods: `plot_joint()` and `plot_marginals()`.
+Setting `common_norm=False` normalizes each distribution independently, so you're comparing shapes rather than absolute counts. This lets you see that Tuesday and Thursday have similar distribution shapes despite potentially having different numbers of observations.
+
+Histograms have lots more options - different binning strategies, various normalization methods, cumulative distributions. The [official documentation](https://seaborn.pydata.org/generated/seaborn.histplot.html) is worth exploring when you need something specific.
+
+---
+
+## Box Plots: Compact Statistical Summaries
+
+Sometimes you need to compare distributions across many categories, but creating separate histograms for each would be overwhelming. This is where box plots excel - they condense an entire distribution into five key numbers, displayed compactly enough that you can compare dozens of groups side by side.
+
+Each box shows you the quartiles (25th, 50th, and 75th percentiles), the whiskers extend to the data's range, and individual points beyond the whiskers are flagged as potential outliers. It's an incredibly efficient use of space.
+
+Let's work with the tips dataset - this captures restaurant tipping behavior:
 
 ```python
-# Let's use the penguins dataset again
-g = sns.JointGrid(data=penguins, x="bill_length_mm", 
-                  y="bill_depth_mm", hue="species", palette="Set1")
-# Histplot with kde on both marginal axes
-g.plot_marginals(sns.histplot,  kde=True, hue=None, legend=False, element='step')
-# kde and scatter plots on the joint axes
-g.plot_joint(sns.kdeplot, levels=4)
-g.plot_joint(sns.scatterplot)
+tips = sns.load_dataset('tips')
 ```
 
-<div class="imgcap">
-<img src="/assets/4/jointGrid3.png" style="zoom:100%;" alt="JointGrid with penguins dataset and species as hue parameter using plot_marginal() and plot_joint()"/>
-<div class="thecap"> </div></div>
-
-`JointGrid` serves also as a backbone for a figure-level function.
-
-Now that we have some knowledge of axes-level plotting functions and understand how faceting in Seaborn works, we can finally move on to explore figure-level plotting functions.
-
-
-## Exploring Figure-Level Plotting Functions
-
-The purpose of seaborn's figure-level functions is to facilitate the plotting process. They provide high-level interfaces with matplotlib through one of the classes discussed above, usually a `FacetGrid`, which manages the figure.  They also provide a uniform interface to their underlying axes-level functions -Remember the following figure from the previous tutorial. 
-
-<div class="imgcap">
-<img src="/assets/3/function_overview2.png" style="zoom:80%;" alt="Figure-level functions and their corresponting axes-level functions"/>
-<div class="thecap"> </div></div>
-
-Hence, you don't need to know the arguments and other details of the corresponding axes-level functions, nor do you need to know how to edit a matplotlib figure. It is perfectly fine to know only the arguments of the few figure-level functions provided by seaborn to generate very advanced figures, well unless you need more flexibility.
-
-So in this section, we basically won't cover anything that we haven't already addressed in earlier sections. It is more a showcase of the power of seaborn than a how-to guide for using the figure-level functions.
-### catplot
-
-`seaborn.catplot()` is a figure-level interface for drawing categorical plots onto a `FacetGrid`. The `kind` parameter specifies the underlying axes-level plotting function to use.  
-So let me show you how powerful and yet simple are these kind of high-level interfaces. For this purpose we will use the tips dataset.
+The data includes tip amounts, total bills, day of week, party size, and whether patrons were smokers. Here's what a grouped box plot looks like:
 
 ```python
-g = sns.catplot(data=tips, x='day', y='tip', row='sex', col='smoker', kind='violin')
+sns.boxplot(x="day", y="total_bill",
+            hue="smoker",
+            data=tips,
+            palette='coolwarm');
 ```
 
-<div class="imgcap">
-<img src="/assets/4/catplot1.png" style="zoom:90%;" alt="catplot with violinplots in a facet grid"/>
-<div class="thecap"> </div></div>
+<img src="/assets/3/box.png" alt="Boxplots with hue" width="750">
 
-It's really impressive how much information we can capture with just one line of code. No other visualization library can compete with this.  Well, at least not that I knew of.  
-Let's take a look at another figure-level function.
-### lmplot
+You can immediately see patterns: bills tend to be higher on Saturday and Sunday, and within each day, smokers and non-smokers have similar distributions (the boxes overlap substantially).
 
-This figure-level function combine `regplot()` and `FacetGrid`.  It is designed to provide a convenient interface for fitting regression models across conditional subsets of a given dataset.
+Box plots were invented by statistician John Tukey back in the 1970s, designed to be drawn by hand when doing statistics with pencil and paper. Now that we have computers, we can create more sophisticated variations that show additional distribution details while keeping the compact format.
+
+---
+
+## Letter-Value Plots: When Data Gets Big
+
+Here's a problem you'll encounter with large datasets: traditional box plots show lots of "outliers" that aren't really anomalies - they're just the natural tails of large distributions. With 50,000 observations, even rare events appear hundreds of times. Flagging them all as outliers creates visual noise without adding insight.
+
+Letter-value plots solve this by showing additional quantiles beyond the standard quartiles, giving you better representation of the tail behavior. Think of them as box plots that grow more detailed as your dataset grows larger.
+
+Let's use the diamonds dataset, which has over 50,000 observations:
 
 ```python
-sns.set_theme(color_codes=True)
-g = sns.lmplot(x="size", y="total_bill", hue="smoker", col="day",
-               data=tips, height=6, aspect=.4, x_jitter=.1)
+diamonds = sns.load_dataset('diamonds')
+plt.style.use('fivethirtyeight')
+
+clarity_ranking = ["I1", "SI2", "SI1", "VS2", "VS1", "VVS2", "VVS1", "IF"]
+
+sns.boxenplot(x="clarity", y="carat",
+              color="b", order=clarity_ranking,
+              scale="linear", data=diamonds,
+              palette='RdBu');
 ```
 
-<div class="imgcap">
-<img src="/assets/4/lmplot1.png" style="zoom:110%;" alt="lmplot"/>
-<div class="thecap"> </div></div>
+<img src="/assets/3/boxen.png" alt="letter-value plots of a large dataset" width="750">
 
-### pairplot
-
-`pairplot()` is a high-level interface for `PairGrid` class with the purpose to make it easy to plot a few common styles. However, if you need more flexibility, you should use `PairGrid` directly.
+Compare this to a standard box plot of the same data:
 
 ```python
-g = sns.pairplot(iris, hue="species", corner=True)
+sns.boxplot(x="clarity", y="carat",
+            color="b",
+            order=clarity_ranking,
+            data=diamonds,
+            palette='RdBu')
 ```
 
-<div class="imgcap">
-<img src="/assets/4/pairplot1.png" style="zoom:110%;" alt="pairplot"/>
-<div class="thecap"> </div></div>
+<img src="/assets/3/boxen2.png" alt="boxplot with seaborn for a large dataset" width="750">
 
-### jointplot
+See the difference? The standard box plot is overwhelmed by thousands of "outlier" points that obscure the boxes themselves. The letter-value plot reveals the actual distribution structure that all those points represent.
 
-`jointplot()` is also meant to provide a convenient high-level interface to `JointGrid`.
+Use letter-value plots when you have more than 10,000 observations and traditional box plots become cluttered. Below that size, regular box plots work fine.
+
+---
+
+## Violin Plots: Seeing the Full Shape
+
+Box plots show you five numbers. Histograms show you the full distribution. Violin plots give you both - the complete distribution shape plus summary statistics, all in one compact visualization.
+
+The width of the violin at any height shows you the density of observations at that value. It's like a mirror-image KDE plot, rotated vertically. The inner markings show the same summary statistics as a box plot.
+
+<img src="/assets/3/xkcd.png" alt="Suggestiveness of visualization types" width="600">
+
+*Even XKCD comics recognize the intuitive appeal of violin plots for showing distribution shape.*
+
+Here's what makes violin plots clever: since they're symmetric, you can split them down the middle to compare two groups side-by-side. Let me show you:
 
 ```python
-g = sns.jointplot(data=penguins, x="bill_length_mm", y="bill_depth_mm", 
-               kind="scatter", palette="BuPu", hue='species')
+sns.set(style="whitegrid")
+f, ax = plt.subplots(figsize=(8, 6))
+
+sns.violinplot(x="day", y="total_bill",
+               hue="smoker", data=tips,
+               inner="box", split=True,
+               palette="Set3_r", cut=2, 
+               linewidth=3)
+
+sns.despine(left=True)
+ax.set_xlabel("Day", size=16, alpha=0.7)
+ax.set_ylabel("Total Bill ($)", size=16, alpha=0.7)
+ax.legend(loc=2, ncol=2, title='Smoker?')
+f.suptitle('Total Bills by Day of the Week', fontsize=20)
 ```
 
-<div class="imgcap">
-<img src="/assets/4/jointplot1.png" style="zoom:100%;" alt="jointplot method on penguins dataset"/>
-<div class="thecap"> </div></div>
+<img src="/assets/3/vio1.png" alt="Violin plot of total bills from the tips dataset" width="750">
 
-## Wrapping Up
+Reading this plot takes a moment to learn, but then it becomes second nature. The pink half-violins show the distribution of bills for smokers. The red half-violins show non-smokers. The inner box shows summary statistics for all bills combined on that day, regardless of smoking status.
 
-With this series of visualization tutorials we have covered the most important aspects of seaborn.  
-In the first part, we introduced the matplotlib figure grammar and then discussed some common types of plots and their use cases, using only axes-level functions.  
-In the second part of the tutorial, we looked at more advanced visualization techniques that use figure-level functions to analyze multivariate data, such as conditional small multiples and pairwise data relationships. 
+You can also show separate summaries for each group:
 
-Both parts focused on the power and simplicity of seaborn. After all, no matter what plotting technique you use, there is no universally best way to represent your data. Different questions are better answered with different plotting techniques. Seaborn just makes it easy for you to switch between different visual representations by providing a consistent high-level API, while internally taking care of the layout design along with performing the necessary statistical computations. So that your only concern is to understand the various elements of your plots, rather than wasting time on the technicalities of generating them.
+```python
+sns.violinplot(x="day", y="total_bill",
+               hue="smoker", data=tips,
+               inner="quart", split=True,
+               palette="Set3_r", cut=2,
+               linewidth=3)
 
+sns.despine(left=True)
+ax.set_xlabel("Day", size=16, alpha=0.7)
+ax.set_ylabel("Total Bill ($)", size=16, alpha=0.7)
+ax.legend(loc=2, ncol=2, title='Smoker?')
+f.suptitle('Total Bills by Day of the Week', fontsize=20)
+```
+
+<img src="/assets/3/vio2.png" alt="Violin plot showing quartiles for each group" width="750">
+
+Now the inner lines show quartiles separately for smokers and non-smokers, giving you even more granular information.
+
+Violin plots work best with small to medium datasets where the distribution shape carries meaningful information. With very large datasets, the computational cost increases and the added detail may not justify the complexity.
+
+---
+
+## Regression Plots: Lines of Best Fit
+
+Linear regression is one of the oldest statistical techniques, but it remains powerful for understanding relationships between variables. Regression plots visualize these relationships by fitting a line through your data and showing the uncertainty around that line.
+
+A word of caution though: Seaborn will always draw a regression line, even when your data has no meaningful relationship. The line itself doesn't prove anything - you need to evaluate the relationship's strength statistically. Think of the plot as a visualization tool, not a statistical test.
+
+Let's start simple:
+
+```python
+penguins = sns.load_dataset('penguins')
+sns.set_theme(style="whitegrid", palette="colorblind")
+
+sns.regplot(data=penguins, x='bill_length_mm', y='bill_depth_mm');
+```
+
+<img src="/assets/3/reg1.png" alt="penguins dataset: Linear regression bill length vs depth" width="700">
+
+The plot suggests a negative relationship - as bill length increases, depth decreases. The shaded region shows the confidence interval for the regression line. But here's where things get interesting...
+
+### When Aggregation Lies: Simpson's Paradox
+
+The basic `regplot()` function has a limitation: no `hue` parameter. It can only show one regression line for all your data. For grouped data, this can be dangerously misleading. Watch what happens when we use `lmplot()`, which lets us separate by species:
+
+```python
+sns.lmplot(data=penguins, x='bill_length_mm',
+           y='bill_depth_mm', hue='species',
+           height=6, aspect=8/6,
+           palette='cool');
+```
+
+<img src="/assets/3/reg0.png" alt="penguins dataset: Linear regression bill length vs depth with hue" width="750">
+
+Wait, what? Now each species shows a **positive** relationship, completely contradicting the overall negative trend we saw before. This isn't an error - it's Simpson's Paradox in action.
+
+Simpson's Paradox occurs when a trend in aggregated data reverses when you properly separate the data into meaningful groups. Here's what's happening: the three penguin species have different body plans. Gentoo penguins are generally larger with both longer and deeper bills. Adelie penguins are smaller on both dimensions. When you lump all species together, the between-species differences dominate the within-species pattern, creating a spurious negative correlation.
+
+This is a crucial lesson for data analysis: always examine relationships within meaningful subgroups. Aggregating across distinct populations can produce completely misleading conclusions. The relationship you see in aggregated data might not exist at all - or worse, might be the opposite of the truth.
+
+### Beyond Linear Relationships
+
+Not everything is linear. For curved relationships, you can fit polynomial regressions:
+
+```python
+mpg = sns.load_dataset('mpg')
+
+sns.regplot(data=mpg, x='horsepower', y='mpg', order=2);
+```
+
+<img src="/assets/3/reg2.png" alt="mpg dataset: second-order polynomial regression" width="700">
+
+The `order=2` parameter fits a quadratic curve. Be careful though - higher-order polynomials can overfit your data, fitting noise rather than signal. Use them judiciously.
+
+For binary outcomes, logistic regression is the right tool:
+
+```python
+# Generate binary outcome data
+x = np.random.normal(size=150)
+y = (x > 0).astype(np.float)
+x = x.reshape(-1, 1)
+x[x > 0] -= .8
+x[x < 0] += .5
+
+# Plot logistic regression
+sns.regplot(x=x, y=y, logistic=True)
+```
+
+<img src="/assets/3/mpg.png" alt="Logistic regression example" width="700">
+
+The S-shaped curve is characteristic of logistic regression, showing how probability changes with the predictor variable.
+
+When should you use `regplot()` versus `lmplot()`? Use `regplot()` when you want a single regression as part of a larger matplotlib figure. Use `lmplot()` when you need separate regressions for different groups or want to create faceted regression plots.
+
+---
+
+## The Supporting Cast: Complementary Plots
+
+These last few plot types rarely stand alone - they're best used as overlays on other visualizations, adding detail without overwhelming the viewer.
+
+### Strip Plots: Showing Every Point
+
+Sometimes summary statistics hide important details. You need to see the individual observations - how many there are, where they cluster, whether any stand out as unusual. Strip plots display every data point at categorical positions.
+
+```python
+plt.rcParams["figure.figsize"] = 7, 5
+plt.style.use('fivethirtyeight')
+
+titanic = sns.load_dataset('titanic')
+
+params = dict(edgecolor='gray',
+              palette=['#91bfdb', '#fc8d59'],
+              linewidth=1,
+              jitter=0.25)
+
+sns.stripplot(data=titanic, x='pclass',
+              hue='sex', y='age',
+              **params);
+```
+
+<img src="/assets/3/strip1.png" alt="strip plot showing individual Titanic passenger ages" width="700">
+
+The `jitter` parameter adds random horizontal displacement so overlapping points don't hide each other completely. Without jitter, they'd all stack vertically in lines, and you'd lose the sense of how many observations you have.
+
+Strip plots shine when layered over violin or box plots:
+
+```python
+plt.rcParams["figure.figsize"] = 10, 6
+
+# First plot the violins
+sns.violinplot(x=titanic['pclass'], y=titanic['age'],
+               palette='Accent', dodge=True,
+               hue=titanic['survived'])
+
+# Then overlay the strip plot
+g = sns.stripplot(x=titanic['pclass'], y=titanic['age'],
+                  edgecolor='gray',
+                  palette=['#fc8d59', 'wheat'],
+                  dodge=True,
+                  hue=titanic['survived'],
+                  jitter=.15);
+```
+
+<img src="/assets/3/strip2.png" alt="strip plot overlay on violin plot" width="750">
+
+Now you see both the distribution shape and the actual data points. This combination works beautifully for datasets up to a few hundred points per group.
+
+---
+
+### Swarm Plots: Intelligent Point Placement
+
+Strip plots add random jitter. Swarm plots do something smarter - they arrange points algorithmically to avoid overlap while revealing the distribution shape. The result looks like a swarm of bees, hence the name.
+
+```python
+sns.swarmplot(x=titanic['pclass'],
+              y=titanic['age'],
+              palette='icefire_r');
+```
+
+<img src="/assets/3/swarm1.png" alt="swarm plot of Titanic passenger ages" width="700">
+
+The point arrangement itself shows you the distribution density. Where points spread wider, you have more observations. The shape emerges naturally from the algorithm trying to pack points efficiently.
+
+The downside? Swarm plots are computationally expensive. With thousands of points, they become slow to render. They work best with small to medium datasets - say, under 2,000 points total.
+
+Like strip plots, swarm plots pair beautifully with box plots:
+
+```python
+# First the swarm plot
+sns.swarmplot(data=titanic, x='pclass',
+              palette='PuBu', hue='survived',
+              y='age')
+
+# Then overlay the box plot with transparency
+ax = sns.boxplot(x=titanic['pclass'],
+                 y=titanic['age'],
+                 palette="Accent")
+
+# Add transparency to boxes
+for patch in ax.artists:
+    r, g, b, a = patch.get_facecolor()
+    patch.set_facecolor((r, g, b, .5))
+```
+
+<img src="/assets/3/swarm2.png" alt="swarm plot overlaid on box plot" width="750">
+
+Now you see individual points, distribution shape, and summary statistics all at once. It's a lot of information in one plot, but it works because each layer adds meaning without creating clutter.
+
+---
+
+### Rug Plots: Marginal Distributions
+
+The humblest plot in our toolkit is the rug plot - just tiny tick marks along the axis showing where each data point sits. They're called rug plots because the marks resemble the fringe on a rug.
+
+```python
+fig, axs = plt.subplots(figsize=(8, 1.5))
+
+sns.rugplot(ax=axs, a=tips['total_bill'],
+            height=0.25, lw=0.5,
+            color=sns.xkcd_rgb["pale red"]);
+```
+
+<img src="/assets/3/rug.png" alt="rug plot showing distribution of bill totals" width="700">
+
+On their own, rug plots don't tell you much. But as marginal distributions alongside 2D visualizations like scatter plots or regression plots, they add context about the underlying data density. They answer the question "where is my data actually concentrated?" without interfering with the main visualization.
+
+---
+
+## Your Statistical Toolkit: A Quick Reference
+
+You now have a comprehensive set of tools for statistical visualization. Here's when to use each:
+
+| Plot Type | Best For | Avoid When |
+|-----------|----------|------------|
+| **Histogram** | Understanding single variable distributions | Comparing >5 distributions simultaneously |
+| **Box Plot** | Comparing distributions across many groups | Dataset is very large (>10k points per group) |
+| **Letter-Value Plot** | Large datasets (>10k points) | Small datasets (<1k points) |
+| **Violin Plot** | Showing distribution shapes with statistics | Dataset is extremely large or computation time matters |
+| **Regression Plot** | Visualizing linear relationships | Relationship is clearly non-linear |
+| **Strip Plot** | Showing individual points with categories | Too many points cause severe overplotting |
+| **Swarm Plot** | Small/medium datasets with distribution shape | Large datasets (very slow rendering) |
+| **Rug Plot** | Adding marginal distributions | As standalone visualization |
+
+### Key Principles Learned
+
+**Distribution matters.** Before running statistical tests or building models, understand your variable distributions. Are they normal? Skewed? Multimodal? The right plot makes this obvious.
+
+**Context reveals truth.** Simpson's Paradox taught us that aggregated data can lie. Always examine relationships within meaningful subgroups, not just across your entire dataset.
+
+**Layering adds insight.** Combining plot types - strip plots over violins, rug plots with scatter plots - provides richer understanding than any single visualization.
+
+**Choose the right tool.** Box plots for many groups. Histograms for distribution details. Violin plots when shape matters. Each plot type has its sweet spot.
+
+## What's Next
+
+You've now mastered both essential plots (Part 1) and statistical depth (Part 2). You can create professional visualizations, compare groups rigorously, understand distributions, and model relationships.
+
+But what happens when you need to compare these relationships across multiple categories simultaneously? What if you want to see how every variable in your dataset relates to every other variable? What if your data has so many dimensions that individual plots become overwhelming?
+
+In **Part 3: Multivariate Visualization**, you'll discover Seaborn's most powerful feature: Grid classes that let you create sophisticated multi-panel visualizations with a single command. You'll learn about FacetGrid for conditional comparisons, PairGrid for exploring all relationships at once, and JointGrid for focused bivariate analysis with marginal context.
+
+These tools transform how you approach complex data. Instead of struggling to cram multiple dimensions into one plot, you'll create multiple simple plots that work together to tell a complete story.
+
+The journey continues - you have the foundation and the depth, now let's add breadth.
+
+## Resources for Continued Learning
+
+**Official Documentation:**
+- [Seaborn Tutorial](https://seaborn.pydata.org/tutorial.html) - Comprehensive guide to all features
+- [Example Gallery](https://seaborn.pydata.org/examples/index.html) - Visual inspiration with code
+- [API Reference](https://seaborn.pydata.org/api.html) - Complete function documentation
+
+**This Tutorial Series:**
+- Part 1 covered essential plots for everyday visualization
+- Part 2 (this tutorial) covered distributions and statistical analysis
+- Part 3 will cover multivariate visualization with Grid classes
+- [Code and Datasets](https://github.com/skacem/TIL/blob/main/seaborn_intro.ipynb) - Download and experiment
+
+---
 
 ## References
 
-[1] Tufte, Edward (1990). Envisioning Information. Graphics Press. p. 67. ISBN 978-0961392116.  
-[2] [seaborn official website](https://seaborn.pydata.org/index.html)
+[1] VanderPlas, Jake. 2016. *Python Data Science Handbook*. O'Reilly Media, Inc.
+
+[2] Waskom, M. L., (2021). seaborn: statistical data visualization. *Journal of Open Source Software*, 6(60), 3021, https://doi.org/10.21105/joss.03021
+
+[3] Gureckis, Todd. 2020. [Lab in Cognition and Perception](http://gureckislab.org/courses/spring20/labincp/intro)
+
+[4] Hofmann, Heike, Hadley Wickham & Karen Kafadar (2017) Letter-Value Plots: Boxplots for Large Data, *Journal of Computational and Graphical Statistics*, 26:3, 469-477, DOI: 10.1080/10618600.2017.1305277
