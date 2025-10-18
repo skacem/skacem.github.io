@@ -380,6 +380,14 @@ header h1 {
   overflow: auto;
 }
 
+.post pre {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  white-space: pre;
+  word-wrap: normal;
+}
+
 .post code { padding: 1px 5px; }
 
 .post ul,
