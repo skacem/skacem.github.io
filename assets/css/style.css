@@ -382,6 +382,7 @@ header h1 {
 
 .post pre {
   max-width: 100%;
+  max-height: 500px;
   overflow-x: auto;
   overflow-y: auto;
   white-space: pre;
