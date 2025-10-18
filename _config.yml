@@ -36,6 +36,7 @@ kramdown:
 # Build settings
 markdown: kramdown
 #permalink: pretty
+show_excerpts: false
 
 plugins:
   - jemoji

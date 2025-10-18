@@ -1,4 +1,4 @@
---
+---
 layout: post
 category: ml
 comments: true
@@ -13,7 +13,6 @@ tags:
 katex: true
 
 ---
-
 
 In the [previous post](/ml/2021/06/25/Web-Crawlers/), we learned the fundamentals of web scraping and built our first crawler for movie data. Today, we're taking things further by building a GitHub users crawler. But more importantly, we'll explore when scraping makes sense, when it doesn't, and how to do it responsibly.
 
