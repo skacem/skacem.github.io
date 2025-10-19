@@ -56,7 +56,7 @@ pagination:
   </div>
 </div>
 
-<div style="margin: 40px 0; text-align: center;">
+<div style="margin: 30px 0 10px 0; text-align: center;">
 <b>tagged in</b>: [
 {% for tag in page.tags %}
   {% capture tag_name %}{{ tag }}{% endcapture %}
@@ -110,6 +110,7 @@ pagination:
     position: relative;
     max-width: 1400px;
     margin: 0 auto;
+    padding: 0 15px;
   }
 
   /* Sidebar styling */
@@ -223,6 +224,8 @@ pagination:
   @media screen and (max-width: 1200px) {
     .post-with-toc {
       display: block;
+      padding: 0 20px;
+      overflow-x: hidden;
     }
 
     .toc-sidebar {
@@ -237,6 +240,7 @@ pagination:
     .toc-container {
       max-width: 100%;
       margin: 0 auto;
+      overflow-x: hidden;
     }
 
     .toc-title {
@@ -273,8 +277,15 @@ pagination:
     }
 
     .post-with-toc .post {
-      max-width: 850px;
+      max-width: 100%;
       margin: 0 auto;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .post-content {
+      overflow-x: hidden;
+      word-wrap: break-word;
     }
   }
 
