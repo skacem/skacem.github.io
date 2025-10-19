@@ -13,12 +13,22 @@ pagination:
 <!-- Reading Progress Bar -->
 <div class="reading-progress-bar" id="reading-progress-bar"></div>
 
+<!-- Scroll to Top Button -->
+<button id="scroll-to-top" class="scroll-to-top" aria-label="Scroll to top">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"></polyline>
+  </svg>
+</button>
+
 <div class="post-with-toc">
   <!-- Table of Contents Sidebar (only for posts > 5 min) -->
   {% if reading_time > 5 %}
   <aside class="toc-sidebar" id="toc-sidebar">
     <div class="toc-container">
-      <h3 class="toc-title">📑 Contents</h3>
+      <h3 class="toc-title" id="toc-title">
+        <span>📑 Contents</span>
+        <span class="toc-toggle" id="toc-toggle">▼</span>
+      </h3>
       <nav id="toc-nav"></nav>
     </div>
   </aside>
@@ -46,14 +56,14 @@ pagination:
   </div>
 </div>
 
-<center>
+<div style="margin: 40px 0; text-align: center;">
 <b>tagged in</b>: [
 {% for tag in page.tags %}
   {% capture tag_name %}{{ tag }}{% endcapture %}
   <a href="/tag/{{ tag_name }}"><code class="highligher-rouge"><nobr>{{ tag_name }}</nobr></code></a>
 {% endfor %}
 ]
-</center>
+</div>
 
 {% include share-page.html %}
 
@@ -107,9 +117,9 @@ pagination:
     position: sticky;
     top: 80px;
     left: 0;
-    width: 280px;
+    width: 220px;
     height: fit-content;
-    padding-right: 30px;
+    padding-right: 20px;
     flex-shrink: 0;
   }
 
@@ -117,19 +127,35 @@ pagination:
     background: #f8f9fa;
     border: 1px solid #e9ecef;
     border-radius: 8px;
-    padding: 20px;
+    padding: 15px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     max-height: calc(100vh - 100px);
     overflow-y: auto;
   }
 
   .toc-title {
-    margin: 0 0 15px 0;
-    font-size: 18px;
+    margin: 0 0 12px 0;
+    font-size: 16px;
     font-weight: 600;
     color: #212529;
     border-bottom: 2px solid #dee2e6;
-    padding-bottom: 10px;
+    padding-bottom: 8px;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .toc-toggle {
+    display: none;
+    font-size: 14px;
+    color: #6c757d;
+    transition: transform 0.3s ease;
+  }
+
+  .toc-toggle.rotated {
+    transform: rotate(180deg);
   }
 
   /* TOC navigation list */
@@ -152,14 +178,14 @@ pagination:
 
   #toc-nav a {
     display: block;
-    padding: 6px 12px;
+    padding: 5px 10px;
     color: #495057;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.4;
     border-left: 3px solid transparent;
     transition: all 0.2s ease;
-    margin: 2px 0;
+    margin: 1px 0;
   }
 
   #toc-nav a:hover {
@@ -177,9 +203,9 @@ pagination:
   }
 
   /* Nested heading levels (H3, H4, etc.) */
-  #toc-nav .toc-h2 { padding-left: 12px; }
-  #toc-nav .toc-h3 { padding-left: 28px; font-size: 13px; }
-  #toc-nav .toc-h4 { padding-left: 44px; font-size: 12px; }
+  #toc-nav .toc-h2 { padding-left: 10px; }
+  #toc-nav .toc-h3 { padding-left: 22px; font-size: 12px; }
+  #toc-nav .toc-h4 { padding-left: 34px; font-size: 11px; }
 
   /* Main post content */
   .post-with-toc .post {
@@ -193,14 +219,57 @@ pagination:
     scroll-behavior: smooth;
   }
 
-  /* Responsive: hide TOC on smaller screens */
+  /* Responsive: show TOC inline at top on smaller screens */
   @media screen and (max-width: 1200px) {
-    .toc-sidebar {
-      display: none;
-    }
-
     .post-with-toc {
       display: block;
+    }
+
+    .toc-sidebar {
+      position: relative;
+      top: 0;
+      width: 100%;
+      padding-right: 0;
+      margin-bottom: 30px;
+      order: -1;
+    }
+
+    .toc-container {
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    .toc-title {
+      cursor: pointer;
+    }
+
+    .toc-title:hover {
+      color: #0066cc;
+    }
+
+    .toc-toggle {
+      display: inline-block;
+    }
+
+    #toc-nav {
+      max-height: 1000px;
+      overflow: hidden;
+      transition: max-height 0.4s ease, opacity 0.3s ease;
+      opacity: 1;
+    }
+
+    #toc-nav.collapsed {
+      max-height: 0;
+      opacity: 0;
+      margin-top: 0;
+    }
+
+    .toc-title {
+      margin-bottom: 0;
+    }
+
+    .toc-title.expanded {
+      margin-bottom: 12px;
     }
 
     .post-with-toc .post {
@@ -238,6 +307,53 @@ pagination:
     background: linear-gradient(90deg, #0066cc, #0099ff);
     z-index: 9999;
     transition: width 0.1s ease;
+  }
+
+  /* Scroll to Top Button */
+  .scroll-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+  }
+
+  .scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .scroll-to-top:hover {
+    background: #0052a3;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 102, 204, 0.4);
+  }
+
+  .scroll-to-top:active {
+    transform: translateY(-1px);
+  }
+
+  /* Mobile adjustments */
+  @media screen and (max-width: 768px) {
+    .scroll-to-top {
+      bottom: 20px;
+      right: 20px;
+      width: 45px;
+      height: 45px;
+    }
   }
 
   /* Copy Code Button */
@@ -387,6 +503,41 @@ document.addEventListener('DOMContentLoaded', function() {
   // Only run if TOC container exists (i.e., post is > 5 min)
   if (!tocNav) return;
 
+  // Mobile TOC toggle functionality
+  const tocTitle = document.getElementById('toc-title');
+  const tocToggle = document.getElementById('toc-toggle');
+
+  if (tocTitle && tocToggle) {
+    // Start collapsed on mobile (screens < 1200px)
+    if (window.innerWidth <= 1200) {
+      tocNav.classList.add('collapsed');
+      tocToggle.classList.add('rotated');
+    }
+
+    tocTitle.addEventListener('click', function() {
+      // Only toggle on mobile screens
+      if (window.innerWidth <= 1200) {
+        tocNav.classList.toggle('collapsed');
+        tocToggle.classList.toggle('rotated');
+        tocTitle.classList.toggle('expanded');
+      }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+      if (window.innerWidth > 1200) {
+        // Remove collapsed state on larger screens
+        tocNav.classList.remove('collapsed');
+        tocToggle.classList.remove('rotated');
+        tocTitle.classList.remove('expanded');
+      } else if (window.innerWidth <= 1200 && !tocNav.classList.contains('collapsed') && !tocNav.classList.contains('expanded')) {
+        // Start collapsed on mobile if not already interacted with
+        tocNav.classList.add('collapsed');
+        tocToggle.classList.add('rotated');
+      }
+    });
+  }
+
   // Get all headings from the post content
   const postContent = document.querySelector('.post-content');
   const headings = postContent.querySelectorAll('h2, h3, h4');
@@ -509,6 +660,33 @@ document.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('scroll', updateProgressBar);
   // Initialize on load
   updateProgressBar();
+
+  // ============================================
+  // Scroll to Top Button
+  // ============================================
+  const scrollToTopBtn = document.getElementById('scroll-to-top');
+
+  // Show/hide button based on scroll position
+  function toggleScrollToTopButton() {
+    if (window.pageYOffset > 300) {
+      scrollToTopBtn.classList.add('visible');
+    } else {
+      scrollToTopBtn.classList.remove('visible');
+    }
+  }
+
+  // Scroll to top when clicked
+  scrollToTopBtn.addEventListener('click', function() {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
+
+  // Listen to scroll events
+  window.addEventListener('scroll', toggleScrollToTopButton);
+  // Initialize on load
+  toggleScrollToTopButton();
 
   // ============================================
   // Copy Code Button
