@@ -7,7 +7,6 @@ author: "Skander Kacem"
 tags:
     - Visualization
     - Tutorial
-    - Seaborn
     - Python
 katex: true
 ---

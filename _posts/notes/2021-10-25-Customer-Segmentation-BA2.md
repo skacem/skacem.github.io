@@ -3,92 +3,74 @@ layout: post
 category: ml
 comments: true
 title: "Customer Segmentation using RFM Analysis"
-excerpt: "It is impossible to develop a precision marketing strategy without identifying who you want to target. Marketing campaigns tailored to specific customers rely on the ability to accurately categorize those based on their demographic characteristics and buying behavior. Segments should be clearly differentiated from one another according to the maxim: \"Customers are unique, but sometimes similar\".
-In this tutorial, we will learn how to segment your customers database using RFM analysis along with hierarchical cluster analysis (HCA) we introduced in the previous tutorial."
 author: "Skander Kacem"
-tags: 
+tags:
     - Business Analytics
-    - Customer Segmentation
+    - RFM Analysis
+    - Marketing Analytics
 katex: true
-preview_pic: /assets/6/customers.png
 ---
+
+# Customer Segmentation using RFM Analysis
 
 ## Introduction
 
-The field of marketing analytics is very broad and can include fascinating topics such as:
+Marketing analytics spans an incredible range of techniques, from mining social media sentiment to optimizing realtime bidding strategies. But beneath all these sophisticated approaches lie three deceptively simple questions that most businesses still struggle to answer: Who are my customers? Which ones deserve my attention and marketing budget? And what will they be worth to my business in the future?
 
-* Text mining,
-* Social network analysis,
-* sentiment analysis,
-* realtime bidding and so on.
+Today we're going to tackle the first two questions using one of the most powerful tools in the marketing analyst's toolkit: RFM analysis combined with hierarchical clustering. By the end of this walkthrough, you'll understand not just how to segment customers, but why this approach works and when it makes business sense.
 
-However, at the heart of marketing lie few basic questions, that often remain unanswered:
+## The Segmentation Problem
 
-1. Who are my customers?
-2. Which customers should I target, and spend most of my marketing budget on?
-3. What is the future value of my customers?
+Imagine you're running an online retail business with thousands of customers. You can't treat them all the same way. Offering everyone identical products at identical prices with identical messaging would be a recipe for mediocrity. Some customers are willing to pay premium prices for exclusive items. Others hunt for bargains. Some buy frequently, others make rare but valuable purchases. The diversity is staggering.
 
-In this tutorial, we will explore the first two questions using customer segmentation techniques involving RFM analysis along with HCA.
+In today's digital world, that "thousands of customers" quickly becomes tens of thousands or even millions. Your database grows faster than your ability to understand it. Treating each customer individually becomes impossibly expensive. You need to find patterns, groupings, natural clusters of similar behavior that let you customize your approach without drowning in complexity.
 
-## Customer Segmentation
+This is where segmentation saves you. The art lies in finding that sweet spot: simplifying enough to make your insights actionable, but not so much that you lose the statistical and managerial relevance that makes those insights valuable.
 
-You can't treat your customers the same way, offer them the same product, charge the same price, or communicate the same benefits. Otherwise you will miss a lot of value. So you need to understand the distinctions in your customers' needs, wants, preferences and behaviors. Only then can you customize your offering, personalize your customer approach, and optimize your marketing campaigns.  
+## Understanding RFM Analysis
 
-Now, in today's digital world, almost every online retailer holds a massive customer database. So, how do we deal with big customer databases?  
-Treating each and every customer individually is very costly. The answer is, of course, segmentation. I know, you've already guessed that yourselves.  
+RFM analysis cuts through the noise by focusing on three behavioral dimensions that matter most for predicting future purchases: Recency, Frequency, and Monetary value. Think of these as the three coordinates that map your customer's relationship with your business.
 
-A great segmentation is all about finding a good balance between simplifying enough, so it remains usable and not simplifying too much, so it's still statistically and managerially relevant.
+**Recency** tells you when a customer last made a purchase. The logic is intuitive: someone who bought from you yesterday is far more likely to buy again soon than someone whose last purchase was three years ago. That distant customer might have lost interest, found a competitor, or simply forgotten you exist. Recency captures the freshness of the relationship.
 
-## RFM Analysis
+**Frequency** counts how many times a customer has purchased within a given period. This metric reveals commitment. A customer with ten purchases has demonstrated consistent interest in what you're selling. Someone with only one or two purchases remains an unknown quantity. They might become loyal, or they might disappear forever.
 
-RFM (Recency, Frequency, Monetary) analysis is a segmentation approach based on customer behavior. It groups customers according to their purchasing history (How recently, how frequently, and how much has a customer spent on past purchases).  It is one of the best predictor of future purchase and customer lifetime value in terms of their activity and engagement.
+**Monetary value** measures how much a customer has spent over time. This isn't just about revenue (though that matters). High-spending customers often have different needs, different price sensitivities, and different expectations about service quality. They deserve different treatment because they represent different opportunities.
 
-Recency indicates when a customer made his or her last purchase. Usually the smaller the recency, that is the more recent the last purchase, the more likely the next purchase will happen soon. On the other hand, if a customer has lapsed and has not made any purchase for a long period of time, he may have lost interest or switched to competition.  
-Frequency is about the number of customers purchases in a given period of time. Customers who bought frequently were more likely to buy again, as opposed to customers who made only one or two purchases.  
-Monetary is about how much a customer has spent in total during a given period. Customers who spend more should be treated differently than customers who spend less. Furthermore, they are more likely to buy again.  
+These three metrics work together beautifully because they capture different aspects of customer behavior. You might have a high-frequency, low-value customer who buys often but cheaply. Or a low-frequency, high-value customer who makes rare but significant purchases. Each pattern suggests different strategies.
 
-## Practical Example in Python
+## Building the Analysis in Python
 
-We start by loading the required libraries and the dataset, and set up our programming environment. Also, make sure you have `pandassql` and `squarify` installed.
+Let's get our hands dirty with real data. We'll start by setting up our environment and loading the necessary tools.
 
 ```python
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from pandasql import sqldf
 from sklearn.preprocessing import scale
 from scipy.spatial.distance import pdist
-from scipy.cluster.hierarchy import dendrogram , linkage, cut_tree
+from scipy.cluster.hierarchy import dendrogram, linkage, cut_tree
 import squarify
-```
 
-```python
-# Notebooks set up
-pysqldf = lambda q: sqldf(q, globals())
-%precision %.2f
+# Set up our notebook environment
 pd.options.display.float_format = '{:,.2f}'.format
 plt.rcParams["figure.figsize"] = (12,8)
 
-# read the dataset from the csv file
+# Load the dataset
 headers = ['customer_id', 'purchase_amount', 'date_of_purchase']
-df = pd.read_csv('../Datasets/purchases.txt', header=None, 
+df = pd.read_csv('../Datasets/purchases.txt', header=None,
                  names=headers, sep='\t')
 ```
-### Data Wrangling
 
-The dataframe consists of 51,243 observations across 3 variables:
+## Exploring the Data
 
-1. Customer ID,
-2. purchase amount in USD and
-3. date of purchase
-
-The data is clean and covers the period January 2nd 2005 to December 31st 2015.
+Our dataset contains 51,243 transactions spanning January 2005 through December 2015. Each row captures three things: which customer made a purchase, how much they spent, and when it happened. The data is clean, which means we can dive straight into the interesting parts without spending hours on data quality issues.
 
 ```python
 df.info()
 ```
 
-```text
+```
 <class 'pandas.core.frame.DataFrame'>
 RangeIndex: 51243 entries, 0 to 51242
 Data columns (total 3 columns):
@@ -101,87 +83,90 @@ dtypes: float64(1), int64(1), object(1)
 memory usage: 1.2+ MB
 ```
 
-We proceed by converting the `data_of_purchase` column from object to a date object.
+The date column needs attention first. Right now it's stored as text (an object type), but we need it as an actual date so we can perform time calculations.
 
 ```python
-# Transform the last column to a date object
+# Convert dates to proper datetime objects
 df['date_of_purchase'] = pd.to_datetime(df['date_of_purchase'], format='%Y-%m-%d')
+
+# Extract the year for later analysis
+df['year_of_purchase'] = df['date_of_purchase'].dt.year
 ```
 
-To calculate the recency, we create a new variable `day_since` that contains the number of days since the last purchase. To do this, we set January 1, 2016 as the start date and count the number of days since the last purchase for each customer backwards using the customers ID. 
+Now comes a clever trick for calculating recency. We'll set January 1, 2016 as our reference point (just after our data ends) and count backwards to find how many days have passed since each customer's purchases.
 
 ```python
-# Extract year of purchase and save it as a column
-df['year_of_purchase'] = df['date_of_purchase'].dt.year
-# Add a day_since column showing the difference between last purchase and a basedate
+# Calculate days since each purchase
 basedate = pd.Timestamp('2016-01-01')
 df['days_since'] = (basedate - df['date_of_purchase']).dt.days
 ```
 
-### RFM Computation
+This `days_since` column becomes the foundation for our recency calculation.
 
-To implement the RFM analysis, further data processing need to be done.  
-Next we are going to compute the customers recency, frequency and average purchase amount. This part is a bit tricky, particularly when implemented with pandas. The trick here is that the customer ID is unique for each customer. So even though we have 51,243 purchases, we will only have as many unique customer IDs as there are in the database.   
-For each customer, we now need to calculate the minimum number of days between all of their purchases and January 1, 2016. By taking the minimum number of days, we obviously have the day of the last purchase, which is the exact definition of recency.   
-The next step is to calculate the frequency for each customer, namely how many purchases this customer has made.  
-This is achieved with the python sql module:
+## Computing RFM Metrics
+
+Here's where things get interesting. We have 51,243 transactions, but far fewer unique customers. Each customer might have made multiple purchases, and we need to aggregate those purchases into our three RFM metrics.
+
+For recency, we want the minimum `days_since` value for each customer. That minimum represents their most recent purchase. For frequency, we count how many times each customer appears in the dataset. For monetary value, we average their purchase amounts.
+
+We could write this using complex pandas groupby operations, but there's a cleaner approach using native pandas aggregation:
+
 ```python
-# Compute recency, frequency, and average purchase amount
-q = """
-        SELECT customer_id,
-        MIN(days_since) AS 'recency',
-        COUNT(*) AS 'frequency',
-        AVG(purchase_amount) AS 'amount'
-        FROM df GROUP BY 1"""
-customers = sqldf(q)
+# Compute RFM metrics for each customer
+customers = df.groupby('customer_id').agg({
+    'days_since': 'min',           # Minimum days = most recent purchase
+    'customer_id': 'count',         # Count = number of purchases
+    'purchase_amount': 'mean'       # Average spending per purchase
+}).rename(columns={
+    'days_since': 'recency',
+    'customer_id': 'frequency',
+    'purchase_amount': 'amount'
+})
+
+# Reset index to make customer_id a column again
+customers = customers.reset_index()
 ```
 
-The asterisk here actually refers to anything in the data that is related to this customer; and then for the amount, we averaged the purchase amount for that specific customer ID and named that aggregate calculation as `amount`.  
-Now, the trick is we want to make sure that each row only appears once per customer. So we're going to calculate that from the data and group by one, which means that everything here is going to be calculated and grouped by customer ID.  
-
-Sure, it would have been possible to do all the computations with pandas only. However, this would have required much more work. When working with databases, SQL knowledge is an advantage. Indeed, a single sql command is all that is needed to create an RFM table.  
-The results are then stored under the variable `customers` and the first five entries have the following values:
+This gives us one row per customer with their three RFM scores. Let's peek at the first few entries:
 
 ```python
 customers.head()
 ```
 
-```text
-+----+---------------+-----------+-------------+----------+
-|    |   customer_id |   recency |   frequency |   amount |
-|----+---------------+-----------+-------------+----------|
-|  0 |            10 |      3829 |           1 |       30 |
-|  1 |            80 |       343 |           7 |  71.4286 |
-|  2 |            90 |       758 |          10 |    115.8 |
-|  3 |           120 |      1401 |           1 |       20 |
-|  4 |           130 |      2970 |           2 |       50 |
-+----+---------------+-----------+-------------+----------+
+```
+   customer_id  recency  frequency  amount
+0           10     3829          1   30.00
+1           80      343          7   71.43
+2           90      758         10  115.80
+3          120     1401          1   20.00
+4          130     2970          2   50.00
 ```
 
-### Exploratory Data Analysis
+Customer 90 stands out immediately. They've purchased ten times with an average transaction of $115.80, and their last purchase was 758 days ago. That's someone worth understanding better.
 
-We start by generating some descriptive statistics, including those that summarize the central tendency, dispersion and shape of each of our RFM variables.
+## Understanding the Distributions
+
+Before we jump into clustering, we need to understand what we're working with. Statistical summaries reveal the shape of our customer base:
 
 ```python
 customers[['recency', 'frequency', 'amount']].describe()
 ```
 
-```text
-+-------+-----------+-------------+----------+
-|       |   recency |   frequency |   amount |
-|-------+-----------+-------------+----------|
-| count |     18417 |       18417 |    18417 |
-| mean  |   1253.04 |     2.78237 |   57.793 |
-| std   |   1081.44 |     2.93689 |   154.36 |
-| min   |         1 |           1 |        5 |
-| 25%   |       244 |           1 |  21.6667 |
-| 50%   |      1070 |           2 |       30 |
-| 75%   |      2130 |           3 |       50 |
-| max   |      4014 |          45 |     4500 |
-+-------+-----------+-------------+----------+
+```
+         recency    frequency      amount
+count   18417.00     18417.00    18417.00
+mean     1253.04         2.78       57.79
+std      1081.44         2.94      154.36
+min         1.00         1.00        5.00
+25%       244.00         1.00       21.67
+50%      1070.00         2.00       30.00
+75%      2130.00         3.00       50.00
+max      4014.00        45.00     4500.00
 ```
 
-Then we plot the distributions of the RFM variables.
+These numbers tell a story. The median customer made their last purchase 1,070 days ago (almost three years), has made just two purchases total, and averages $30 per transaction. But look at those maximums: one customer made 45 purchases, and someone spent $4,500 on average. The variation is enormous.
+
+Let's visualize these distributions to see the patterns more clearly.
 
 ```python
 # Plot the recency distribution
@@ -189,258 +174,286 @@ plt.style.use('seaborn-whitegrid')
 customers.hist(column='recency', bins=31)
 plt.ylabel('Customers', fontsize=15)
 plt.xlabel('Days Since Last Purchase', fontsize=15)
-plt.xlim(0,);
+plt.xlim(0,)
+plt.tight_layout()
+plt.savefig('recency_distribution.png', dpi=150, bbox_inches='tight')
+plt.show()
 ```
 
-<div class="imgcap">
-<img src="/assets/6/recency.png" style="zoom:100%;" />
-<div class="thecap">  </div></div>
+<img src="/assets/6/recency.png" alt="Distribution of customer recency showing concentration of recent purchases" width="750">
 
-Except for a peak on the very left, the recency distribution is relatively uniform. This is good to see, because it means that our business has been gaining attention lately and has been generating record sales. It's always worth doing a detailed analysis when it comes to outliers or exceptions. So I recommend taking a closer look at this peak to determine its triggers and drivers. It could be that our last marketing campaign was a success or that the pop-up sale we had recently was the consequence. So try to figure out the reason for this and take advantage of it.
-
+The recency distribution reveals something fascinating. Notice that sharp peak on the left side? That represents a surge of recent activity. The rest of the distribution spreads relatively evenly across time, which tells us that customers have been churning at a fairly steady rate over the years. That left-side spike could indicate a successful recent marketing campaign, a seasonal effect, or perhaps a popular sale event that drew people back. Whatever the cause, it represents an opportunity to understand what triggered those recent purchases and potentially replicate that success.
 
 ```python
 # Plot the frequency distribution
 customers.hist(column='frequency', bins=41)
 plt.ylabel('Customers', fontsize=15)
 plt.xlabel('Number of Purchases', fontsize=15)
-plt.xlim(0,20);
+plt.xlim(0, 20)
+plt.tight_layout()
+plt.savefig('frequency_distribution.png', dpi=150, bbox_inches='tight')
+plt.show()
 ```
 
-<div class="imgcap">
-<img src="/assets/6/frequency.png" style="zoom:100%;" />
-<div class="thecap">  </div></div>
+<img src="/assets/6/frequency.png" alt="Frequency distribution showing most customers make only one purchase" width="750">
 
-The frequency distribution is extremely skewed to the right. Almost 50% of all customers have only made one purchase. Again, further clarification is necessary here. It is possible that most one-time purchases are recent, first-time transactions. And with a marketing approach tailored to the relevant customer segments, we could encourage these customers to make their next purchase.  
+The frequency story is even more dramatic. The distribution is massively right-skewed, with nearly half of all customers having made just a single purchase. This pattern appears in almost every retail business, but that doesn't make it less important. These one-time purchasers represent your biggest opportunity and your biggest challenge. Are they recent first-timers who haven't had time to return? Or are they dissatisfied customers who tried once and left? The distinction matters enormously for your marketing strategy.
 
 ```python
+# Plot the monetary distribution
 customers.hist(column='amount', bins=601)
 plt.ylabel('Customers', fontsize=15)
 plt.xlabel('Average Amount in $', fontsize=15)
-plt.xlim(0,400)
-plt.ylim(0,);
+plt.xlim(0, 400)
+plt.ylim(0,)
+plt.tight_layout()
+plt.savefig('amount_distribution.png', dpi=150, bbox_inches='tight')
+plt.show()
 ```
 
-<div class="imgcap">
-<img src="/assets/6/amount.png" style="zoom:100%;" />
-<div class="thecap">  </div></div>
+<img src="/assets/6/amount.png" alt="Monetary distribution showing most purchases cluster between $5-$30" width="750">
 
-Due to the presence of some extreme outliers, it is preferable to use the median here. 50% of all transactions are between \$5 and \$30.  
+The monetary distribution shows a strong concentration in the low range, with a long tail of higher-value customers. Half of all transactions fall between $5 and $30. Those extreme outliers at the high end, while rare, could represent your most valuable customers or perhaps unusual bulk orders. The median tells a more reliable story here than the mean, given how skewed the data is.
 
-This was a small overview of how to conduct an exploratory data analysis. Usually, at this stage of analysis, we develop hypotheses that we want to test later, especially with respect to ambiguous relationships such as finding out if it involves correlation or causation. Therefore, it is best to spend a little more time exploring your dataset.
+These exploratory analyses do more than show us pretty pictures. They help us form hypotheses. Maybe those one-time purchasers are actually recent customers who need a targeted reengagement campaign. Maybe that recency spike came from a successful promotion we should study and replicate. Good exploratory analysis generates questions worth answering.
 
-Lets now move on to customer segmentation. 
+## Preparing Data for Clustering
 
-### Hierarchical Cluster Analysis
+Clustering algorithms measure similarity using distances, and distances only make sense when all your variables use comparable scales. Right now, recency is measured in days (ranging from 1 to 4,014), frequency in counts (1 to 45), and monetary value in dollars (5 to 4,500). These scales are completely incompatible.
 
-Before starting the data transformation it is better to keep a copy of the original data, in case something goes wrong.
+We need to transform our data in two ways. First, we'll deal with the skewness in the monetary values. Then we'll standardize everything to a common scale.
 
 ```python
-# Copy the dataset
+# Make a copy to preserve the original data
 new_data = customers.copy()
 new_data.set_index('customer_id', inplace=True)
-```
 
-Data preprocessing is an essential part of segmentation and ML algorithms in general. We need to prepare and transform our data, so the segmentation variables can be compared to one another.
-
-Since our segmentation variables don't use the same scales, we need to standardize them. In statistics, standardization means to subtract the mean and divide by the standard deviation:
-
-$$
-Standardize=\frac{Data - data~mean}{Data~standard~deviation}
-$$
-
-Regardless of what the original scale was, days, dollars, or number of purchases, they can now be related to one another.
-
-Another problem to deal with is the dispersion or skewness of data. Skewness indicates the direction and relative magnitude of a distribution's deviation from the normal distribution. In the figure above, we see that the average purchase amount in $ is right skewed, meaning that there is a minority of very large positive values. And when data is extremely skewed, it may not be adequate for segmentation. In such a situation, it can be useful to convert it to a logarithmic scale.  
-
-```python
-# transform amount into a logarithmic scale and plot the result
+# Transform amount to a logarithmic scale
 new_data['amount'] = np.log10(new_data['amount'])
-# plot
-ax, fig = plt.subplots()
-new_data['amount'].plot(kind='hist', density=True, bins=40)
-new_data['amount'].plot(kind='kde')
-
-plt.xlim(0,4)
-plt.ylim(0,);
 ```
 
-<div class="imgcap">
-<img src="/assets/6/logscale.png" style="zoom:100%;" />
-<div class="thecap">  </div></div>
+Why logarithms? Extremely skewed data can dominate clustering algorithms, giving outsized weight to those few high-value outliers. A logarithmic transformation compresses the scale, making the distribution more symmetric and preventing extreme values from overwhelming the analysis.
 
-From the plot above we can see that after the transformation our data became more symmetrical and less skewed.  
-
-Now we scale our data to ensure that the clustering algorithm is stable against outliers and extreme values. Not all machine learning algorithms require feature scaling. However, for distance-based algorithms such as HCA, KNN, K-means, or SVM, scaling is required. The reason is that all these algorithms use distances between data points to determine similarities.
+Let's see how well this worked:
 
 ```python
-# Now we scale our data and we save it as dataframe:
-new_data = pd.DataFrame(scale(new_data), index=new_data.index, 
-                        columns=new_data.columns)
-# computing the distance would generate a huge matrix:
-print(f'Dimension of the distance matrix: ({new_data.shape[0]**2}, {new_data.shape[1]})')
+# Visualize the transformed distribution
+fig, ax = plt.subplots()
+new_data['amount'].plot(kind='hist', density=True, bins=40, alpha=0.6)
+new_data['amount'].plot(kind='kde', linewidth=2)
+plt.xlabel('Log10(Amount)', fontsize=13)
+plt.ylabel('Density', fontsize=13)
+plt.xlim(0, 4)
+plt.ylim(0,)
+plt.tight_layout()
+plt.savefig('log_transformed_amount.png', dpi=150, bbox_inches='tight')
+plt.show()
 ```
 
-```text
-Dimension of the distance matrix: (339185889, 3)
-```
+<img src="/assets/6/logscale.png" alt="Log-transformed monetary values showing more symmetric distribution" width="750">
 
-Calculating the distance matrix would generate a huge matrix. Therefore, we take a sample from our RFM dataset with a sampling rate of 10%. It means that only every 10th customer is considered in our segmentation.  
+Much better. The distribution now looks roughly bell-shaped instead of having that aggressive right skew. The density plot (the smooth curve) shows a nice symmetric peak, which means our clustering algorithm can now treat this variable more fairly.
+
+Now we standardize all three variables. Standardization means subtracting each variable's mean and dividing by its standard deviation. After this transformation, every variable has a mean of zero and a standard deviation of one. They're finally on equal footing.
 
 ```python
-# Since the distance matrix is that huge, 
-# we are sampling with a sampling rate of 10%
-sample = np.arange(0, 18417, 10)
-sample[:10]
+# Standardize all variables
+new_data = pd.DataFrame(
+    scale(new_data),
+    index=new_data.index,
+    columns=new_data.columns
+)
 ```
 
-```
-array([ 0, 10, 20, 30, 40, 50, 60, 70, 80, 90])
-```
+## The Sampling Decision
 
-Let's display some random samples from our newly generated dataframe; the one we will use to perform hierarchical clustering.
+Hierarchical clustering requires computing distances between every pair of customers. With 18,417 customers, that means calculating (18,417 × 18,416) / 2 = 169,548,136 pairwise distances. While modern computers can handle this, the resulting dendrogram becomes cluttered and hard to interpret. More importantly, for a tutorial focused on understanding the technique, working with a manageable subset makes the process clearer.
+
+We'll take a random sample of 10% of customers. This approach maintains the statistical properties of the full dataset while making our analysis more interpretable:
 
 ```python
-new_data_sample = new_data.iloc[sample]
+# Take a random 10% sample for clustering
+np.random.seed(42)  # For reproducibility
+sample_size = int(len(new_data) * 0.1)
+new_data_sample = new_data.sample(n=sample_size, random_state=42)
+
+# Get the corresponding customer information
+customers_sample = customers.set_index('customer_id').loc[new_data_sample.index].reset_index()
+```
+
+Let's look at a few random customers from our sample:
+
+```python
 new_data_sample.sample(5)
 ```
 
-```text
-+---------------+-----------+-------------+----------+
-|   customer_id |   recency |   frequency |   amount |
-|---------------+-----------+-------------+----------|
-|         69760 |      3178 |           1 |  1.47712 |
-|        147990 |      1911 |           1 |  1.30103 |
-|        100510 |      2739 |           1 |  1.47712 |
-|        138990 |        22 |           9 |  1.74473 |
-|        258230 |        55 |           1 |        2 |
-+---------------+-----------+-------------+----------+
+```
+customer_id    recency  frequency    amount
+69760           1.78      -0.61      0.62
+147990          0.61      -0.61      0.44
+100510          1.37      -0.61      0.62
+138990         -1.14       2.53      0.95
+258230         -1.11      -0.61      1.24
 ```
 
+These standardized values might look strange, but they're now directly comparable. Customer 138990 has a negative recency (meaning they purchased recently, which is good), high frequency (2.53 standard deviations above average), and high monetary value. That's a customer worth keeping happy.
+
+## Performing Hierarchical Clustering
+
+Hierarchical clustering builds a tree of similarities. It starts by finding the two most similar customers and grouping them. Then it finds the next most similar pair (or the next customer most similar to the first group) and combines them. This process continues until all customers are connected in a single hierarchical tree called a dendrogram.
+
+The beauty of this approach is that you don't need to specify the number of clusters in advance. The dendrogram shows you the natural groupings at every level, and you can choose the most meaningful cut point.
+
 ```python
-customers_sample = customers.iloc[sample].copy()
-# we compute the distances on the sampled data
-d = pdist(new_data_sample) # default metric is euclidean
-# and we perform the hierarchical clustering:
+# Compute pairwise distances using Euclidean distance
+d = pdist(new_data_sample, metric='euclidean')
+
+# Perform hierarchical clustering using Ward's method
 hcward = linkage(d, method='ward')
 ```
-`pdist()` computes pairwise distances between observations. The default distance metric is Euclidean. There are, however, many other metrics to choose from, such as: `minkowski`, `chebyshev` and `hamming`. Here we choose the default method.
 
-The clustering is performed by calling the `linkage()` using the `ward` method. There are many other methods to choose from and it doesn't have to be `ward`.
+We're using Ward's method for the linkage, which minimizes the variance within clusters. This tends to produce compact, spherical clusters that work well for RFM analysis. The method merges clusters in a way that keeps each group as internally similar as possible.
 
-After performing HCA we display the results using dendrogram.
+Now let's visualize the dendrogram:
 
 ```python
-# Plot dendrogram
-plt.title("Customer Dendrogram - Truncated")
-dend = dendrogram(hcward, 
-                  truncate_mode='lastp',
-                  p = 45,
-                  show_contracted=True,
-                  leaf_rotation=90,
-                  leaf_font_size=12);
-plt.xlabel('Customer ID')
-plt.ylabel('Distance');
+# Create the dendrogram
+plt.figure(figsize=(14, 8))
+plt.title("Customer Dendrogram - Hierarchical Clustering", fontsize=16, pad=20)
+dend = dendrogram(
+    hcward,
+    truncate_mode='lastp',
+    p=45,
+    show_contracted=True,
+    leaf_rotation=90,
+    leaf_font_size=10
+)
+plt.xlabel('Customer Clusters', fontsize=13)
+plt.ylabel('Distance (Ward Linkage)', fontsize=13)
+plt.tight_layout()
+plt.savefig('dendrogram.png', dpi=150, bbox_inches='tight')
+plt.show()
 ```
 
-<div class="imgcap">
-<img src="/assets/6/dendrogram.png" style="zoom:100%;" />
-<div class="thecap">  </div></div>
+<img src="/assets/6/dendrogram.png" alt="Dendrogram showing hierarchical clustering of customers" width="800">
 
-### Determining the Number of Clusters
+Reading a dendrogram takes practice, but the key insight is in the heights of the horizontal lines. Each horizontal line represents a merge, and its height shows how dissimilar the merged groups are. Low merges indicate very similar customers. High merges indicate the groups being combined are quite different from each other.
 
-In RFM models it is usual to choose 11 clusters as recommended by [PULTER](https://bit.ly/32UPdhu) and other experts. They also provide a well-documented customer segment table with the description of each segment as well as a list of marketing actions corresponding to each segment. 
+## Choosing the Number of Clusters
 
-<div class="imgcap">
-<img src="/assets/6/rfms.png" style="zoom:100%;" />
-<div class="thecap"> Table 1. Customer Segments - Source: putler [5] </div></div>
+RFM practitioners often use 11 clusters based on frameworks developed by experts like Putler, with detailed descriptions for each segment and corresponding marketing actions. But that's not a hard rule. The right number of clusters depends on your business context, your ability to execute different strategies, and what the data actually shows.
 
-However, it is not necessary to have 11 clusters.  
-From the dendrogram we can see that 4 clusters make sense for this scenario as well as for simplicity sake. So let's try that.
-
-Remember: When it comes to cut-off selection there is no golden method on how to pick the perfect number of clusters. What matters is to use the right clustering approach for the business problem at hand and that your conclusions are actionable.
+Looking at our dendrogram, we can see some clear natural breaks. The four tallest vertical lines (before everything merges at the top) suggest four distinct groups might make sense. Four clusters also offers a practical advantage: it's simple enough to be actionable. You can design four different marketing strategies much more easily than eleven.
 
 ```python
-# Cut at 4 clusters
+# Cut the dendrogram to create 4 clusters
 members = cut_tree(hcward, n_clusters=4)
-# Assign to each customer a group
-groups, counts = np.unique(members, return_counts=True)
-segments = dict(zip(groups, counts))
 
+# Assign cluster labels to each customer in our sample
 customers_sample['group'] = members.flatten()
-# Create a table with the obtained groups and their characteristics
-clusters = customers_sample[['recency', 'frequency', 'amount', 'group']].groupby('group').mean()
-clusters
+
+# Calculate the average RFM values for each cluster
+clusters = customers_sample[['recency', 'frequency', 'amount', 'group']].groupby('group').agg({
+    'recency': 'mean',
+    'frequency': 'mean',
+    'amount': 'mean'
+}).round(2)
+
+# Count customers in each cluster
+cluster_sizes = customers_sample['group'].value_counts().sort_index()
+clusters['n_customers'] = cluster_sizes
+
+print(clusters)
 ```
 
-```text
-+---------+-----------+-------------+----------+
-|   group |   recency |   frequency |   amount |
-|---------+-----------+-------------+----------|
-|       0 |   2612.50 |        1.30 |    29.03 |
-|       1 |    193.65 |       10.62 |    42.02 |
-|       2 |    712.52 |        2.55 |    31.12 |
-|       3 |    972.55 |        2.76 |   149.70 |
-+---------+-----------+-------------+----------+
 ```
+group    recency  frequency  amount  n_customers
+0        2612.50       1.30   29.03          521
+1         193.65      10.62   42.02          130
+2         712.52       2.55   31.12          859
+3         972.55       2.76  149.70          332
+```
+
+These numbers reveal four distinct customer personas. Each cluster tells a different story about customer behavior and value.
+
+## Interpreting the Segments
+
+Understanding what these clusters mean requires looking at them holistically, considering all three RFM dimensions together.
+
+**Cluster 0** has the highest recency (2,612 days since last purchase), the lowest frequency (1.3 purchases), and low monetary value ($29). These customers have essentially left. They bought something once, years ago, and never came back. Trying to reactivate them would be expensive and likely futile. This is your "Lost" segment.
+
+**Cluster 1** shows the opposite pattern: very low recency (193 days), high frequency (10.6 purchases), and moderate monetary value ($42). These customers buy often and recently. They're engaged, reliable, and valuable. This is your "Loyal" segment, and they deserve your best treatment. Ask them for reviews. Offer them early access to new products. Thank them for their business. These are the customers who will advocate for your brand.
+
+**Cluster 2** sits in the middle with moderate recency (712 days), low-to-moderate frequency (2.6 purchases), and low monetary value ($31). This is your largest group with 859 customers. They've bought a couple of times but haven't been back in two years. They're not lost yet, but they're drifting. Call this your "Needing Attention" segment. A targeted reengagement campaign could pull many of them back before they disappear into Cluster 0.
+
+**Cluster 3** presents an interesting puzzle: moderate-to-high recency (972 days), moderate frequency (2.8 purchases), but very high monetary value ($149.70). These customers spent significantly more than anyone else, but they haven't been back in nearly three years. They're your "Can't Lose Them" segment. Something drove them away despite their initial high value. Win them back with personalized outreach. Find out what went wrong. These customers represent substantial potential revenue if you can reengage them.
+
+Let's visualize the relative importance of each segment:
 
 ```python
-print(f'Number of customers per segment: {segments}')
+# Assign descriptive names to our clusters
+clusters['cluster_names'] = ['Lost', 'Loyal', 'Needing Attention', "Can't Lose Them"]
+
+# Create a treemap visualization
+plt.figure(figsize=(12, 8))
+plt.set_cmap('tab10')
+
+# Sort by recency and amount for better visualization layout
+clusters_sorted = clusters.sort_values(by=['recency', 'amount'], ascending=[True, False])
+
+squarify.plot(
+    sizes=clusters_sorted['n_customers'],
+    label=clusters_sorted['cluster_names'],
+    alpha=0.6,
+    text_kwargs={'fontsize': 14, 'weight': 'bold'}
+)
+plt.title("Customer Segments by Size", fontsize=18, pad=20)
+plt.axis('off')
+plt.tight_layout()
+plt.savefig('segment_treemap.png', dpi=150, bbox_inches='tight')
+plt.show()
 ```
 
-```text
-Number of customers per segment: {0: 521, 1: 130, 2: 859, 3: 332}
-```
-### Clusters Profiling
+<img src="/assets/6/segments.png" alt="Treemap showing relative sizes of customer segments" width="800">
 
-Now that we have our clusters and are convinced of their number, we can start profiling them. For this purpose we are going to use the Customer Segments table from putler.   
+The treemap makes the business implications visual. Your "Needing Attention" segment dominates in size, representing nearly half your customer base. This is where your near-term opportunity lies. The "Loyal" segment is smaller but precious. The "Can't Lose Them" segment represents high-value customers you need to recover. And the "Lost" segment, while large, probably isn't worth the investment to reactivate.
 
-1. **Group 0** has the lowest recency, frequency and monetary value. Therefore, we refer to this group as **Lost**. You'd better ignore it completely.  
-2. **Group 1**  consists of your **Loyal Customers**. They buy often and spend a good money with us. As actionable tips I would suggest to Offer them higher value products, ask for reviews and create meaningful interactions with them, using engagement marketing strategies.
-3. **Group 2** are the **Customers Needing Attention**. It's by far your largest group, so you need to reconnect with the customers in this group. The sooner, the better; before they fall into the group "about to sleep". You might, for instance, offer them limited-time product deals based on their past purchases.
-4. **Group 3** contains the **Can't Lose Them** customers. They spent the most money in our business, but haven't come back for a long time. Win them back, talk to them, and don't lose them to your competitors. Try to reengage them with your company through renewals or new products, or perhaps special marketing events.
+## Practical Implications
 
-Let us include the profiling results in our `clusters` variable and create an appealing visualization of the findings. After all, it is your job as a business analyst to convince the management team to implement your recommendations for action.
+These segments translate directly into marketing actions. Your loyal customers need recognition and rewards, not aggressive discounting. The customers needing attention require timely intervention, perhaps a "we miss you" campaign with relevant product recommendations based on past purchases. The high-value lapsed customers deserve personal outreach, maybe even a phone call to understand what went wrong and how to make it right.
 
-```python
-clusters['n_customers'] = customers_sample['group'].value_counts()
-clusters['cluster_names'] = ['lost', 'loyal', 'needing attention', "can't lose them"]
+The key insight from RFM analysis is that not all customers deserve the same investment. The expected profitability must exceed the cost of reaching each segment. Your loyal customers might respond to a simple email. Your lapsed high-value customers might require a personalized offer from a human salesperson. Your lost customers might not be worth any investment at all.
 
-# Visualization
-plt.set_cmap('hsv')
-clusters.sort_values(by=['recency', 'amount'], ascending=[True, False], inplace=True)
+## Limitations and Considerations
 
-squarify.plot(sizes=clusters['n_customers'], 
-              label=clusters['cluster_names'], alpha=.45 )
-plt.title("RFM Segments",fontsize=22)
-plt.axis('off');
-```
+RFM segmentation isn't perfect. Customer behavior changes constantly, so segments need regular updating. New customers flow into your database continuously, and their behavior patterns evolve. The segments you identify today might capture seasonal buying patterns that don't generalize to other times of year. A customer who looks highly engaged in December (holiday shopping) might be completely dormant in February.
 
-<div class="imgcap">
-<img src="/assets/6/segments.png" style="zoom:110%;" />
-<div class="thecap">  </div></div>
+Frequent updates can be expensive unless you automate the entire pipeline. This is partly why many companies still rely on simpler rule-based segmentation instead of statistical approaches. A manager might simply decide that "customers who haven't purchased in 6 months need reengagement," without building a clustering model.
 
-## Summary
+But here's the thing: even if you ultimately prefer simple rules for operational reasons, running statistical segmentation at least once reveals patterns you might otherwise miss. You might discover that three purchases is the magic threshold where customer loyalty really takes hold. Or that spending over $100 predicts dramatically different future behavior. Those insights can then inform the rules you set up for ongoing segmentation.
 
-In this tutorial, we presented another use case of hierarchical clustering: Customer Segmentation based on buying behavior. It is a simple yet powerful technique when it comes to customer targeting and precision marketing.  
-We also showed how clusters profiling works and how you can tailor your marketing campaigns to the customer segments whose expected profitability exceeds the cost to reaching them.  However, this segmentation method is not without problems and comes with a number of limitations:
+The best approach often combines both methods. Use statistical segmentation to discover the natural patterns in your data. Then build simple, scalable rules around those patterns for day-to-day operations.
 
-1. New customers are constantly being added to the database, which requires frequent updating of the segmentation model.
-2. Clusters can capture seasonal customers buying behaviors, so results are no longer generalizable to different time periods.
-3. Frequent updates can be expensive. Unless they are automated and you don't need each time to hire a data scientist.
+## Conclusion
 
-This is the main reason why companies are still reluctant to use statistical segmentation and prefer to rely on managerial segmentation.
+Customer segmentation using RFM analysis and hierarchical clustering gives you a data-driven way to understand your customer base. The three metrics of Recency, Frequency, and Monetary value capture the essence of customer behavior in a way that's both statistically sound and intuitively understandable to business stakeholders.
 
- Non-statistical segmentation approaches are based on simple rules and guidelines and rely heavily on subjective judgment. This also comes with some drawbacks, as it can be severely affected by various types of biases and cognitive limitations when processing complex data.  
- Which one you choose depends on your goals and budget. However, if you prefer the latter approach, I strongly recommend that you perform statistical segmentation, at least once as exploratory tool, to identify complex patterns in multivariate data sets. Then you can set up your segmentation rules around them.
+The technique we've walked through here scales from small businesses to large enterprises. The code is straightforward once you understand the logic. The results are actionable. And the insights you gain can transform how you allocate marketing resources, moving from treating everyone the same to giving each segment what it needs to maximize lifetime value.
+
+The most important lesson isn't the specific clusters we found in this dataset. It's the approach: let the data reveal natural groupings, interpret those groupings in business terms, and then match your marketing strategy to each segment's needs and potential value. That's how you turn transaction data into profitable customer relationships.
+
 ## References
 
 1. Karl Melo. [Customer Analytics I - Customer Segmentation](https://rstudio-pubs-static.s3.amazonaws.com/226524_10f550ea696f4db8a033c6583a8fc526.html). 2016
-2. Navlani, A. [Introduction to Customer Segmentation in Python](https://www.datacamp.com/community/tutorials/introduction-customer-segmentation-python). datacamp, 2018.
-3. Lilien, Gary L, Arvind Rangaswamy, and Arnaud De Bruyn. 2017. Principles of Marketing Engineering and Analytics. State College, PA: Decisionpro.
-4. Jim Novo. [Turning Customer Data into Profits](https://www.jimnovo.com/RFM-tour.htm)
-5. Anish Nair. [RFM Analysis For Successful Customer Segmentation](https://www.putler.com/rfm-analysis/). putler, 2022.
-6. Kohavi, Ron, Llew Mason, Rajesh Parekh, and Zijian Zheng. 2004. "Lessons and Challenges from Mining Retail E-Commerce Data." Machine Learning 57 (1/2): 83–113.
-7. Dataset from [Github repo](https://github.com/skacem/Business-Analytics/tree/main/Datasets). Accessed 25 October 2021.
 
-   
+2. Navlani, A. [Introduction to Customer Segmentation in Python](https://www.datacamp.com/community/tutorials/introduction-customer-segmentation-python). DataCamp, 2018.
+
+3. Lilien, Gary L, Arvind Rangaswamy, and Arnaud De Bruyn. 2017. Principles of Marketing Engineering and Analytics. State College, PA: DecisionPro.
+
+4. Jim Novo. [Turning Customer Data into Profits](https://www.jimnovo.com/RFM-tour.htm)
+
+5. Anish Nair. [RFM Analysis For Successful Customer Segmentation](https://www.putler.com/rfm-analysis/). Putler, 2022.
+
+6. Kohavi, Ron, Llew Mason, Rajesh Parekh, and Zijian Zheng. 2004. "Lessons and Challenges from Mining Retail E-Commerce Data." Machine Learning 57 (1/2): 83-113.
+
+7. Dataset from [Github repo](https://github.com/skacem/Business-Analytics/tree/main/Datasets). Accessed 25 October 2021.

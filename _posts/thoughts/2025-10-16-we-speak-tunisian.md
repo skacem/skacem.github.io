@@ -3,11 +3,10 @@ layout: post
 category: thoughts
 comments: true
 title: "Fuck your darija. We speak Tunisian."
-excerpt: "Everything that makes us who we are is expressed in Tunisian."
 author: "Skander Kacem"
 tags:
   - Culture
-  - Identity
+  - Tunisia
   - Politics
 featured: true
 ---
@@ -46,6 +45,9 @@ It becomes clear, then, that the verse is a warning: Islam cannot demand self-er
 
 The conclusion, therefore, is not a debate but a duty: to make Tunisian an official language. This isn’t a dream. It is a political reality waiting for the will to enact it. And that will is already here. Despite the official narrative, Tunisian is not a future project; it is a present reality. It is the language of our films, our food, our songs, our stories.
 
-Everything that makes us who we are is expressed in Tunisian. So where will the courage for this act come from? It will not be handed down to us. It must come from us. It is the courage of a people who act, not because they wish to "fix" their language, but because they love it as it is, and refuse to let it be silenced any longer. We once showed the world that a people united could overthrow a tyrant with a single word: “Dégage.” The time has come for us to say, with one voice: "Fuck your darija. We speak Tunisian."
+Everything that makes us who we are is expressed in Tunisian. So where will the courage for this act come from? It will not be handed down to us. It must come from us. It is the courage of a people who act, not because they wish to "fix" their language, but because they love it as it is, and refuse to let it be silenced any longer. 
+
+We once showed the world that a people united could overthrow a tyrant with a single word: “Dégage.” The time has come for us to say, with one voice: "Fuck your darija. We speak Tunisian."
 
 
+PS. My apologies for the profanity. Then again what else would you expect from someone whose mother tongue is dismissed as "vulgar slang"; aka derija?
