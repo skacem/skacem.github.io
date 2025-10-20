@@ -67,7 +67,7 @@ A system built on exploitation requires fuel. The cheapest fuel is hope.
 
 Therefore, with great fanfare, an occasional contractor is converted to a permanent employee. The "Golden Ticket." Announcements are made. Proof that the firewall is permeable.
 
-This is HR as casino. A minuscule conversion rate is statistically abysmal but motivationally perfect. It provides the illusion of meritocracy. Just enough success to keep the remaining 99% compliant, hoping they will be next.
+This is HR as casino. A minuscule conversion rate is statistically abysmal but motivationally perfect. It provides the illusion of meritocracy. Just enough success to keep the remainingcompliant, hoping they will be next.
 
 Hope is significantly cheaper than competitive salaries.
 
