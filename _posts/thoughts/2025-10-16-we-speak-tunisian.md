@@ -50,4 +50,4 @@ Everything that makes us who we are is expressed in Tunisian. So where will the 
 We once showed the world that a people united could overthrow a tyrant with a single word: “Dégage.” The time has come for us to say, with one voice: "Fuck your darija. We speak Tunisian."
 
 
-PS. My apologies for the profanity. Then again what else would you expect from someone whose mother tongue is dismissed as "vulgar slang"; aka derija?
+PS. My apologies for the profanity. Then again what else would you expect from someone whose mother tongue is dismissed as "vulgar slang"?

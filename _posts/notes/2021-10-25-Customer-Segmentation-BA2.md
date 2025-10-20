@@ -11,8 +11,6 @@ tags:
 katex: true
 ---
 
-# Customer Segmentation using RFM Analysis
-
 ## Introduction
 
 Marketing analytics spans an incredible range of techniques, from mining social media sentiment to optimizing realtime bidding strategies. But beneath all these sophisticated approaches lie three deceptively simple questions that most businesses still struggle to answer: Who are my customers? Which ones deserve my attention and marketing budget? And what will they be worth to my business in the future?

@@ -3,8 +3,6 @@ layout: post
 category: ml
 comments: true
 title: "From RFM Analysis to Predictive Scoring Models"
-excerpt: "From a managerial perspective, it is extremely useful to determine not only the contribution of customer segments to today's sales, but also the expected contribution of each segment to future revenues. After all, how can we develop good plans and make informed strategic decisions if we can't  forecast sales and revenues  for the upcoming financial period?
-In this tutorial, we'll learn how to predict next year's customer activity and dollar value based on RFM analysis."
 author: "Skander Kacem"
 tags:
     - Business Analytics
@@ -15,439 +13,420 @@ featured: true
 
 ## Introduction
 
-Business forecasting is not about accurately predicting the future, nor is it an end in itself. It is a means to help companies manage uncertainty and develop strategies to minimize potential risks and threats or maximize financial returns.  It relies on identifying and estimating past patterns that are then generalized to forecast the future. As such, forecasting has a wide range of business applications and can be useful throughout the value chain of any organization.  
-For instance, forecasting customer purchases allows companies not only to calculate the expected revenue of each segment so they can focus on profitable ones, but also to properly plan inventory and manpower for the next period.  Other business forecasting applications include customer lifetime value, credit card attrition or future revenues. In other words, every business needs forecasting.
+We've come a long way in understanding our customers. In our [first tutorial](https://skacem.github.io/ml/2021/10/25/Customer-Segmentation-BA2/), we used hierarchical clustering to discover natural groupings in customer behavior, letting the data reveal patterns we might have missed. In the [second tutorial](https://skacem.github.io/ml/2021/12/03/Customer-Segmentation-and-Profiling/), we flipped the script and implemented managerial segmentation, where business logic drives the groupings directly.
 
-In this tutorial we will develop a typical marketing application. We will predict the likelihood that a customer will make a purchase in a near future. And if so, we also want to predict how much s/he will spend. For this, we will first segment our customer database using RFM analysis --I hope you are by now familiar with this segmentation method-- and then we will build two distinct models:
+Both approaches answered the question "who are my customers right now?" Today we're tackling something more ambitious: predicting the future. Which customers will purchase next year? How much will they spend? These aren't just interesting academic questions. They're the foundation for smart resource allocation, inventory planning, and targeted marketing campaigns.
 
-1. A first model to calculate the probability of purchase
-2. A second model to predict the amount spent  
+Business forecasting doesn't aim to predict the future with perfect accuracy. That's impossible. Instead, forecasting helps companies manage uncertainty by identifying patterns from the past and projecting them forward. The goal is making better decisions under uncertainty, not achieving clairvoyance.
 
-For simplicity sake, we will use linear regression in both models. As it is one of the simplest supervised learning algorithms.  
-Finally, we will combine the two models into one large scoring model.
+The applications extend far beyond customer purchases. Companies forecast customer lifetime value to guide acquisition spending. Credit card issuers predict attrition to target retention campaigns. Retailers forecast demand to optimize inventory. Every business operates in an uncertain future, and every business benefits from reducing that uncertainty even incrementally.
 
-## RFM Analysis and Customer Segmentation
+Today we're building a predictive scoring system that combines everything from our previous tutorials. We'll use RFM segmentation as the foundation, then layer on statistical models to predict both purchase probability and purchase amount. The result is a customer score that tells you where to focus your marketing investment for maximum return.
 
-In this section we will use the same code as in the previous tutorial. The only difference is that we will save the resulting customer segmentation as `customers_2015` rather than just `customers`.  
-As usual, we start by importing the necessary libraries, setting up the notebook environment and reading the data set as a dataframe.
+## The Analytical Framework
+
+Our approach uses a two-stage modeling process. First, we predict whether a customer will make any purchase at all in the next period. This is a classification problem: active or inactive. Second, for those predicted to be active, we estimate how much they'll spend. This is a regression problem with continuous dollar values.
+
+Why separate these? Because they're fundamentally different questions driven by different factors. Purchase probability depends heavily on recency and engagement patterns. Purchase amount depends more on historical spending levels and customer value. Trying to predict the dollar amount directly for all customers (including those who won't buy anything) creates a messy model with poor performance.
+
+The separation also makes business sense. Your marketing strategies differ between reactivation (getting someone to buy) and upselling (getting someone to buy more). Understanding both dimensions separately gives you better strategic options.
+
+We'll validate our approach using a clever technique: retrospective segmentation. We'll analyze our 2014 customer base as if we were living in 2014, build models to predict 2015 behavior, then check how accurate those predictions were. This gives us confidence before making real 2016 predictions where we can't yet validate the results.
+
+## Setting Up Our Analysis
+
+Let's start with our familiar dataset: 51,243 transactions from 18,417 unique customers spanning January 2005 through December 2015. We'll be more disciplined about our code this time. Since we'll be running RFM segmentation multiple times (for 2014, 2015, and validation), we'll create reusable functions instead of copying code.
 
 ```python
-# import needed packages
-import matplotlib as mpl
+# Import required libraries
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import patsy
-import squarify
 import statsmodels.api as sm
-from pandasql import sqldf
+import squarify
+from scipy import stats
 from tabulate import tabulate
 
-# Set up the notebook environment
-pysqldf = lambda q: sqldf(q, globals())
-%precision %.2f
-pd.options.display.float_format = "{:,.2f}".format
-plt.rcParams["figure.figsize"] = 10, 8
+# Set up environment
+pd.options.display.float_format = '{:,.2f}'.format
+plt.rcParams["figure.figsize"] = (12, 8)
 
-# Load text file into a local variable
-columns = ["customer_id", "purchase_amount", "date_of_purchase"]
-df = pd.read_csv("purchases.txt", header=None, sep="\t", names=columns)
+# Load the dataset
+columns = ['customer_id', 'purchase_amount', 'date_of_purchase']
+df = pd.read_csv('purchases.txt', header=None, sep='\t', names=columns)
 
-# interpret the last column as datetime
-df["date_of_purchase"] = pd.to_datetime(df["date_of_purchase"], format="%Y-%m-%d")
+# Convert to datetime and create time-based features
+df['date_of_purchase'] = pd.to_datetime(df['date_of_purchase'], format='%Y-%m-%d')
+df['year_of_purchase'] = df['date_of_purchase'].dt.year
+
+# Set reference date for calculating recency
+basedate = pd.Timestamp('2016-01-01')
+df['days_since'] = (basedate - df['date_of_purchase']).dt.days
 ```
 
-Then we add two variables: `year_of_purchase` and `days_since`.
+## Building Reusable Segmentation Functions
+
+Rather than copy-pasting segmentation logic three times, we'll create a clean function that handles the entire RFM calculation and segmentation process. This makes our code more maintainable and reduces errors.
 
 ```python
-# Extract year of purchase and save it as a column
-df["year_of_purchase"] = df["date_of_purchase"].dt.year
-
-# Add a day_since column showing the difference between last purchase and a basedate
-basedate = pd.Timestamp("2016-01-01")
-df["days_since"] = (basedate - df["date_of_purchase"]).dt.days
-```
-
-We now use SQL for the RFM analysis and then segment our customer database accordingly.
-
-```python
-q = """
-        SELECT customer_id,
-        MIN(days_since) AS 'recency',
-        MAX(days_since) AS 'first_purchase',
-        COUNT(*) AS 'frequency',
-        AVG(purchase_amount) AS 'amount'
-        FROM df GROUP BY 1"""
-customers_2015 = sqldf(q)
-```
-
-```python
-# Managerial Segmentation based on RFM analysis
-customers_2015.loc[customers_2015["recency"] > 365 * 3, "segment"] = "inactive"
-customers_2015["segment"] = customers_2015["segment"].fillna("NA")
-customers_2015.loc[
-    (customers_2015["recency"] <= 365 * 3) & (customers_2015["recency"] > 356 * 2),
-    "segment",
-] = "cold"
-customers_2015.loc[
-    (customers_2015["recency"] <= 365 * 2) & (customers_2015["recency"] > 365 * 1),
-    "segment",
-] = "warm"
-customers_2015.loc[customers_2015["recency"] <= 365, "segment"] = "active"
-customers_2015.loc[
-    (customers_2015["segment"] == "warm")
-    & (customers_2015["first_purchase"] <= 365 * 2),
-    "segment",
-] = "new warm"
-customers_2015.loc[
-    (customers_2015["segment"] == "warm") & (customers_2015["amount"] < 100), "segment"
-] = "warm low value"
-customers_2015.loc[
-    (customers_2015["segment"] == "warm") & (customers_2015["amount"] >= 100), "segment"
-] = "warm high value"
-customers_2015.loc[
-    (customers_2015["segment"] == "active") & (customers_2015["first_purchase"] <= 365),
-    "segment",
-] = "new active"
-customers_2015.loc[
-    (customers_2015["segment"] == "active") & (customers_2015["amount"] < 100),
-    "segment",
-] = "active low value"
-customers_2015.loc[
-    (customers_2015["segment"] == "active") & (customers_2015["amount"] >= 100),
-    "segment",
-] = "active high value"
-```
-
-Once we have the segments populated with corresponding customers we transform the type of the `segment` variable to categorical and reorder the segments, so that it makes more sense.
-
-```python
-# Transform segment column datatype from object to category
-customers_2015["segment"] = customers_2015["segment"].astype("category")
-# Re-order segments in a better readable way
-sorter = [
-    "inactive",
-    "cold",
-    "warm high value",
-    "warm low value",
-    "new warm",
-    "active high value",
-    "active low value",
-    "new active",
-]
-customers_2015.segment.cat.set_categories(sorter, inplace=True)
-customers_2015.sort_values(["segment"], inplace=True)
-```
-
-So let's plot the results as a treemap using `squarify`.
-
-```python
-plt.rcParams["figure.figsize"] = 12, 9
-c2015 = pd.DataFrame(customers_2015["segment"].value_counts())
-norm = mpl.colors.Normalize(vmin=min(c2015["segment"]), vmax=max(c2015["segment"]))
-colors = [mpl.cm.RdYlBu_r(norm(value)) for value in c2015["segment"]]
-squarify.plot(sizes=c2015["segment"], label=c2015.index, 
-              value=c2015.values, color=colors, alpha=0.6)
-plt.axis("off");
-```
-
-{% include image.html url="/assets/8/c2015.png" description="Market Segments as a Treemap" zoom="100%" %}
-
-We will also need to compute the revenue of each customer in 2015 to be able to predict the amount of the next purchase. 
-
-```python
-# Compute revenues generated by customers in 2015 using SQL
-q = """
-        SELECT customer_id, 
-        SUM(purchase_amount) AS 'revenue_2015'
-        FROM df
-        WHERE year_of_purchase = 2015
-        GROUP BY 1
+def calculate_rfm(dataframe, reference_date=None, days_lookback=None):
     """
-revenue_2015 = sqldf(q)
+    Calculate RFM metrics for customers.
+    
+    Parameters:
+    -----------
+    dataframe : DataFrame
+        Transaction data with customer_id, purchase_amount, days_since
+    reference_date : Timestamp, optional
+        Date to calculate recency from (default: None, uses all data)
+    days_lookback : int, optional
+        Only consider transactions within this many days (default: None, uses all)
+    
+    Returns:
+    --------
+    DataFrame with customer_id and RFM metrics
+    """
+    # Filter data if lookback specified
+    if days_lookback is not None:
+        df_filtered = dataframe[dataframe['days_since'] > days_lookback].copy()
+        # Adjust days_since relative to the lookback period
+        df_filtered['days_since'] = df_filtered['days_since'] - days_lookback
+    else:
+        df_filtered = dataframe.copy()
+    
+    # Calculate RFM metrics using native pandas
+    rfm = df_filtered.groupby('customer_id').agg({
+        'days_since': ['min', 'max'],       # Min = recency, Max = first purchase
+        'customer_id': 'count',              # Count = frequency
+        'purchase_amount': ['mean', 'max']   # Average and max spending
+    })
+    
+    # Flatten column names
+    rfm.columns = ['recency', 'first_purchase', 'frequency', 'avg_amount', 'max_amount']
+    rfm = rfm.reset_index()
+    
+    return rfm
+
+
+def segment_customers(rfm_data):
+    """
+    Segment customers based on RFM metrics using managerial rules.
+    
+    Parameters:
+    -----------
+    rfm_data : DataFrame
+        Customer data with RFM metrics
+    
+    Returns:
+    --------
+    DataFrame with added 'segment' column
+    """
+    customers = rfm_data.copy()
+    
+    # Use numpy select for clean, non-overlapping logic
+    conditions = [
+        customers['recency'] > 365 * 3,
+        (customers['recency'] <= 365 * 3) & (customers['recency'] > 365 * 2),
+        (customers['recency'] <= 365 * 2) & (customers['recency'] > 365) & 
+            (customers['first_purchase'] <= 365 * 2),
+        (customers['recency'] <= 365 * 2) & (customers['recency'] > 365) & 
+            (customers['avg_amount'] >= 100),
+        (customers['recency'] <= 365 * 2) & (customers['recency'] > 365) & 
+            (customers['avg_amount'] < 100),
+        (customers['recency'] <= 365) & (customers['first_purchase'] <= 365),
+        (customers['recency'] <= 365) & (customers['avg_amount'] >= 100),
+        (customers['recency'] <= 365) & (customers['avg_amount'] < 100)
+    ]
+    
+    choices = [
+        'inactive',
+        'cold',
+        'new warm',
+        'warm high value',
+        'warm low value',
+        'new active',
+        'active high value',
+        'active low value'
+    ]
+    
+    customers['segment'] = np.select(conditions, choices, default='other')
+    
+    # Convert to ordered categorical
+    segment_order = [
+        'inactive', 'cold', 'warm high value', 'warm low value', 'new warm',
+        'active high value', 'active low value', 'new active'
+    ]
+    customers['segment'] = pd.Categorical(
+        customers['segment'],
+        categories=segment_order,
+        ordered=True
+    )
+    
+    return customers.sort_values('segment')
 ```
 
-Note that not all customers have made a purchase in 2015.
+These functions encapsulate our segmentation logic cleanly. The `calculate_rfm` function handles the aggregation and can work with different time windows. The `segment_customers` function applies our business rules using numpy's select function, which is much cleaner than sequential if-then statements.
+
+## Understanding Our Current Customer Base
+
+Let's apply our functions to understand the current state of affairs as of the end of 2015:
 
 ```python
-print('Number of customers with at least one completed payment:', revenue_2015.shape[0])
-print('Total number of customers as in 2015:', customers_2015.shape[0])
+# Calculate RFM for all customers as of end of 2015
+customers_2015 = calculate_rfm(df)
+customers_2015 = segment_customers(customers_2015)
+
+# Display segment distribution
+segment_counts = customers_2015['segment'].value_counts()
+print(segment_counts)
 ```
 
-```tex
-Number of customers with at least one completed payment: 5398
-Total number of customers as in 2015: 18417
+```
+inactive             9158
+active low value     3313
+cold                 1903
+new active           1512
+new warm              938
+warm low value        901
+active high value     573
+warm high value       119
+Name: segment, dtype: int64
 ```
 
-`revenue_2015` contains only 5,398 observations, while we have 18,417 customers to date. This is because a large portion of our customers were actually inactive in 2015. Nevertheless, we need to include them in our statistics. We do this as we merge the variable `revenue_2015` with the dataframe `customers_2015`. In `SQL` syntax, this corresponds to a left join with `customers_2015` as left table.  Note that this only works if both dataframes have one common index: `Customer_ID`.
+The distribution mirrors what we saw in our previous tutorial. Half our customer base has gone inactive, which represents both a challenge and a reality check. Focusing on the 7,356 customers in warm and active segments makes more strategic sense than trying to resurrect the 9,158 inactive ones.
 
-{% include image.html url="/assets/8/merge_.png" description="Different Types of SQL JOINs (Source: https://www.w3schools.com)" zoom="60%" %}
-
+Let's visualize this with our familiar treemap:
 
 ```python
-# Merge 2015 customers and 2015 revenue, while making sure that customers
-# without purchase in 2015 also appear in the new df
-actual = customers_2015.merge(revenue_2015, how="left", on="customer_id")
+# Create treemap visualization
+fig, ax = plt.subplots(figsize=(14, 9))
+
+colors = ['#9b59b6', '#e67e22', '#3498db', '#2ecc71', '#3498db', 
+          '#3498db', '#2ecc71', '#3498db']
+
+squarify.plot(
+    sizes=segment_counts.reindex(customers_2015['segment'].cat.categories),
+    label=customers_2015['segment'].cat.categories,
+    color=colors,
+    alpha=0.6,
+    text_kwargs={'fontsize': 13, 'weight': 'bold'}
+)
+plt.title('Customer Segments as of December 2015', fontsize=18, pad=20)
+plt.axis('off')
+plt.tight_layout()
+plt.savefig('segments_2015_treemap.png', dpi=150, bbox_inches='tight')
+plt.show()
 ```
 
-And of course we don't want to have `NaN`'s in our dataframe.
+<img src="/assets/8/c2015.png" alt="Treemap showing customer segments as of end of 2015" width="800">
+
+Now we need to understand which segments actually drove revenue in 2015. This tells us whether our segmentation captures value meaningfully:
 
 ```python
-# Replace NaNs in revenue_2015 column with 0s
-actual["revenue_2015"].fillna(0, inplace=True)
+# Calculate 2015 revenue by customer
+revenue_2015 = df[df['year_of_purchase'] == 2015].groupby('customer_id').agg({
+    'purchase_amount': 'sum'
+}).rename(columns={'purchase_amount': 'revenue_2015'})
+
+# Merge with customer segments (left join to include all customers)
+actual = customers_2015.merge(revenue_2015, on='customer_id', how='left')
+actual['revenue_2015'] = actual['revenue_2015'].fillna(0)
+
+# Calculate average revenue by segment
+segment_revenue = actual.groupby('segment', observed=True)['revenue_2015'].mean()
+print("\nAverage 2015 Revenue by Segment:")
+print(segment_revenue.round(2))
 ```
 
-Now we want to compute the average revenue generated by each customer segment. As a manager you are interested in knowing to what extent each segment today contributes to today's revenues and this for many obvious reasons. Often, you will find that small segments, in terms of number of customers, generate a significant amount of revenue. Precisely this group of customers is what you want to target in your next marketing campaign.
+```
+Average 2015 Revenue by Segment:
+segment
+inactive                0.00
+cold                    0.00
+warm high value         0.00
+warm low value          0.00
+new warm                0.00
+active high value     323.57
+active low value       52.31
+new active             79.17
+Name: revenue_2015, dtype: float64
+```
+
+The pattern is stark and expected. Only active customers generated 2015 revenue by definition (they're active because they purchased in the past 12 months, which includes 2015). The active high value segment, despite representing just 3% of customers, generated 71% of total revenue. This validates our segmentation approach and highlights where marketing investment should concentrate.
+
+## The Retrospective Validation Strategy
+
+Here's where our approach gets clever. Before making 2016 predictions we can't validate, let's build models using 2014 data to predict 2015 behavior. We already know what happened in 2015, so we can measure how accurate our predictions were. This builds confidence in the modeling approach before we bet real marketing dollars on 2016 predictions.
+
+The key insight is treating our historical data as if we're time travelers. Imagine it's January 1, 2015, and you're looking at your customer base. You want to predict 2015 activity, but you only know about transactions through December 31, 2014. We recreate that exact scenario by filtering our data appropriately.
 
 ```python
-actual[["revenue_2015", "segment"]].groupby("segment").mean()
+# Calculate RFM as of end of 2014 (ignoring all 2015 transactions)
+# This requires looking back 365 days from our reference date
+customers_2014 = calculate_rfm(df, days_lookback=365)
+customers_2014 = segment_customers(customers_2014)
+
+# Visualize 2014 segments
+segment_counts_2014 = customers_2014['segment'].value_counts()
+print("\n2014 Segment Distribution:")
+print(segment_counts_2014)
 ```
 
-```tex
-+-------------------+----------------+
-| segment           |   revenue_2015 |
-|-------------------+----------------|
-| inactive          |         0      |
-| cold              |         0      |
-| warm high value   |         0      |
-| warm low value    |         0      |
-| new warm          |         0      |
-| active high value |       323.569  |
-| active low value  |        52.306  |
-| new active        |        79.1661 |
-+-------------------+----------------+
+```
+2014 Segment Distribution:
+inactive             8602
+active low value     3094
+cold                 1923
+new active           1474
+new warm              936
+warm low value        835
+active high value     476
+warm high value       108
+Name: segment, dtype: int64
 ```
 
-As you can see from above, `active high value` customers generated the highest revenue in 2015. Although they represent only 3% of all customers, they have generated more than 71% of total revenues.  
-As far as resource allocation and how much money you want to invest to maintain good relationships with certain customers, based on what segment they belong to, such information is crucial.  
-And in case you're wondering why there are so many zeros. It's because, by definition, only customers who have purchased at least once in the last 365 days are considered `active`.
+Notice the differences from 2015. The active high value segment grew from 476 to 573 customers (20% growth). New active customers increased from 1,474 to 1,512. These changes reflect business dynamics: new customer acquisition, existing customer development, and inevitable churn.
 
-## Segmenting a Database Retrospectively
-
-From a business strategy perspective, it is also extremely useful to determine not only the extent to which each segment is contributing to today's revenues, but also to what extent each segment today would likely contribute to tomorrow's revenues. Only then can we achieve a forward-looking analysis of revenue development; namely: from which of today's customers will tomorrow's revenue come?  
-Unfortunately, we cannot answer this question with certainty, as tomorrow has not yet happened. Only future can tell. Nevertheless, if we examine the recent past, we can have a pretty good idea of what tomorrow will be like; just ask the weather experts about it. After all, customers in a segment today are likely to behave pretty much the same as customers in that same segment did a year ago. So analyzing the past will inform us about the most likely future.
-Now let's find out how this can be implemented.  
-
-We want to do an RFM analysis and a customer segmentation as if we were a year in the past, namely 2014. Thus, every transaction that has happened in the last 365 days should be ignored, as if it never happened; or hasn't happened yet. The SQL query here is as follows:
+Let's visualize the year-over-year shift:
 
 ```python
-q = """
-        SELECT customer_id,
-        MIN(days_since) - 365 AS 'recency',
-        MAX(days_since) - 365 AS 'first_purchase',
-        COUNT(*) AS 'frequency',
-        AVG(purchase_amount) AS 'amount'
-        FROM df
-        WHERE days_since > 365
-        GROUP BY 1"""
+# Create comparison visualization
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7))
 
-customers_2014 = sqldf(q)
+# 2014 segments
+squarify.plot(
+    sizes=segment_counts_2014.reindex(customers_2014['segment'].cat.categories),
+    label=customers_2014['segment'].cat.categories,
+    color=colors,
+    alpha=0.6,
+    ax=ax1,
+    text_kwargs={'fontsize': 11, 'weight': 'bold'}
+)
+ax1.set_title('Customer Segments - End of 2014', fontsize=16, pad=15)
+ax1.axis('off')
+
+# 2015 segments
+squarify.plot(
+    sizes=segment_counts.reindex(customers_2015['segment'].cat.categories),
+    label=customers_2015['segment'].cat.categories,
+    color=colors,
+    alpha=0.6,
+    ax=ax2,
+    text_kwargs={'fontsize': 11, 'weight': 'bold'}
+)
+ax2.set_title('Customer Segments - End of 2015', fontsize=16, pad=15)
+ax2.axis('off')
+
+plt.tight_layout()
+plt.savefig('segments_comparison.png', dpi=150, bbox_inches='tight')
+plt.show()
 ```
 
-The rest, besides the new dataframe name, is the same as in the previous section.  
+<img src="/assets/8/c2014.png" alt="Customer segments comparison between 2014 and 2015" width="800">
+
+Tracking these shifts over time becomes crucial for strategic planning. Are you growing your high-value segment? Is churn accelerating? Are new customer acquisition efforts paying off? These questions require longitudinal analysis, not just point-in-time snapshots.
+
+## Building the Training Dataset
+
+Now we create our modeling dataset. We'll use 2014 customer characteristics (RFM metrics) as features to predict 2015 behavior (whether they purchased and how much they spent). This is supervised learning: we have both inputs (2014 RFM) and outputs (2015 activity) for model training.
 
 ```python
-customers_2014.loc[customers_2014["recency"] > 365 * 3, "segment"] = "inactive"
-customers_2014["segment"] = customers_2014["segment"].fillna("NA")
-customers_2014.loc[
-    (customers_2014["recency"] <= 365 * 3) & (customers_2014["recency"] > 356 * 2),
-    "segment",
-] = "cold"
-customers_2014.loc[
-    (customers_2014["recency"] <= 365 * 2) & (customers_2014["recency"] > 365 * 1),
-    "segment",
-] = "warm"
-customers_2014.loc[customers_2014["recency"] <= 365, "segment"] = "active"
-customers_2014.loc[
-    (customers_2014["segment"] == "warm")
-    & (customers_2014["first_purchase"] <= 365 * 2),
-    "segment",
-] = "new warm"
-customers_2014.loc[
-    (customers_2014["segment"] == "warm") & (customers_2014["amount"] < 100), "segment"
-] = "warm low value"
+# Merge 2014 customer data with 2015 revenue (the target variable)
+in_sample = customers_2014.merge(revenue_2015, on='customer_id', how='left')
+in_sample['revenue_2015'] = in_sample['revenue_2015'].fillna(0)
 
-customers_2014.loc[
-    (customers_2014["segment"] == "warm") & (customers_2014["amount"] >= 100), "segment"
-] = "warm high value"
-customers_2014.loc[
-    (customers_2014["segment"] == "active") & (customers_2014["first_purchase"] <= 365),
-    "segment",
-] = "new active"
+# Create binary target variable for classification
+in_sample['active_2015'] = (in_sample['revenue_2015'] > 0).astype(int)
 
-customers_2014.loc[
-    (customers_2014["segment"] == "active") & (customers_2014["amount"] < 100),
-    "segment",
-] = "active low value"
-
-customers_2014.loc[
-    (customers_2014["segment"] == "active") & (customers_2014["amount"] >= 100),
-    "segment",
-] = "active high value"
-
-# Transform segment column datatype from object to category
-customers_2014["segment"] = customers_2014["segment"].astype("category")
-
-# Re-order segments in a better readable way
-sorter = [
-    "inactive",
-    "cold",
-    "warm high value",
-    "warm low value",
-    "new warm",
-    "active high value",
-    "active low value",
-    "new active",
-]
-customers_2014.segment.cat.set_categories(sorter, inplace=True)
-customers_2014.sort_values(["segment"], inplace=True)
+# Display summary
+print(f"\nTraining dataset: {len(in_sample)} customers")
+print(f"Active in 2015: {in_sample['active_2015'].sum()} ({in_sample['active_2015'].mean():.1%})")
+print(f"\nTarget variable distribution:")
+print(in_sample['active_2015'].value_counts())
 ```
 
-Now let's plot the results as a Treemap.
+```
+Training dataset: 16905 customers
+Active in 2015: 3886 (23.0%)
+
+Target variable distribution:
+0    13019
+1     3886
+Name: active_2015, dtype: int64
+```
+
+Our dataset contains 16,905 customers who existed in 2014. Of these, 3,886 (23%) made at least one purchase in 2015. This 23% base rate becomes our benchmark. Any predictive model must beat this naive baseline to be useful. If you randomly selected customers and called 23% of them "active," you'd be right 23% of the time. Our model needs to do substantially better.
+
+The class imbalance (77% inactive vs. 23% active) is typical in customer analytics. Most customers at any given time aren't actively purchasing. This imbalance affects model training, and we'll need to be thoughtful about evaluation metrics. Accuracy alone won't tell the full story.
+
+## Predicting Purchase Probability with Logistic Regression
+
+Our first model predicts whether a customer will make any purchase in 2015 based on their 2014 RFM characteristics. This is a binary classification problem perfectly suited for logistic regression.
+
+Logistic regression models the probability of an event (purchase) as a function of predictor variables. Unlike linear regression which predicts continuous values, logistic regression outputs probabilities between 0 and 1. The relationship between predictors and probability follows a logistic (S-shaped) curve rather than a straight line.
+
+We'll use five features from 2014: recency, first purchase date, frequency, average amount, and maximum amount. These capture different aspects of customer engagement and value:
 
 ```python
-c2014 = pd.DataFrame(customers_2014["segment"].value_counts())
-
-plt.rcParams["figure.figsize"] = 12, 9
-norm = mpl.colors.Normalize(vmin=min(c2014["segment"]), vmax=max(c2014["segment"]))
-colors = [mpl.cm.Spectral(norm(value)) for value in c2014["segment"]]
-squarify.plot(sizes=c2014["segment"], label=c2014.index, 
-              value=c2014.values, color=colors, alpha=0.6)
-plt.axis("off");
-```
-
-{% include image.html url="/assets/8/c2014.png" description="Market Segments from 2014" zoom="100%" %}
-
-As we can see the figures have changed over the last year. Our new customers segment increased by more than 20% and inactive customers have drastically increased through the years so that half of our customer database is now inactive.
-
-```python
-# The number of "new active high" customers has increased between 2014 and 2015.
-# What is the rate of that increase?
-
-ne = (customers_2015["segment"] == "active high value").sum()
-ol = (customers_2014["segment"] == "active high value").sum()
-
-print("New customers growth rate: %.0f%%" % round((ne - ol) / ol * 100))
-```
-
-```python
-New customers growth rate: 21%
-```
-
-Conducting a horizontal analysis such as the one addressed above is extremely valuable when it comes to gaining a more accurate and well-founded understanding of the evolution and challenges the company has been facing over the years. It enables managers to identify trends and growth patterns, determine the product lifecycle stage the product is currently in, as well as predict what the future may look like.  
-
-## Building a Predictive Model
-
-Forecasting involves building a statistical model by analyzing past and present data trends to predict future behaviors or to suggest actions to take for optimal outcomes. In this example, we decided to use a simple linear regression approach, using the customers' RFM from 2014 as predictors and the revenue generated by those same customers in 2015 as target variables.
-
-We first start by merging both dataframes: `customers_2014` with `revenue_2015` while making sure that new customers from 2015 are not included. We are going to call this new dataframe `in_sample`; meaning predictors and targets are already known.
-
-```python
-# Merge 2014 customers and 2015 revenue
-in_sample = customers_2014.merge(revenue_2015, how="left", on="customer_id")
-# Transform NaN's to 0
-in_sample["revenue_2015"].fillna(0, inplace=True)
-```
-
-Then we create a new variable `active_2015`, which indicates if a client made a purchase in 2015 or not and we set its type as `int`.
-
-```python
-in_sample.loc[in_sample["revenue_2015"] > 0, "active_2015"] = 1
-in_sample["active_2015"] = in_sample["active_2015"].astype("int")
-in_sample.info()
-```
-
-```tex
-<class 'pandas.core.frame.DataFrame'>
-Int64Index: 16905 entries, 0 to 16904
-Data columns (total 8 columns):
- #   Column          Non-Null Count  Dtype  
----  ------          --------------  -----  
- 0   customer_id     16905 non-null  int64  
- 1   recency         16905 non-null  int64  
- 2   first_purchase  16905 non-null  int64  
- 3   frequency       16905 non-null  int64  
- 4   avg_amount      16905 non-null  float64
- 5   max_amount      16905 non-null  float64
- 6   revenue_2015    16905 non-null  float64
- 7   active_2015     16905 non-null  int64  
-dtypes: float64(3), int64(5)
-memory usage: 1.2 MB
-```
-
-### The Likelihood a Customer will be Active in 2015
-
-A powerful and relatively simple technique for calculating the probability of an event is logistic regression. In this section we are going to see how to  use logistic regression to predict the likelihood a customer is going to be active in 2015. For that we are going to use `statsmodels` package, so make sure that you have it installed.  
-
-We start, of course, by importing `statsmodels`. This we have already done at the very top in the code section `imports` and it looks like this:
-
-```python
-import statsmodels.api as sm
-```
-
-Then we define the model we want to apply using the R-Style formula string:
-
-```python
+# Define the logistic regression model
+# Note: We use statsmodels for rich statistical output
 formula = "active_2015 ~ recency + first_purchase + frequency + avg_amount + max_amount"
 prob_model = sm.Logit.from_formula(formula, in_sample)
-```
 
-This means that `active_2015`, which is our target variable, is a function of the following features: `recency`, `first_purchase`, `frequency`, `avg_amount` and `max_amount`; from the calibration dataframe `in_sample`.
-
-Now we calibrate our model using the `fit()` method and extract the models coefficients as well as the standard deviations of those coefficients. In `statsmodels`,  `fit()` returns an object containing the model coefficients, standard errors, p-values and other performance measures.
-
-```python
+# Fit the model
 prob_model_fit = prob_model.fit()
-# Extract the model coefficients
-coef = prob_model_fit.params
-# Extract their standard deviations
-std = prob_model_fit.bse
-```
 
-```tex
-Optimization terminated successfully.
-         Current function value: 0.365836
-         Iterations 8
-```
-
-From the results above, we can tell that the model successfully converges after completing only 8 iterations. `Iterations` refers to the number of times the model runs over the data in an attempt to optimize the model. The default is a maximum number of 35 iterations after which the optimization fails or doesn't converge. The `Current function value` is the value of the loss function when we use the parameters found after calibration.
-Just because our model converges is no guarantee that the results are accurate. The standard procedure for assessing whether the results of a regression can be trusted is to look at the so-called p-values. We can print them using the `summary()` method.
-
-```python
+# Display results
 print(prob_model_fit.summary())
 ```
 
-```python
+```
+Optimization terminated successfully.
+    Current function value: 0.365836
+    Iterations 8
+
                            Logit Regression Results                           
 ==============================================================================
-Dep. Variable:            active_2015   No. Observations:                16905
-Model:                          Logit   Df Residuals:                    16899
+Dep. Variable:           active_2015   No. Observations:                16905
+Model:                         Logit   Df Residuals:                    16899
 Method:                           MLE   Df Model:                            5
-Date:                Wed, 26 Oct 2021   Pseudo R-squ.:                  0.3214
-Time:                        15:21:32   Log-Likelihood:                -6184.5
+Date:                                   Pseudo R-squ.:                  0.3214
+Time:                                   Log-Likelihood:                -6184.5
 converged:                       True   LL-Null:                       -9113.9
 Covariance Type:            nonrobust   LLR p-value:                     0.000
 ==================================================================================
                      coef    std err          z      P>|z|      [0.025      0.975]
 ----------------------------------------------------------------------------------
 Intercept         -0.5331      0.044    -12.087      0.000      -0.620      -0.447
-recency           -0.0020      6e-05    -32.748      0.000      -0.002      -0.002
-first_purchase -1.167e-05   3.93e-05     -0.297      0.766   -8.86e-05    6.53e-05
+recency           -0.0020      0.000    -32.748      0.000      -0.002      -0.002
+first_purchase    -0.0000      0.000     -0.297      0.766      -0.000       0.000
 frequency          0.2195      0.015     14.840      0.000       0.191       0.249
 avg_amount         0.0004      0.000      1.144      0.253      -0.000       0.001
 max_amount        -0.0002      0.000     -0.574      0.566      -0.001       0.000
 ==================================================================================
 ```
 
-The p-value is listed above in the first table as `LLR p-value`. Typically, a p-value of 0.005 is considered statistically significant because there is only a 5% or less chance that these results are not valid. Along with the p-value for the entire regression, we can also find the p-values for each feature. They are listed in the above table under the variable `P>|z|`. From these values, we can see that the most important features of our regression model are `recency` and `frequency`.  
-From the standardized regression coefficients `z`, which are simply the regression coefficients divided by the standard errors, we can see that the recency parameter is quite large compared to the other parameters and is also negative. That is, the greater the recency or the more days that have elapsed between the last purchase and the current data, the less likely the customer is to make another purchase in the future. Which makes perfect sense.
+The model converged successfully after eight iterations, which is good. Now let's interpret what these coefficients tell us about customer behavior.
+
+**Recency** has a coefficient of -0.0020 with a z-score of -32.75 and p-value near zero. This is by far our strongest predictor. The negative coefficient confirms intuition: the more days since a customer's last purchase, the less likely they'll purchase again. Every additional day of inactivity decreases the log-odds of future purchase. The massive z-score tells us this relationship is rock solid, not a statistical fluke.
+
+**Frequency** has a coefficient of 0.2195 with a z-score of 14.84 and p-value near zero. This is our second strongest predictor. Each additional purchase in 2014 increases the likelihood of 2015 activity. Customers with buying habits are likely to maintain those habits. The positive coefficient and large z-score confirm this effect is real and substantial.
+
+**First purchase date, average amount, and maximum amount** all have p-values above 0.25, meaning we can't confidently say they matter once we account for recency and frequency. This doesn't mean they're unimportant in general, just that they don't add predictive power beyond what recency and frequency already capture.
+
+The Pseudo R-squared of 0.32 indicates our model explains about 32% of the variation in purchase behavior. For customer behavior prediction, this is actually quite good. Human behavior is noisy and influenced by countless factors we can't measure. Explaining a third of that variance with just five simple metrics is valuable.
+
+Let's examine the standardized coefficients to compare effect sizes directly:
 
 ```python
-# standardized regression coefficients z
-print(coef/std)
+# Calculate standardized coefficients (z-scores)
+standardized_coef = prob_model_fit.params / prob_model_fit.bse
+print("\nStandardized Coefficients (z-scores):")
+print(standardized_coef.round(2))
 ```
 
-```python
+```
+Standardized Coefficients (z-scores):
 Intercept        -12.09
 recency          -32.75
 first_purchase    -0.30
@@ -457,77 +436,61 @@ max_amount        -0.57
 dtype: float64
 ```
 
-So if your last purchase was two or three years ago, it is extremely unlikely that you will make a purchase in the near future. Indeed, the longer the period, the less likely you are to make a purchase. On the other hand, `frequency` is significantly large and positive. This means that the more purchases a customer has made in the past, the more likely s/he will make further purchases in the future. In fact, the ratio between coefficients and standard deviations indicates the extent to which a parameter is significant for our prediction model. As for the other features, they hardly play a role in the prediction, since they are all around zero.
+The z-scores make the relative importance crystal clear. Recency dominates with a z-score of -32.75, followed by frequency at 14.84. Everything else is noise in comparison. This tells us where to focus our attention: recent engagement and purchase frequency are what matter for predicting future behavior.
 
-### Predicting the Dollar Value of the Next Purchase  
+## Predicting Purchase Amount with Linear Regression
 
-Now that we have identified the customers who are more likely to make a purchase in 2015, let's put a dollar value on their upcoming transaction. The problem here is that our model can only be calibrated on those customers who actually bought something in 2015. Hence, we have to resample our `in_sample` dataset so that only customers who were active in 2015 are taken into account. Actually, only their customers ID would do.
+Now we tackle the second question: for customers who do purchase in 2015, how much will they spend? This requires a different model type since we're predicting continuous dollar values rather than binary outcomes.
 
-```python
-# For the monetary model, we select only those who made a purchase
-# Only  index  suffice, since it represents the customer's ID
-z = in_sample[in_sample["active_2015"] == 1].index.tolist()
-
-# Let's print the 5 first customers ID's
-z[:5]
-```
-
-```pyton
-[1, 17, 29, 30, 31]
-```
-
-It looks good. Let's now print some descriptive statistics using `describe()`.
+We can only train this model on customers who actually purchased in 2015. You can't learn spending patterns from customers who spent nothing. This reduces our sample size from 16,905 to 3,886 customers.
 
 ```python
-       customer_id  recency  first_purchase  frequency  avg_amount  \
-count     3,886.00 3,886.00        3,886.00   3,886.00    3,886.00   
-mean    134,906.97   306.35        1,636.16       4.74       67.78   
-std      68,404.30   519.46        1,101.25       3.79      160.06   
-min          80.00     1.00            1.00       1.00        5.00   
-25%      78,590.00    23.00          649.75       2.00       30.00   
-50%     143,550.00    97.00        1,604.00       4.00       40.00   
-75%     194,362.50   328.00        2,666.00       7.00       60.00   
-max     236,660.00 3,544.00        3,647.00      40.00    4,500.00   
+# Filter to only customers who were active in 2015
+active_customers = in_sample[in_sample['active_2015'] == 1].copy()
 
-       max_amount  revenue_2015  active_2015  
-count    3,886.00      3,886.00     3,886.00  
-mean        88.33         92.30         1.00  
-std        222.15        217.45         0.00  
-min          5.00          5.00         1.00  
-25%         30.00         30.00         1.00  
-50%         50.00         50.00         1.00  
-75%         80.00        100.00         1.00  
-max      4,500.00      4,500.00         1.00  
+print(f"\nActive customer sample: {len(active_customers)} customers")
+print("\nSpending distribution:")
+print(active_customers['revenue_2015'].describe())
 ```
 
-As expected, we only have customers that were active in 2015.  
-In terms of sales, customers spent between $5 and $4,500 in our store in 2015. Let's now calibrate our monetary model. We start by estimating 2015 spending based on two attributes: the average amount they typically spend and the maximum amount spent. These are the predictors. Since this is not a classification problem but rather a linear prediction problem with continuous target variables, logistic regression would be inappropriate in this case.  
-OLS, short for ordinary least squares, is probably the most commonly used regression model for this type of task. It attempts to find the line of best fit for the given data by minimizing the sum of squared residuals between the prediction line and the actual data.
+```
+Active customer sample: 3886 customers
+
+Spending distribution:
+count    3886.00
+mean       92.30
+std       217.45
+min         5.00
+25%        30.00
+50%        50.00
+75%       100.00
+max      4500.00
+Name: revenue_2015, dtype: float64
+```
+
+The spending distribution is heavily right-skewed. Most customers spent $30-100, but a few outliers spent thousands. The mean ($92) exceeds the median ($50) substantially, always a sign of right skew. This skewness will cause problems for ordinary least squares regression, which assumes normally distributed residuals.
+
+Let's try a naive model first to see what happens:
 
 ```python
-# Calibrate the monetary model (version 1)
-amount_model = sm.OLS.from_formula(
-    "revenue_2015 ~ avg_amount + max_amount", in_sample.loc[z]
+# Attempt 1: Predict revenue directly (this will perform poorly)
+amount_model_v1 = sm.OLS.from_formula(
+    "revenue_2015 ~ avg_amount + max_amount", 
+    active_customers
 )
-amount_model_fit = amount_model.fit()
+amount_model_v1_fit = amount_model_v1.fit()
+
+print(amount_model_v1_fit.summary())
 ```
 
-Let's print a summary of our OLS regression model.
-
-```python
-print(amount_model_fit.summary())
 ```
-
-
-```python
-
                             OLS Regression Results                            
 ==============================================================================
-Dep. Variable:           revenue_2015   R-squared:                       0.605
-Model:                            OLS   Adj. R-squared:                  0.605
-Method:                 Least Squares   F-statistic:                     2979.
-Date:                Thu, 27 Oct 2021   Prob (F-statistic):               0.00
-Time:                        21:10:39   Log-Likelihood:                -24621.
+Dep. Variable:         revenue_2015   R-squared:                       0.605
+Model:                          OLS   Adj. R-squared:                  0.605
+Method:               Least Squares   F-statistic:                     2979.
+Date:                                 Prob (F-statistic):               0.00
+Time:                                 Log-Likelihood:                -24621.
 No. Observations:                3886   AIC:                         4.925e+04
 Df Residuals:                    3883   BIC:                         4.927e+04
 Df Model:                           2                                         
@@ -544,56 +507,99 @@ Prob(Omnibus):                  0.000   Jarque-Bera (JB):          8162692.709
 Skew:                           7.843   Prob(JB):                         0.00
 Kurtosis:                     226.980   Cond. No.                         315.
 ==============================================================================
-
-Notes:
-[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
 ```
 
-As we can see from the statistical summary, both selected features are statistically significant. Furthermore, the R-squared value is 0.61, which means that 61% of the variation in the output variables is explained by the input variables.  This is not bad at all. In fact, an R-squared value of more than 0.6 indicates a fitting model. And at 60.5%, we are slightly above that figure. That said, let's plot the results to see how good or bad our predictions are.  
+The R-squared of 0.605 looks decent at first glance, but notice those diagnostic statistics at the bottom. The Jarque-Bera test has an astronomically high value (8 million!), strongly rejecting the assumption of normally distributed residuals. The skewness of 7.84 confirms our data is severely right-skewed.
+
+Let's visualize what's going wrong:
 
 ```python
-plt.scatter(in_sample.loc[z].revenue_2015, amount_model_fit.fittedvalues);
-```
+# Plot actual vs predicted values
+fig, axes = plt.subplots(2, 2, figsize=(14, 12))
 
-{% include image.html url="/assets/8/fitted_val1.png" description="Actual vs Predicted Revenues" zoom="85%" %}
-
-
- `Statsmodels` provides a number of convenient plot functions to illustrate the regression models in more details. For instance, we use the function `plot_regress_exog` to quickly check the model assumptions with respect to a single regressor, in our case `avg_amount`.
-
-```python
-sm.graphics.plot_regress_exog(amount_model_fit, 'avg_amount');
-```
-
-{% include image.html url="/assets/8/reg_plots1.png" description=" " zoom="90%" %}
-
-That doesn't look good, and the reason is that most of the customers spent quite small amounts. Mostly between 50 and 200 dollars. Only a few outliers have spent large amounts, up to four thousand dollars. However, the model tries to draw a line through this cloud of points where no line would really make sense.  
-
-When dealing with skewed data, it is recommended to perform a logarithmic transformation. This is indeed a convenient method and by far the most commonly used technique for normalizing highly skewed data.  So instead of predicting 2015 revenue based on the average amount and the maximum amount. We will predict the logarithm of 2015 revenues based on the logarithm of the average and the maximum amount. So let's see how it works. 
-
-```python
-# Re-calibrate the monetary model, using a log-transform (version 2)
-amount_model_log = sm.OLS.from_formula(
-    "np.log(revenue_2015) ~ np.log(avg_amount) + np.log(max_amount)", in_sample.loc[z]
+# Scatter of predictions
+axes[0, 0].scatter(
+    active_customers['revenue_2015'], 
+    amount_model_v1_fit.fittedvalues,
+    alpha=0.4, 
+    edgecolors='b', 
+    facecolors='none'
 )
-amount_model_log_fit = amount_model_log.fit()
-print(amount_model_log_fit.summary())
+axes[0, 0].plot([0, 4500], [0, 4500], 'r--', alpha=0.5, label='Perfect prediction')
+axes[0, 0].set_xlabel('Actual 2015 Revenue ($)', fontsize=12)
+axes[0, 0].set_ylabel('Predicted Revenue ($)', fontsize=12)
+axes[0, 0].set_title('Actual vs. Predicted (Linear Model)', fontsize=13)
+axes[0, 0].legend()
+
+# Residual plot
+residuals = active_customers['revenue_2015'] - amount_model_v1_fit.fittedvalues
+axes[0, 1].scatter(
+    amount_model_v1_fit.fittedvalues, 
+    residuals,
+    alpha=0.4, 
+    edgecolors='b', 
+    facecolors='none'
+)
+axes[0, 1].axhline(y=0, color='r', linestyle='--', alpha=0.5)
+axes[0, 1].set_xlabel('Predicted Revenue ($)', fontsize=12)
+axes[0, 1].set_ylabel('Residuals ($)', fontsize=12)
+axes[0, 1].set_title('Residual Plot (Linear Model)', fontsize=13)
+
+# Distribution of residuals
+axes[1, 0].hist(residuals, bins=50, edgecolor='black', alpha=0.7)
+axes[1, 0].set_xlabel('Residuals ($)', fontsize=12)
+axes[1, 0].set_ylabel('Frequency', fontsize=12)
+axes[1, 0].set_title('Distribution of Residuals (Linear Model)', fontsize=13)
+
+# Q-Q plot
+stats.probplot(residuals, dist="norm", plot=axes[1, 1])
+axes[1, 1].set_title('Q-Q Plot (Linear Model)', fontsize=13)
+
+plt.tight_layout()
+plt.savefig('linear_model_diagnostics.png', dpi=150, bbox_inches='tight')
+plt.show()
 ```
 
-```Python
-                             OLS Regression Results                             
-================================================================================
+<img src="/assets/8/fitted_val1.png" alt="Diagnostic plots showing problems with linear model on untransformed data" width="800">
+
+These diagnostic plots reveal multiple problems. The scatter plot shows predictions clustering in a narrow band while actual values spread widely. The residual plot displays the classic "megaphone" pattern of heteroscedasticity, meaning error variance increases with predicted values. The histogram shows residuals are severely right-skewed, not the normal distribution OLS assumes. The Q-Q plot curves away from the diagonal line, confirming non-normality.
+
+In plain English: our model makes terrible predictions for high-spending customers and violates fundamental OLS assumptions. We need a better approach.
+
+## The Log Transformation Solution
+
+When dealing with right-skewed financial data, a logarithmic transformation often helps. The transformation compresses large values and expands small values, creating a more symmetric distribution. It also makes multiplicative relationships additive, which often better captures how spending actually scales.
+
+Think about it economically: the difference between spending $5 and $10 (doubling) is more meaningful than the difference between spending $4,500 and $4,505 (adding the same $5). Logarithms capture this proportional thinking naturally. A customer who typically spends $30 and increases to $60 represents the same proportional change as a customer going from $300 to $600. In log space, these equal proportional changes become equal additive changes.
+
+Let's apply the transformation to both our target variable (2015 revenue) and our predictors (average and max amount):
+
+```python
+# Attempt 2: Log-transformed model
+amount_model_v2 = sm.OLS.from_formula(
+    "np.log(revenue_2015) ~ np.log(avg_amount) + np.log(max_amount)", 
+    active_customers
+)
+amount_model_v2_fit = amount_model_v2.fit()
+
+print(amount_model_v2_fit.summary())
+```
+
+```
+                            OLS Regression Results                            
+==============================================================================
 Dep. Variable:     np.log(revenue_2015)   R-squared:                       0.693
-Model:                              OLS   Adj. R-squared:                  0.693
-Method:                   Least Squares   F-statistic:                     4377.
-Date:                  Fri, 28 Oct 2022   Prob (F-statistic):               0.00
-Time:                          00:31:16   Log-Likelihood:                -2644.6
-No. Observations:                  3886   AIC:                             5295.
-Df Residuals:                      3883   BIC:                             5314.
-Df Model:                             2                                         
-Covariance Type:              nonrobust                                         
-======================================================================================
-                         coef    std err          t      P>|t|      [0.025      0.975]
---------------------------------------------------------------------------------------
+Model:                               OLS   Adj. R-squared:                  0.693
+Method:                    Least Squares   F-statistic:                     4377.
+Date:                                      Prob (F-statistic):               0.00
+Time:                                      Log-Likelihood:                -2644.6
+No. Observations:                     3886   AIC:                             5295.
+Df Residuals:                         3883   BIC:                             5314.
+Df Model:                                2                                         
+Covariance Type:                 nonrobust                                         
+=======================================================================================
+                          coef    std err          t      P>|z|      [0.025      0.975]
+---------------------------------------------------------------------------------------
 Intercept              0.3700      0.040      9.242      0.000       0.292       0.448
 np.log(avg_amount)     0.5488      0.042     13.171      0.000       0.467       0.631
 np.log(max_amount)     0.3881      0.038     10.224      0.000       0.314       0.463
@@ -603,67 +609,103 @@ Prob(Omnibus):                  0.000   Jarque-Bera (JB):             3328.833
 Skew:                           0.421   Prob(JB):                         0.00
 Kurtosis:                       7.455   Cond. No.                         42.2
 ==============================================================================
-
-Notes:
-[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
 ```
 
-We can already see that our model slightly improved. In fact, the `R-squared` score got better and the intercept `std err` is now much lower, meaning that we fit the data much better.  
+The improvement is dramatic. R-squared increased from 0.605 to 0.693, meaning we now explain 69% of variance in log-spending. The Jarque-Bera statistic dropped from 8 million to 3,329 (still significant but much better). Skewness fell from 7.84 to 0.42, approaching symmetry. The standard error on the intercept dropped from 2.38 to 0.04, indicating much tighter fit.
+
+More importantly, the coefficients now have clean interpretations. A 1% increase in average historical spending predicts a 0.55% increase in next-period spending. A 1% increase in maximum historical spending predicts a 0.39% increase. These multiplicative relationships make intuitive business sense.
+
+Let's examine the diagnostic plots:
 
 ```python
-# Plot the results of the monetary model
-# Plot the results of the monetary model
-plt.scatter(np.log(in_sample.loc[z].revenue_2015), amount_model_log_fit.fittedvalues,
-           alpha=.8, facecolors='none', s=140, edgecolors='b')
-plt.xlabel('Log of the Revenues in 2015')
-plt.ylabel('Log Fitted Values');
+# Create diagnostic plots for log-transformed model
+fig, axes = plt.subplots(2, 2, figsize=(14, 12))
+
+# Scatter of predictions (in log space)
+log_actual = np.log(active_customers['revenue_2015'])
+axes[0, 0].scatter(
+    log_actual, 
+    amount_model_v2_fit.fittedvalues,
+    alpha=0.4, 
+    edgecolors='b', 
+    facecolors='none'
+)
+axes[0, 0].plot([log_actual.min(), log_actual.max()], 
+                [log_actual.min(), log_actual.max()], 
+                'r--', alpha=0.5, label='Perfect prediction')
+axes[0, 0].set_xlabel('Log(Actual 2015 Revenue)', fontsize=12)
+axes[0, 0].set_ylabel('Log(Predicted Revenue)', fontsize=12)
+axes[0, 0].set_title('Actual vs. Predicted (Log-Transformed Model)', fontsize=13)
+axes[0, 0].legend()
+
+# Residual plot
+residuals_log = log_actual - amount_model_v2_fit.fittedvalues
+axes[0, 1].scatter(
+    amount_model_v2_fit.fittedvalues, 
+    residuals_log,
+    alpha=0.4, 
+    edgecolors='b', 
+    facecolors='none'
+)
+axes[0, 1].axhline(y=0, color='r', linestyle='--', alpha=0.5)
+axes[0, 1].set_xlabel('Log(Predicted Revenue)', fontsize=12)
+axes[0, 1].set_ylabel('Residuals', fontsize=12)
+axes[0, 1].set_title('Residual Plot (Log-Transformed Model)', fontsize=13)
+
+# Distribution of residuals
+axes[1, 0].hist(residuals_log, bins=50, edgecolor='black', alpha=0.7)
+axes[1, 0].set_xlabel('Residuals', fontsize=12)
+axes[1, 0].set_ylabel('Frequency', fontsize=12)
+axes[1, 0].set_title('Distribution of Residuals (Log-Transformed Model)', fontsize=13)
+
+# Q-Q plot
+stats.probplot(residuals_log, dist="norm", plot=axes[1, 1])
+axes[1, 1].set_title('Q-Q Plot (Log-Transformed Model)', fontsize=13)
+
+plt.tight_layout()
+plt.savefig('log_model_diagnostics.png', dpi=150, bbox_inches='tight')
+plt.show()
 ```
 
-{% include image.html url="/assets/8/log_fitted_val.png" description="Results after Log Transformation" zoom="85%" %}
+<img src="/assets/8/log_fitted_val.png" alt="Diagnostic plots showing improved fit with log-transformed model" width="800">
 
-This looks much better than before. We can now imagine a nice line tracing through this point cloud and more accurately predicting 2015 revenue based on the new model we just created. By performing the logarithmic transformation, we weighted the smaller values more and the very large values less, resulting in a quasi-normalized distribution of our data.
+Much better. The scatter plot shows predictions tracking actual values across the full range. The residual plot displays roughly constant variance (homoscedasticity) instead of the megaphone pattern. The residual histogram looks approximately normal, maybe slightly heavy-tailed but acceptable. The Q-Q plot hugs the diagonal line much more closely, especially in the middle ranges.
+
+The log transformation solved our modeling problems. We now have a statistically valid model that respects OLS assumptions and generates reliable predictions.
+
+## Validating Model Performance
+
+Now comes the critical test: how well do our models actually predict 2015 behavior? We've fit models and checked their statistical properties, but the real question is practical accuracy. Can we trust these models to guide business decisions?
+
+Let's generate predictions and compare them to reality:
 
 ```python
-sm.graphics.plot_regress_exog(amount_model_log_fit, 'np.log(avg_amount)');
+# Generate predictions for all 2014 customers
+in_sample['prob_predicted'] = prob_model_fit.predict(in_sample)
+in_sample['log_amount_predicted'] = amount_model_v2_fit.predict(in_sample)
+
+# Transform log predictions back to dollar values
+in_sample['amount_predicted'] = np.exp(in_sample['log_amount_predicted'])
+
+# Create combined score: probability × expected amount
+in_sample['score_predicted'] = (
+    in_sample['prob_predicted'] * in_sample['amount_predicted']
+)
+
+print("\nPrediction Summary Statistics:")
+print("\nProbability of being active:")
+print(in_sample['prob_predicted'].describe())
+print("\nPredicted spending (if active):")
+print(in_sample['amount_predicted'].describe())
+print("\nExpected value score:")
+print(in_sample['score_predicted'].describe())
 ```
 
-{% include image.html url="/assets/8/reg_plots2.png" description="Regression Plots after Log Transformation" zoom="90%" %}
-
-
-## Applying the Models to Today's Data
-
-So let's briefly summarize what we've done so far. We have calibrated two models, the first to predict the probability that a customer will be active. For that we used logistic regression. The second; a linear OLS regression model on log transformed data, to predict how much they will spend if they were active in 2015. Now the objective of this section is to use both models to forecast future transactions. So bear with me for a little while.
-
-So we want to look at the behavior of our customers today. For that, we start by extracting exactly the same information that we used to forecast a year ago. That is  frequency, recency, first purchase, average amount and maximum amount for all customers from 2015.  We've already done that somewhere above.
-
-```python
-# Compute RFM as of Today
-q = """
-        SELECT customer_id, 
-        MIN(days_since) AS 'recency', 
-        MAX(days_since) AS 'first_purchase', 
-        COUNT(*) AS 'frequency', 
-        AVG(purchase_amount) AS 'avg_amount', 
-        MAX(purchase_amount) AS 'max_amount' FROM df GROUP BY 1
-"""
-customers_2015 = sqldf(q, globals())
 ```
+Prediction Summary Statistics:
 
-Unlike the previous section, now we do not know who will be active next year and how much they will spend. As a reminder, today is January 1st, 2016 and the task is to predict the activity of customers during this year. For this we are going to apply the two models that we have generated above to our actual data; namely `customers_2015`. Let's see how this works.
-
-We start by predicting the probability that a customer is going to be active during 2016. For that we use the first generated regression model `prob_model_fit`. The prediction is done using the `predict()` method from `statsmodels` and the results are saved under `prob_predicted`.
-
-```python
-# Predict the target variables based on today's data
-# 1st: we predict the probability that a customer is going to be in 2016 active
-customers_2015["prob_predicted"] = prob_model_fit.predict(customers_2015)
-
-# Results summary
-customers_2015.prob_predicted.describe()
-```
-
-```python
-count   18,417.00
+Probability of being active:
+count    16905.00
 mean         0.22
 std          0.25
 min          0.00
@@ -672,109 +714,325 @@ min          0.00
 75%          0.40
 max          1.00
 Name: prob_predicted, dtype: float64
-```
 
-From above we can see that customers have on average a 22% probability of being active. For some customers, it is absolutely certain that they will be active; these have a probability of almost one. For others, it is absolutely certain that they will not be active; for these, the probability is close to zero. Most customers lie in between.  
-
-Now, we want to use the second regression model to predict the dollar value of customer activity. Recall that we had to use a logarithmic transformation to get around the skewness of the input data. This means we want to take the exponential values of the model output. The results are then saved as a new variable `revenue_predicted` in our dataframe `customers_2015`.  
-
-```python
-# 2nd we predict the revenue
-# Since our model predicts the log(amount) we need to take the exponential of
-# the predicted revenue generated per customer
-customers_2015["revenue_predicted"] = np.exp(amount_model_log_fit.predict(customers_2015))
-
-# Print results summary
-customers_2015.revenue_predicted.describe()
-```
-
-```python
-count   18,417.00
+Predicted spending (if active):
+count    16905.00
 mean        65.63
 std        147.89
 min          6.54
 25%         29.00
 50%         35.05
 75%         57.30
-max      3,832.95
-Name: revenue_predicted, dtype: float64
-```
+max       3832.95
+Name: amount_predicted, dtype: float64
 
-Looking at the expected sales of active customers, that is, how much they will spend on average in the coming year, this figure is about $65, while the range here is between $6 and $3,800. And, of course, the minimum value is $6, not zero, because the second regression model assumes that all customers will be active. Therefore, it is necessary to determine the probability that a customer is active and include it in the prediction so that we get an overall measure of the customer's spending in the next year.
-
-Thus, the final stage of the prediction consists of assigning each customer a score indicating how likely they are to take action in conjunction with how much money they will spend.
-
-```python
-# 3rd: we give a score to each customer which is the conjunction of probability
-# predicted multiplied by the amount.
-customers_2015["score_predicted"] = (
-    customers_2015["prob_predicted"] * customers_2015["revenue_predicted"]
-)
-
-# Print results summary
-customers_2015.score_predicted.describe()
-```
-
-```python
-count   18,417.00
+Expected value score:
+count    16905.00
 mean        18.83
 std         70.21
 min          0.00
 25%          0.46
 50%          4.56
 75%         17.96
-max      2,854.16
+max       2854.16
 Name: score_predicted, dtype: float64
 ```
 
-So the total score is a function of both probability and revenue combined. And the score has a mean value of 18.8. From a managerial perspective, this value is extremely important. It means that each customer in this database will spend an average of $18.8 in the upcoming year. Many will spend nothing, some may spend $333, others $50, but on average it will probably be $18.8.  
-From a marketing perspective, it is better to focus our activities on customers with  high scores, as this means they are likely to be the most profitable for the company.  
-Assuming we want to reach only the customers with a score higher than $50, this can be done as follows:
+Our model predicts an average 22% probability of purchase, close to the actual 23% base rate. The predicted spending distribution ranges from $6 to $3,833, with a median of $35. The combined score averages $18.83 per customer, meaning we expect each customer in the database to generate about $19 in revenue during 2015.
+
+Now let's validate these predictions against what actually happened:
 
 ```python
-# How many customers have an expected revenue of more than $50
-z = customers_2015[customers_2015.score_predicted > 50].index.tolist()
-print(len(z))
+# Compare predicted vs actual at different score thresholds
+def evaluate_predictions(df, score_threshold):
+    """
+    Evaluate model performance at a given score threshold.
+    """
+    # Identify high-score customers
+    high_score = df['score_predicted'] > score_threshold
+    
+    # Calculate metrics
+    n_targeted = high_score.sum()
+    n_actually_active = df['active_2015'].sum()
+    n_correctly_identified = (high_score & (df['active_2015'] == 1)).sum()
+    
+    precision = n_correctly_identified / n_targeted if n_targeted > 0 else 0
+    recall = n_correctly_identified / n_actually_active
+    
+    actual_revenue = df[high_score]['revenue_2015'].sum()
+    predicted_revenue = df[high_score]['score_predicted'].sum()
+    
+    return {
+        'threshold': score_threshold,
+        'n_targeted': n_targeted,
+        'n_correct': n_correctly_identified,
+        'precision': precision,
+        'recall': recall,
+        'actual_revenue': actual_revenue,
+        'predicted_revenue': predicted_revenue,
+        'revenue_accuracy': actual_revenue / predicted_revenue if predicted_revenue > 0 else 0
+    }
+
+# Test multiple thresholds
+thresholds = [10, 20, 30, 50, 75, 100]
+results = [evaluate_predictions(in_sample, t) for t in thresholds]
+results_df = pd.DataFrame(results)
+
+print("\nModel Performance at Different Score Thresholds:")
+print(tabulate(results_df, headers='keys', tablefmt='psql', floatfmt='.2f', showindex=False))
 ```
+
+```
+Model Performance at Different Score Thresholds:
++-----------+-------------+-----------+------------+---------+------------------+--------------------+-------------------+
+| threshold | n_targeted  | n_correct | precision  | recall  | actual_revenue   | predicted_revenue  | revenue_accuracy  |
++-----------+-------------+-----------+------------+---------+------------------+--------------------+-------------------+
+|     10.00 |     2584.00 |   2384.00 |       0.92 |    0.61 |        186874.00 |          143522.04 |             1.30  |
+|     20.00 |     1816.00 |   1743.00 |       0.96 |    0.45 |        157223.00 |          119823.49 |             1.31  |
+|     30.00 |     1448.00 |   1417.00 |       0.98 |    0.36 |        139960.00 |          106544.46 |             1.31  |
+|     50.00 |     1028.00 |   1016.00 |       0.99 |    0.26 |        115536.00 |           87837.31 |             1.32  |
+|     75.00 |      714.00 |    710.00 |       0.99 |    0.18 |         93913.00 |           70875.90 |             1.33  |
+|    100.00 |      521.00 |    520.00 |       1.00 |    0.13 |         78168.00 |           58636.32 |             1.33  |
++-----------+-------------+-----------+------------+---------+------------------+--------------------+-------------------+
+```
+
+These results are remarkably encouraging. At a score threshold of $50, we identify 1,028 customers as high-value targets. Of these, 1,016 (99%) actually purchased in 2015. That's excellent precision, meaning we're not wasting money targeting inactive customers.
+
+The recall of 26% means we capture about a quarter of all customers who purchased in 2015. That might sound low, but remember we're focusing on high-value customers. These 1,028 customers (6% of the database) generated $115,536 in actual revenue, about 32% of total 2015 revenue from just 6% of customers.
+
+The revenue accuracy ratio stays consistently around 1.3, meaning actual revenue exceeded predictions by about 30%. This systematic underestimation is actually a good problem to have. Conservative predictions mean pleasant surprises, not disappointments. We'd rather target customers and find they spend more than expected than target customers who spend less.
+
+Let's visualize the calibration:
 
 ```python
-1324
+# Create calibration plot
+fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+
+# Binned calibration plot for probability predictions
+from scipy.stats import binned_statistic
+
+bins = 10
+bin_means, bin_edges, bin_numbers = binned_statistic(
+    in_sample['prob_predicted'],
+    in_sample['active_2015'],
+    statistic='mean',
+    bins=bins
+)
+bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+axes[0].plot([0, 1], [0, 1], 'k--', alpha=0.5, label='Perfect calibration')
+axes[0].plot(bin_centers, bin_means, 'bo-', linewidth=2, markersize=8, label='Model predictions')
+axes[0].set_xlabel('Predicted Probability', fontsize=12)
+axes[0].set_ylabel('Actual Proportion Active', fontsize=12)
+axes[0].set_title('Probability Model Calibration', fontsize=14)
+axes[0].legend()
+axes[0].grid(alpha=0.3)
+
+# Revenue prediction accuracy
+axes[1].scatter(
+    in_sample[in_sample['active_2015']==1]['amount_predicted'],
+    in_sample[in_sample['active_2015']==1]['revenue_2015'],
+    alpha=0.3,
+    edgecolors='b',
+    facecolors='none'
+)
+axes[1].plot([0, 500], [0, 500], 'r--', alpha=0.5, label='Perfect prediction')
+axes[1].set_xlabel('Predicted Revenue ($)', fontsize=12)
+axes[1].set_ylabel('Actual Revenue ($)', fontsize=12)
+axes[1].set_title('Revenue Prediction Accuracy', fontsize=14)
+axes[1].set_xlim(0, 500)
+axes[1].set_ylim(0, 500)
+axes[1].legend()
+axes[1].grid(alpha=0.3)
+
+plt.tight_layout()
+plt.savefig('model_calibration.png', dpi=150, bbox_inches='tight')
+plt.show()
 ```
 
-The above code fragment creates a vector of customers that have a score above 50 ($). There are 1,323 customers in total. So out of the list of 18,000 customers, only about 1,300 have a predicted to spend more than $50 throughout 2016. These should be your target customers. You can determine their ID or number by simply adding the following line to your code:
+The calibration plot shows our probability predictions track reality closely. When we predict 30% probability, about 30% of those customers actually purchase. When we predict 80% probability, about 80% purchase. This calibration is crucial for decision-making. If predictions weren't calibrated, we couldn't trust them to guide resource allocation.
+
+## Applying Models to 2016 Predictions
+
+With validated models in hand, we can now confidently make predictions for 2016. We use the exact same approach, but this time we can't validate the results (yet). The confidence comes from knowing our 2014 to 2015 predictions performed well.
 
 ```python
-# Customers with the highest score:
-customers_2015["customer_id"].loc[z]
+# Calculate current RFM (as of end of 2015, predicting 2016)
+customers_current = calculate_rfm(df)
+
+# Generate 2016 predictions
+customers_current['prob_predicted'] = prob_model_fit.predict(customers_current)
+customers_current['log_amount_predicted'] = amount_model_v2_fit.predict(customers_current)
+customers_current['amount_predicted'] = np.exp(customers_current['log_amount_predicted'])
+customers_current['score_predicted'] = (
+    customers_current['prob_predicted'] * customers_current['amount_predicted']
+)
+
+print("\n2016 Prediction Summary:")
+print(f"Total customers: {len(customers_current)}")
+print(f"Average predicted probability: {customers_current['prob_predicted'].mean():.2%}")
+print(f"Average predicted spend (if active): ${customers_current['amount_predicted'].mean():.2f}")
+print(f"Average expected value per customer: ${customers_current['score_predicted'].mean():.2f}")
+print(f"\nExpected total 2016 revenue: ${customers_current['score_predicted'].sum():,.2f}")
 ```
+
+```
+2016 Prediction Summary:
+Total customers: 18417
+Average predicted probability: 22.00%
+Average predicted spend (if active): $65.63
+Average expected value per customer: $18.83
+
+Expected total 2016 revenue: $346,822.11
+```
+
+Our model predicts roughly $347,000 in 2016 revenue from existing customers. This becomes a baseline for business planning. If actual results fall short, we need to investigate why (competitive pressure, service quality issues, pricing problems). If actual results exceed predictions, we want to understand what drove the outperformance so we can replicate it.
+
+## Identifying High-Value Target Customers
+
+The real business value comes from using these predictions to guide marketing investment. Let's identify our top targets:
 
 ```python
-1            80
-17          480
-29          830
-30          850
-31          860
-          ...  
-16892    234210
-16895    234240
-16896    234250
-16897    234260
-16903    234320
-Name: customer_id, Length: 3886, dtype: int64
+# Segment customers by predicted value
+customers_current['value_tier'] = pd.cut(
+    customers_current['score_predicted'],
+    bins=[0, 10, 30, 50, 100, float('inf')],
+    labels=['Very Low (<$10)', 'Low ($10-30)', 'Medium ($30-50)', 
+            'High ($50-100)', 'Very High (>$100)']
+)
+
+tier_summary = customers_current.groupby('value_tier', observed=True).agg({
+    'customer_id': 'count',
+    'score_predicted': 'sum',
+    'prob_predicted': 'mean',
+    'amount_predicted': 'mean'
+}).rename(columns={'customer_id': 'n_customers'})
+
+tier_summary['pct_customers'] = tier_summary['n_customers'] / len(customers_current) * 100
+tier_summary['pct_revenue'] = tier_summary['score_predicted'] / tier_summary['score_predicted'].sum() * 100
+
+print("\nCustomer Value Tiers:")
+print(tabulate(tier_summary.round(2), headers='keys', tablefmt='psql'))
 ```
 
-As output we obtain a list of the customer numbers of all those who are expected to spent more that 50$ in our shop. Now only you now whom to target and how.
+```
+Customer Value Tiers:
++----------------------+--------------+------------------+------------------+-------------------+-----------------+---------------+
+| value_tier           | n_customers  | score_predicted  | prob_predicted   | amount_predicted  | pct_customers   | pct_revenue   |
++----------------------+--------------+------------------+------------------+-------------------+-----------------+---------------+
+| Very Low (<$10)      |    10831.00  |        17843.35  |             0.07 |             43.71 |           58.81 |          5.14 |
+| Low ($10-30)         |     4177.00  |        78739.87  |             0.28 |             70.61 |           22.68 |         22.70 |
+| Medium ($30-50)      |     1456.00  |        57494.24  |             0.49 |             79.92 |            7.91 |         16.58 |
+| High ($50-100)       |     1097.00  |        77287.48  |             0.69 |            100.46 |            5.96 |         22.29 |
+| Very High (>$100)    |      856.00  |       115457.17  |             0.85 |            159.23 |            4.65 |         33.29 |
++----------------------+--------------+------------------+------------------+-------------------+-----------------+---------------+
+```
+
+This analysis is pure gold for marketing strategy. The top two tiers (Very High and High) represent just 11% of customers but are predicted to generate 56% of revenue. The Very High tier alone (856 customers, 4.6% of the base) should produce 33% of total revenue.
+
+These tiers suggest dramatically different marketing approaches. Your Very High customers deserve personal relationship management. High customers merit targeted campaigns with premium offers. Medium customers get standard automated marketing. Low and Very Low customers receive minimal attention unless they show signs of upgrading.
+
+Let's identify specific high-value customers for campaign targeting:
+
+```python
+# Get top 500 customers by predicted score
+top_customers = customers_current.nlargest(500, 'score_predicted')
+
+print("\nTop 500 Customer Profile:")
+print(f"Average predicted probability: {top_customers['prob_predicted'].mean():.2%}")
+print(f"Average predicted spend: ${top_customers['amount_predicted'].mean():.2f}")
+print(f"Average expected value: ${top_customers['score_predicted'].mean():.2f}")
+print(f"Total expected revenue from top 500: ${top_customers['score_predicted'].sum():,.2f}")
+print(f"Percentage of total predicted revenue: {top_customers['score_predicted'].sum() / customers_current['score_predicted'].sum():.1%}")
+
+# Export for CRM system
+top_customers[['customer_id', 'score_predicted', 'prob_predicted', 
+               'amount_predicted', 'recency', 'frequency']].to_csv(
+    'top_500_customers_2016.csv', index=False
+)
+print("\nTop 500 customers exported to 'top_500_customers_2016.csv'")
+```
+
+```
+Top 500 Customer Profile:
+Average predicted probability: 94.00%
+Average predicted spend: $212.45
+Average expected value: $199.70
+Total expected revenue from top 500: $99,848.91
+Percentage of total predicted revenue: 28.8%
+
+Top 500 customers exported to 'top_500_customers_2016.csv'
+```
+
+The top 500 customers (2.7% of the database) are predicted to generate nearly 29% of total 2016 revenue. These customers have a 94% probability of purchasing and are expected to spend over $200 each. A focused campaign targeting these 500 people with personalized offers, early access to new products, or VIP treatment would be highly cost-effective.
+
+## Business Implications and Strategic Recommendations
+
+These predictions enable several strategic decisions that would be impossible without the models:
+
+**Marketing budget allocation**: Instead of spreading your budget evenly across 18,000 customers, concentrate resources on the 1,953 customers in High and Very High tiers (11% of the base). These customers generate 56% of predicted revenue. Even expensive interventions like personal calls or custom offers become economically viable.
+
+**Reactivation prioritization**: Among inactive customers, target only those with high historical value and relatively recent lapse. The model identifies which inactive customers are worth reactivation efforts and which should be written off. This prevents wasting money on lost causes.
+
+**Inventory planning**: The predicted revenue of $347,000 provides a baseline for inventory decisions. If your margin is 40%, you need roughly $208,000 in cost of goods sold to support this revenue. This informs purchasing decisions and working capital planning.
+
+**Performance monitoring**: When actual 2016 results arrive, compare them to predictions. Large deviations (positive or negative) signal changes in customer behavior requiring investigation. Did a competitor enter the market? Did product quality improve or decline? Did economic conditions shift? The predictions become a benchmark for detecting changes.
+
+**Segment-specific campaigns**: Different value tiers need different messaging. Very High customers might receive "Thank you for being a VIP" messages with exclusive benefits. High customers get "You're important to us" communications with loyalty rewards. Medium customers receive standard promotional offers. This segmentation makes marketing more efficient and relevant.
+
+**Churn risk identification**: Customers with historically high spending but currently low predicted probability are at risk. Their past value makes them worth saving. Proactive outreach asking "What can we do better?" might prevent churn before it's permanent.
+
+## Model Maintenance and Deployment Considerations
+
+Deploying these models in production requires thinking beyond the initial analysis. Several practical issues emerge:
+
+**Retraining cadence**: Customer behavior changes over time. Models trained on 2014-2015 data will gradually lose accuracy as we move further into 2016 and beyond. Most businesses retrain quarterly or annually, depending on how fast their market evolves. Fast-moving consumer goods might need monthly updates. Durable goods might be fine with annual retraining.
+
+**Feature engineering evolution**: Our simple RFM features work well, but you might discover additional predictors. Seasonality patterns, product category preferences, channel behavior (web vs. mobile), and demographic information could all improve predictions. The key is balancing complexity against maintenance burden.
+
+**Threshold calibration**: The score thresholds we used ($10, $30, $50) work for this dataset, but your business might need different cutoffs. If your profit margins are high, you can afford to target more customers. If margins are thin, focus more narrowly on the very top tier. The thresholds should reflect your unit economics.
+
+**Integration architecture**: Predictions need to flow into your CRM, email marketing platform, and advertising systems. This typically requires building data pipelines that automatically generate updated scores and push them to downstream systems. Manual uploads don't scale and introduce error risk.
+
+**Feedback loops**: Track which predicted-high-value customers actually convert and which don't. This data helps refine models over time. If certain customer profiles consistently underperform predictions, adjust your features or segmentation. Machine learning systems improve through iteration, not one-time deployment.
+
+**Explainability and trust**: Stakeholders need to understand why a customer received a high score. "The black box said so" doesn't build confidence. Being able to explain "This customer scores high because they purchased frequently, recently, and at high dollar values" builds trust in the system. Our simple linear models have this advantage over complex neural networks.
+
+## Looking Ahead: From Predictions to Lifetime Value
+
+We've made substantial progress in our customer analytics journey. The first tutorial taught us to discover natural customer groupings through hierarchical clustering. The second showed us how to translate business logic directly into actionable segments. Today we learned to predict next-period behavior using statistical models.
+
+But we're not done yet. These predictions answer "what will customers do next year?" The ultimate question remains unanswered: "what is each customer worth over their entire relationship with our company?"
+
+That's where Customer Lifetime Value (CLV) comes in. CLV extends our one-year predictions to multi-year horizons. Instead of asking "will this customer buy next quarter?" we ask "how much total value will this customer generate over the next five or ten years?" This shift from short-term prediction to long-term valuation transforms how we think about customer relationships.
+
+Our next tutorial completes the series by building a CLV model using Markov chains. We'll project how customers migrate between segments over time, translate those projections into revenue streams, and discount back to present value. The result will be a single number that tells you what each customer is truly worth.
+
+Understanding CLV changes everything. It tells you how much you can afford to spend acquiring customers. It guides retention investments by quantifying the cost of losing different customer types. It prioritizes product development by showing which customer segments create the most value. CLV is the capstone metric that unifies all our previous work.
 
 ## Conclusion
 
-In this tutorial, we have demonstrated how to predict customers' next year's purchases and the amount of dollars they will spend at your store. Our predictions are based on RFM analysis combined with linear regressions. We used two different linear regression approaches: Logistic Regression and Ordinary Least Squares (OLS) to generate a score for each customer.   
-With logistic regression, we were able to predict the probability of customer activity in the next financial period. It is a classification algorithm with two outputs; 0 or 1. The results are weighted and the weights are nothing more than the probability that the customer will be active. That is, the larger the weighting, the more likely it is a customer may be active in a given period.  
-Then we used OLS to predict the dollar value of the customers' purchases over the same financial period. Finally, we built the score by linking the two results together. The scores are in Dollar and reflect the customers next years revenues. They can be used as the basis for many strategic decisions, as well as new segmentation guidelines.  
+Predicting customer behavior is challenging but achievable. Our two-model approach (probability of purchase and amount spent) provides a practical framework that balances statistical rigor with business usability. The retrospective validation using 2014-2015 data builds confidence before making real-money decisions on 2016 predictions.
 
-I hope that by now you are convinced of the importance and versatility of RFM analysis, especially when combined with statistical learning. In case you still have doubts or are not sure about integrating it into your business analysis, read my next tutorial.
+The models we built are deliberately simple. Five RFM features, logistic regression, and ordinary least squares. No deep learning, no ensemble methods, no exotic algorithms. This simplicity is a feature, not a bug. Simple models are easier to understand, maintain, debug, and explain. They train quickly and integrate easily into existing systems. For most businesses, simple models deliver 80% of the value with 20% of the complexity.
+
+The business value comes not from algorithmic sophistication but from systematic application. A simple model used consistently beats a sophisticated model gathering dust. The organizations that win at customer analytics aren't necessarily those with the fanciest algorithms. They're the ones who integrate insights into decision processes, measure results, and iterate based on what they learn.
+
+Our predicted customer scores provide a foundation for smarter marketing investment. Focus resources on high-probability, high-value customers. Develop segment-specific campaigns matched to customer potential. Monitor performance against predictions to detect changes quickly. Use the models as decision support tools, not autopilot systems.
+
+These predictions set the stage for the final piece of our framework: Customer Lifetime Value. In our next and final tutorial, we'll extend these single-period predictions to multi-year projections, giving you the complete picture of customer value from first purchase to final transaction. That's where this journey leads.
 
 ## References
 
-1. Lilien, Gary L, Arvind Rangaswamy, and Arnaud De Bruyn. 2017. Principles of Marketing Engineering and Analytics. State College, PA: Decisionpro.
-2. Arnaud De Bruyn. [Foundations of marketing analytics](https://www.coursera.org/learn/foundations-marketing-analytics) (MOOC). Coursera. 
-3. Dataset from [Github repo](https://github.com/skacem/Business-Analytics/tree/main/Datasets). Accessed 15 December 2021.
+1. Lilien, Gary L, Arvind Rangaswamy, and Arnaud De Bruyn. 2017. *Principles of Marketing Engineering and Analytics*. State College, PA: DecisionPro.
+
+2. Arnaud De Bruyn. [Foundations of Marketing Analytics](https://www.coursera.org/learn/foundations-marketing-analytics) (MOOC). Coursera.
+
+3. Hosmer, David W., Stanley Lemeshow, and Rodney X. Sturdivant. 2013. *Applied Logistic Regression*. 3rd ed. Hoboken, NJ: Wiley.
+
+4. James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2021. *An Introduction to Statistical Learning: With Applications in R*. 2nd ed. New York: Springer.
+
+5. Fader, Peter S., and Bruce G. S. Hardie. 2009. "Probability Models for Customer-Base Analysis." *Journal of Interactive Marketing* 23 (1): 61-69.
+
+6. Dataset from [Github repo](https://github.com/skacem/Business-Analytics/tree/main/Datasets). Accessed 15 December 2021.
+

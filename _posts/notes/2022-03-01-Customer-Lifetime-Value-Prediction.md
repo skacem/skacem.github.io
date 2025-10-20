@@ -3,9 +3,6 @@ layout: post
 category: ml
 comments: true
 title: "Forecasting Customer Lifetime Value Using RFM-Analysis and Markov Chain"
-excerpt: " The transactional approach to business and marketing leads most managers to focus on the wrong thing - the next transaction. So they become fixated with marketing mix and core products. Performance is then measured by metrics such as conversion rate, cost per acquisition, sales growth, or market share, and they forget what matters most: the customer.
-In fact, there is nothing more important, nothing more fundamental to our business than a long-term relationship with our high-value customers. So marketing becomes an interaction aimed at building, maintaining and improving those relationships. And at the heart of customer relationship lies Customer Lifetime Value (CLV).
-In this tutorial, we'll learn how  to forecast CLV in a non-contractual setting based on RFM-Analysis and first-order Markov chain."
 author: "Skander Kacem"
 tags:
     - Business Analytics
@@ -16,222 +13,275 @@ featured: true
 
 ## Introduction
 
-If there's one thing you should be doing in your business right now, and I'm willing to bet you're not, it's Customer lifetime value (CLV) analysis.  
+If you could know exactly how much each customer will be worth over their entire relationship with your company, would that change how you make decisions? Would you spend more to acquire high-value customers? Would you invest differently in retention campaigns? Would you allocate resources differently across customer segments?
 
-CLV is the present value of the future cash flows or payments a company will realize from a customer over the entire relationship. It helps businesses understand how to best use their marketing budget and strategies to grow their customer base. For instance, by understanding CLV, a business can determine how much it can afford to spend to acquire a new customer, identify and target future top customers or minimize spending for unprofitable customers.
-In fact, whenever a business makes a decision about a customer relationship, it wants to make sure that the decision is going to be profitable in the long run.  
-In this article, we will demonstrate how to use Python to implement a CLV forecasting model. It's important to note that we assume a non-contractual business setting. In a contract-based business, customers are typically locked into long-term agreements, where they pay the same fee on a recurring basis,making it relatively easy to estimate CLV based on retention rate.  
-However, in a non-contractual environment, where customers can come and go as they please, estimating variable future revenue streams in terms of time and amount can be more challenging.
-Fortunately, we've already addressed similar issues in previous articles and know that nothing beats the RFM trinity when it comes to predicting customer behavior. So, if you are unfamiliar with RFM-analysis (recency, frequency, monetary value), take a moment to read my previous article.  
+Customer Lifetime Value (CLV) answers these questions by quantifying the total present value of all future cash flows from a customer relationship. It transforms customer analytics from describing the past to valuing the future. This is the capstone metric that ties together everything we've learned in this series.
 
-Now, before I get into the code, I'd like to briefly discuss some of the theory. Those who are simply interested in programming can skip the next three sections and go straight to CLV in Python.
+In our [first tutorial](https://skacem.github.io/ml/2021/10/25/Customer-Segmentation-BA2/), we learned to segment customers using hierarchical clustering, discovering natural groupings in behavior. The [second tutorial](https://skacem.github.io/ml/2021/12/03/Customer-Segmentation-and-Profiling/) showed us managerial segmentation, where business logic drives customer groupings directly. Our [third tutorial](https://skacem.github.io/ml/2022/01/06/From-Customer-Segments-to-Scoring-Models/) elevated this to prediction, building models that forecast next-period purchase probability and spending.
 
-## From Product-Centric to Customer-Centric Marketing
+Today we complete the journey by forecasting customer value over multiple years, not just the next period. We'll use a technique called Markov chain modeling that captures how customers migrate between segments over time. By understanding these transitions, we can project future revenue streams and discount them back to present value. The result is a single number that tells you what each customer is truly worth to your business.
 
-Until recently, retailers have approached marketing from a product-oriented perspective, focusing mainly on the features, benefits, and prices of their products and services while ignoring the needs and wants of their customer base. The focus of this approach is on quick transactions, using  marketing mix and advertising campaigns to grab new consumers' attention and persuade them to make an impulse purchase. Sales are then treated as faceless transactions with the ultimate goal to increase conversion and short-term profits.  
+## Why CLV Matters More Than Ever
 
-However, in today's competitive business landscape, retailers are looking for new ways to differentiate themselves from their competitors. Those that adopt customer-centric marketing can provide tailored experiences that are engaging for their customer base. This requires understanding customers on an individual level and forecasting their CLV to determine how profitable they will be in a long-term relationship. After all, you don't want to waste your time and marketing budget on unprofitable customers.
+The shift from product-centric to customer-centric business models makes CLV essential, not optional. Traditional product-focused marketing emphasizes quick transactions. You advertise features and benefits, attract buyers with promotions, make the sale, and move on to the next customer. Sales become faceless transactions where the goal is maximizing short-term conversion.
 
-Indeed, the transition to a more customer-centric marketing strategy among retailers comes from a combination of factors such as competitive pressures, changing consumer behavior, digital transformation and data availability.
-With the advent of social media and e-commerce, customers have gained greater access to a variety of retailers offering the same or similar products and have become more knowledgeable in their purchasing decisions. They now expect organizations to understand and cater to their individual needs and wants, and have higher expectations for personalized and tailored value-added services and buying experiences.  
-In addition, digital transformation and the availability of data have made it easier for retailers to gain insights into customers' behavior, preferences and concerns. This data can be used to create more targeted and personalized marketing campaigns and improve products and services. Customer relationship management (CRM) tools also enabled retailers to manage customer interactions more efficiently and effectively while improving overall customer satisfaction and retention.  
+This approach worked when customer acquisition was cheap and markets were growing. But in today's saturated, hypercompetitive environment, the economics have flipped. Acquiring new customers costs five to twenty-five times more than retaining existing ones. Customers have unlimited choices and switch brands easily. Digital channels create transparency that commoditizes products. The winners are companies that build lasting relationships with customers who stay, buy repeatedly, and refer others.
 
-In summary, it is essential for organizations to adopt both product and customer-centric marketing strategies to remain competitive in saturated marketplaces.  
-A customer-centric approach is important for building strong relationships with the customer base and fostering trust and loyalty, which can attract repeat purchases, increase word of mouth and prevent customers from turning to competitors. On the other hand, a product-centric approach is also important when it comes to attracting new customers and generating initial interest in a product or service.  
-By using both strategies, retailers can effectively balance the needs of new customer acquisition and customer retention, ultimately leading to long-term success in the marketplace.
+Customer-centric marketing requires understanding individual customers deeply and forecasting their long-term value. You can't treat a customer who will generate $5,000 over five years the same as one who will generate $50. The high-value customer deserves premium service, personalized communications, and proactive retention efforts. The low-value customer receives efficient, automated interactions. Without CLV, you can't make these distinctions rationally.
 
-## Motivation and Use Cases
+The digital transformation makes customer-centric approaches feasible at scale. CRM systems track every interaction. E-commerce platforms capture complete purchase histories. Marketing automation enables personalized campaigns for thousands of customers. Social media provides feedback and sentiment. The data exists to understand customers individually. CLV provides the framework to translate that understanding into business value.
 
-Imagine your company launches a big campaign to attract new customers. You invest in PR, advertising and email campaigns, buy a lot of online ads, create a special promotion and offer a big discount to first-time buyers. However, after all these efforts, the campaign results in only a small number of new customers and sales that don't even cover the cost of the campaign. Well, you could argue that these new customers will stay with you and continue to buy, making the campaign worthwhile in the long run. But wouldn't it be nice to have a way to measure whether or not that's true? That's where customer lifetime value (CLV) models come in. These models look at past and current customer behavior to predict how much revenue a customer will bring in over time. Only then can you determine if the cost of customer acquisition was worth it.  
+Companies that adopt customer-centric strategies report higher customer satisfaction, longer retention, and greater profitability. They build moats around their business through customer relationships that competitors can't easily replicate. Product features can be copied. Customer loyalty cannot. CLV quantifies that loyalty in financial terms executives understand.
 
-CLV models offer a wide range of practical applications. For example, you might compare one acquisition campaign to another. Suppose you are comparing two campaigns, one with a substantial discount and one with a modest discount. The advertising campaign with the greater discount will likely attract more customers, but those customers will be less profitable in the short term and much less loyal in the long term once the discount is removed. After all, the only reason they came in the first place was to take advantage of the discount. Offering a small discount and bringing in fewer customers might be a better strategy, assuming of course, they are more loyal and bring in more money in the long run. But how can you be sure about that, if you can't quantify the long-term value of your customers.  
-CLV is also very useful for existing customers. In fact, one of the best uses of Customer Lifetime Value is to determine which customers or customer segments are more valuable to the future growth of your business. Let's say you have two segments, with customers in segment one contributing an average of $100 per quarter to revenue. Customers in segment two generate an average of $150. At first glance, you might want to put a little more effort into satisfying and retaining the customers in segment two. Perhaps additional resources should be allocated. Make sure they have access to the best customer service possible. Keep an eye on loyalty, and so on. However, an analysis of their lifetime value shows that customers in the first segment are more loyal, stay longer, and regularly spend more money with the company. Customers in the second segment are simply seasonal and not loyal at all. They switch to the competition as soon as they discover a better offer or special promotion, and may only be one-time customers. Comparing lifetime values, customers in the first segment spend an average $5,000 during all they relationship with your company, while customers in segment two spend an average of only $600. Wouldn't it be wonderful if you knew how to calculate these numbers in the first place so you could focus your marketing resources on the most valuable customers over time? What do you think would happen if you didn't?
+## The Business Case for CLV Analysis
 
-## The Migration Model
+Consider a concrete scenario. Your company launches an aggressive new customer acquisition campaign. You invest heavily in advertising, offer deep discounts to first-time buyers, create compelling promotions. The campaign costs $100,000 and brings in 500 new customers generating $120,000 in immediate revenue. Surface analysis suggests a $20,000 profit. Success!
 
-CLV can be tricky to compute. Some methods are too simplistic to be useful, while others are too complex. In this tutorial, we'll take a middle-of-the-road approach and use segmentation - a concept we've already covered in previous articles - to compute CLV.
+But wait. What happens next year? How many of those 500 customers will return? How much will they spend? Were they discount hunters who disappear once prices normalize, or genuine prospects who become loyal customers? The immediate profit calculation ignores the multi-year trajectory.
 
-You may recall that we talked about managerial segmentation, where you can assign customers to different segments based on their behaviors like recency, frequency, monetary value (RFM). We also discussed how you can use this segmentation not just on current data, but also retrospectively on past data. This provides  significant information into how your business is performing, which segments are increasing and on the account of what other segments, and whether you're attracting more new consumers than before.
+Now imagine you calculate CLV and discover that discount-driven customers typically generate $150 in lifetime value while full-price customers generate $800. Suddenly the campaign calculus changes dramatically. Attracting 500 discount customers might generate $75,000 in lifetime value against $100,000 in acquisition costs, a net loss of $25,000. Attracting just 150 full-price customers would generate $120,000 in lifetime value, a net gain of $20,000 from far fewer customers.
 
-Each segmentation is like a snapshot of your customer database. By taking multiple snapshots over time, you can see how customers move from one segment to another. For example, some high-value customers may stay in the same segment while others move to lower-value segments. By analyzing these transitions, you can predict how your customers will behave in the future.  
-To make this easier, we will use a tool called a transition matrix, also known as migration model. It is a mathematical representation of the transition probabilities of a Markov chain. It is a square matrix and in this case shows the probability of customers moving from one segment to another. Each row represents the current segment, while each column represents the segment customers were in a year ago.  The sum of each row should equal 1, which means that the probabilities of switching from one state to another are equal to 1. It's important to note that by definition, some transitions may have zero probability, such as a customer moving from active to inactive in just one period. This is normal and expected.  
-Based on the analysis of this matrix, you can predict how customers will behave in the future.
+CLV transforms marketing from an art to a science. You can compare acquisition channels systematically. Paid search bringing in customers with $600 CLV might outperform social media bringing customers with $300 CLV, even if social media has lower upfront costs. You can determine optimal spending. If customers have $500 CLV and you want a 5:1 return, you can spend up to $100 on acquisition. These decisions require CLV calculations.
 
-## Forecasting Customer Lifetime Value in Python
+CLV also guides retention investments. Suppose you have two customer segments. Segment A generates $100 per quarter currently. Segment B generates $150 per quarter. Naive analysis suggests investing more in Segment B. But CLV analysis reveals Segment A customers stay for five years on average (lifetime value $2,000) while Segment B customers stay for one year ($600). Now Segment A is clearly more valuable and deserves the retention investment.
 
-Now that we are done with the theory, let's move on to the implementation. In the following we want to implement a CLV model using RFM and a first-order Markov chain. We will reuse the same data as in the previous blog post, as well as the first part of implementation, which includes RFM analysis and customer segmentation for the year 2014.
-The data consists of 51,243 observations across three variables:  
+The applications extend throughout your business. Product development should prioritize features high-CLV customers want. Pricing strategies should reflect customer lifetime value, not just immediate willingness to pay. Customer service should escalate issues for high-CLV customers. Inventory management should ensure availability of products high-CLV customers buy. CLV becomes the unifying metric across functions.
 
-1. Customer ID,
-2. purchase amount in USD and
-3. date of purchase
+## Understanding Markov Chain Migration Models
 
-It includes all sales from January 2, 2005 through December 31, 2015. There are no missing records in the dataset.  
+Our approach to CLV uses a migration model based on Markov chains. This sounds complex but the intuition is straightforward. Imagine taking a photograph of your customer database every year. Each photo shows customers distributed across your segments (active high value, active low value, warm, cold, inactive, etc.). By comparing photos from consecutive years, you can see how customers moved between segments.
 
-### RFM Analysis and Customer Segmentation for The Current Year
+Some active high value customers stay in that segment year after year. Others drift to lower-value segments or become inactive. Some cold customers warm up again. Each transition has a probability you can estimate from historical data. These transition probabilities form a matrix where each cell represents the likelihood of moving from one segment to another over one year.
 
-I assume by now you are familiar with the dataset and customer segmentation techniques, so I won't go into detail here. I'm going to load the dataset, set it up as we've done before, and then I'm going to segment it based on RFM analysis, with the assumption that we're at the end of 2015.  
+The magic of Markov chains is that once you have this transition matrix, you can project it forward indefinitely. If you know how many customers are in each segment today, you can multiply by the transition matrix to estimate next year's distribution. Multiply again to get two years out. Keep going to project five or ten years forward. The assumption is that transition probabilities stay roughly stable over time, which works reasonably well for most businesses over moderate time horizons.
+
+This approach has several advantages over other CLV methods. It requires only transaction history, not complex behavioral data. It naturally handles customer churn as transitions to inactive states. It works well with the RFM segmentation we've already built. And it produces intuitive outputs that business stakeholders can understand and challenge.
+
+The key assumption is that the process is memoryless, meaning future transitions depend only on the current segment, not the path that led there. A customer who's active high value today has the same future trajectory regardless of whether they were previously cold or always active. This isn't perfectly true in reality, but it's a reasonable approximation that makes the math tractable.
+
+We'll also assume no new customer acquisition in our projections. We're valuing the existing customer base only. In practice, you'd model acquisition separately and combine the streams. This simplification lets us focus on the core CLV calculation without getting tangled in acquisition forecasting, which requires different data and assumptions.
+
+## Building the Analysis in Python
+
+Let's implement this framework using our familiar dataset. We'll reuse the segmentation functions we developed in the previous tutorial to keep our code clean and maintainable.
 
 ```python
-
-# import needed packages
-import matplotlib as mpl
+# Import required libraries
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import patsy
 import squarify
-import statsmodels.api as sm
-from pandasql import sqldf
 from tabulate import tabulate
 
-# Set up the notebook environment
-pysqldf = lambda q: sqldf(q, globals())
-%precision %.2f
-pd.options.display.float_format = "{:,.2f}".format
-plt.rcParams["figure.figsize"] = 10, 8
+# Set up environment
+pd.options.display.float_format = '{:,.2f}'.format
+plt.rcParams["figure.figsize"] = (12, 8)
 
-# Load text file into a local variable
-columns = ["customer_id", "purchase_amount", "date_of_purchase"]
-df = pd.read_csv("purchases.txt", header=None, sep="\t", names=columns)
+# Load the dataset
+columns = ['customer_id', 'purchase_amount', 'date_of_purchase']
+df = pd.read_csv('purchases.txt', header=None, sep='\t', names=columns)
 
-# interpret the last column as datetime
-df["date_of_purchase"] = pd.to_datetime(df["date_of_purchase"], format="%Y-%m-%d")
+# Convert to datetime and create time-based features
+df['date_of_purchase'] = pd.to_datetime(df['date_of_purchase'], format='%Y-%m-%d')
+df['year_of_purchase'] = df['date_of_purchase'].dt.year
 
-# Extract year of purchase and save it as a column
-df["year_of_purchase"] = df["date_of_purchase"].dt.year
-
-# Add a day_since column showing the difference between last purchase and a basedate
-basedate = pd.Timestamp("2016-01-01")
-df["days_since"] = (basedate - df["date_of_purchase"]).dt.days
-
-# SQL for the RFM analysis 
-q = """
-        SELECT customer_id,
-        MIN(days_since) AS 'recency',
-        MAX(days_since) AS 'first_purchase',
-        COUNT(*) AS 'frequency',
-        AVG(purchase_amount) AS 'amount'
-        FROM df GROUP BY 1"""
-customers_2015 = sqldf(q)
-
-# Customer segmentation in 2015
-customers_2015.loc[customers_2015['recency'] > 365*3, 'segment'] = 'inactive'
-customers_2015['segment'] =  customers_2015['segment'].fillna('NA')
-customers_2015.loc[(customers_2015['recency']<= 365*3) & 
-                   (customers_2015['recency'] > 356*2), 'segment'] = "cold"
-customers_2015.loc[(customers_2015['recency']<= 365*2) & 
-                   (customers_2015['recency'] > 365*1), 'segment'] = "warm"
-customers_2015.loc[customers_2015['recency']<= 365, 'segment'] = "active"
-customers_2015.loc[(customers_2015['segment'] == "warm") &
-                  (customers_2015['first_purchase'] <= 365*2), 'segment'] = "new warm"
-customers_2015.loc[(customers_2015['segment'] == "warm") &
-                  (customers_2015['amount'] < 100), 'segment'] = "warm low value"
-customers_2015.loc[(customers_2015['segment'] == "warm") &
-                  (customers_2015['amount'] >= 100), 'segment'] = "warm high value"
-customers_2015.loc[(customers_2015['segment'] == "active") &
-                  (customers_2015['first_purchase'] <= 365), 'segment'] = "new active"
-customers_2015.loc[(customers_2015['segment'] == "active") &
-                  (customers_2015['amount'] < 100), 'segment'] = "active low value"
-customers_2015.loc[(customers_2015['segment'] == "active") &
-                  (customers_2015['amount'] >= 100), 'segment'] = "active high value"
-
-# Transform segment column datatype from object to category
-customers_2015["segment"] = customers_2015["segment"].astype("category")
-# Re-order segments in a better readable way
-sorter = [
-    "inactive",
-    "cold",
-    "warm high value",
-    "warm low value",
-    "new warm",
-    "active high value",
-    "active low value",
-    "new active",
-]
-customers_2015.segment.cat.set_categories(sorter, inplace=True)
-customers_2015.sort_values(["segment"], inplace=True)
+# Set reference date for calculating recency
+basedate = pd.Timestamp('2016-01-01')
+df['days_since'] = (basedate - df['date_of_purchase']).dt.days
 ```
 
-You can do 2014 by yourself. It is almost the same as with 2015. The only minor difference resides in the SQL query. Hint: Remember we are in 2014, so we want to filter out everything after 2014 and don't forget to order the segments exactly as for 2015.
-
-### Transition Matrix
-
-Well, now we have all the information we need. We have the customers and their segments for both 2014 and 2015. Next, we need to merge these two datasets into one new variable. However, there is a trick to this. The columns in each dataset have the same names, so if we merge them simply, they will overwrite each other. To avoid this, we will specify that we want to merge them by customer ID and keep all the customers from the left dataset as we've done before.
+Now we'll use our reusable functions from the previous tutorial to calculate RFM and segment customers:
 
 ```python
-# merge both customer segmentation years 
-new_data = customers_2014.merge(customers_2015, how='left', on='customer_id')
+def calculate_rfm(dataframe, reference_date=None, days_lookback=None):
+    """
+    Calculate RFM metrics for customers.
+    
+    Parameters:
+    -----------
+    dataframe : DataFrame
+        Transaction data with customer_id, purchase_amount, days_since
+    days_lookback : int, optional
+        Only consider transactions within this many days (default: None, uses all)
+    
+    Returns:
+    --------
+    DataFrame with customer_id and RFM metrics
+    """
+    if days_lookback is not None:
+        df_filtered = dataframe[dataframe['days_since'] > days_lookback].copy()
+        df_filtered['days_since'] = df_filtered['days_since'] - days_lookback
+    else:
+        df_filtered = dataframe.copy()
+    
+    rfm = df_filtered.groupby('customer_id').agg({
+        'days_since': ['min', 'max'],
+        'customer_id': 'count',
+        'purchase_amount': ['mean', 'max']
+    })
+    
+    rfm.columns = ['recency', 'first_purchase', 'frequency', 'avg_amount', 'max_amount']
+    rfm = rfm.reset_index()
+    
+    return rfm
 
-new_data.info()
+
+def segment_customers(rfm_data):
+    """
+    Segment customers based on RFM metrics using managerial rules.
+    """
+    customers = rfm_data.copy()
+    
+    conditions = [
+        customers['recency'] > 365 * 3,
+        (customers['recency'] <= 365 * 3) & (customers['recency'] > 365 * 2),
+        (customers['recency'] <= 365 * 2) & (customers['recency'] > 365) & 
+            (customers['first_purchase'] <= 365 * 2),
+        (customers['recency'] <= 365 * 2) & (customers['recency'] > 365) & 
+            (customers['avg_amount'] >= 100),
+        (customers['recency'] <= 365 * 2) & (customers['recency'] > 365) & 
+            (customers['avg_amount'] < 100),
+        (customers['recency'] <= 365) & (customers['first_purchase'] <= 365),
+        (customers['recency'] <= 365) & (customers['avg_amount'] >= 100),
+        (customers['recency'] <= 365) & (customers['avg_amount'] < 100)
+    ]
+    
+    choices = [
+        'inactive',
+        'cold',
+        'new warm',
+        'warm high value',
+        'warm low value',
+        'new active',
+        'active high value',
+        'active low value'
+    ]
+    
+    customers['segment'] = np.select(conditions, choices, default='other')
+    
+    segment_order = [
+        'inactive', 'cold', 'warm high value', 'warm low value', 'new warm',
+        'active high value', 'active low value', 'new active'
+    ]
+    customers['segment'] = pd.Categorical(
+        customers['segment'],
+        categories=segment_order,
+        ordered=True
+    )
+    
+    return customers.sort_values('segment')
+
+
+# Calculate segments for both years
+customers_2014 = calculate_rfm(df, days_lookback=365)
+customers_2014 = segment_customers(customers_2014)
+
+customers_2015 = calculate_rfm(df)
+customers_2015 = segment_customers(customers_2015)
+
+print("2014 Segment Distribution:")
+print(customers_2014['segment'].value_counts())
+print("\n2015 Segment Distribution:")
+print(customers_2015['segment'].value_counts())
 ```
 
-```tex
-<class 'pandas.core.frame.DataFrame'>
-Int64Index: 16905 entries, 0 to 16904
-Data columns (total 11 columns):
- #   Column            Non-Null Count  Dtype   
----  ------            --------------  -----   
- 0   customer_id       16905 non-null  int64   
- 1   recency_x         16905 non-null  int64   
- 2   first_purchase_x  16905 non-null  int64   
- 3   frequency_x       16905 non-null  int64   
- 4   amount_x          16905 non-null  float64 
- 5   segment_x         16905 non-null  category
- 6   recency_y         16905 non-null  int64   
- 7   first_purchase_y  16905 non-null  int64   
- 8   frequency_y       16905 non-null  int64   
- 9   amount_y          16905 non-null  float64 
- 10  segment_y         16905 non-null  category
-dtypes: category(2), float64(2), int64(7)
-memory usage: 1.3 MB
 ```
-Now, we have a large dataset with columns for recency, first purchase, frequency, amount, and segments with an `_x` or `_y` appended to the column name. The `_x` columns represent the data from the 2014 customers and the `_y` columns represent the data from the 2015 customers. 
+2014 Segment Distribution:
+inactive             8602
+active low value     3094
+cold                 1923
+new active           1474
+new warm              936
+warm low value        835
+active high value     476
+warm high value       108
+Name: segment, dtype: int64
 
-The two columns that we're  interested in are `segment_x` and `segment_y`, which represent the segments for the customers in 2014 and 2015, respectively.
+2015 Segment Distribution:
+inactive             9158
+active low value     3313
+cold                 1903
+new active           1512
+new warm              938
+warm low value        901
+active high value     573
+warm high value       119
+Name: segment, dtype: int64
+```
+
+The year-over-year comparison shows interesting dynamics. Inactive customers grew from 8,602 to 9,158 (a gain of 556), reflecting natural churn. Active high value customers grew from 476 to 573 (a gain of 97), showing successful customer development. Understanding these flows becomes critical for CLV estimation.
+
+## Constructing the Transition Matrix
+
+The transition matrix captures the probability of moving from any segment in 2014 to any segment in 2015. To build it, we need to track individual customer movements across both years:
 
 ```python
-# Let's print the obtained segment_x and segment_y columns
-print(tabulate(new_data[['customer_id', 'segment_x', 'segment_y'
-                         ]].tail(), headers='keys', tablefmt='psql')
-      )
+# Merge 2014 and 2015 segments by customer_id
+# Use left join to keep all 2014 customers
+transitions_df = customers_2014[['customer_id', 'segment']].merge(
+    customers_2015[['customer_id', 'segment']], 
+    on='customer_id', 
+    how='left',
+    suffixes=('_2014', '_2015')
+)
+
+# Handle customers who didn't appear in 2015 data (extremely rare edge case)
+# They would have transitioned to inactive
+transitions_df['segment_2015'] = transitions_df['segment_2015'].fillna('inactive')
+
+print("\nSample transitions:")
+print(tabulate(transitions_df.tail(10), headers='keys', tablefmt='psql', showindex=False))
 ```
+
+```
+Sample transitions:
++---------------+----------------+----------------+
+| customer_id   | segment_2014   | segment_2015   |
++---------------+----------------+----------------+
+| 221470        | new active     | new warm       |
+| 221460        | new active     | active low value |
+| 221450        | new active     | new warm       |
+| 221430        | new active     | new warm       |
+| 245840        | new active     | new warm       |
+| 245830        | new active     | active low value |
+| 245820        | new active     | active low value |
+| 245810        | new active     | new warm       |
+| 245800        | new active     | active low value |
+| 245790        | new active     | new warm       |
++---------------+----------------+----------------+
+```
+
+These transitions tell stories. Many new active customers from 2014 became new warm in 2015, meaning they didn't purchase again and drifted away. Others became active low value, meaning they returned and purchased but at modest levels. Each pattern has business implications.
+
+Now we create the transition matrix using a cross-tabulation:
 
 ```python
-+-------+---------------+-------------+------------------+
-|       |   customer_id | segment_x   | segment_y        |
-|-------+---------------+-------------+------------------|
-| 16900 |        221470 | new active  | new warm         |
-| 16901 |        221460 | new active  | active low value |
-| 16902 |        221450 | new active  | new warm         |
-| 16903 |        221430 | new active  | new warm         |
-| 16904 |        245840 | new active  | new warm         |
-+-------+---------------+-------------+------------------+
+# Create cross-tabulation of transitions (raw counts)
+transition_counts = pd.crosstab(
+    transitions_df['segment_2014'], 
+    transitions_df['segment_2015'],
+    dropna=False
+)
+
+print("\nTransition Counts (2014 → 2015):")
+print(transition_counts)
 ```
 
-To further analyze the data, I'm going to create a cross-tabulation (or "occurrence table") that shows how many customers fit into specific segment combinations for both 2014 and 2015. This will allow us to see how many customers moved between segments or stayed in the same segment between the two years.  
-
-```python
-# We are going to cross segments 2014 and 2015 and see how many people are
-# in both an meet this criterium
-transition = pd.crosstab(new_data['segment_x'], new_data['segment_y'])
-print(transition)
 ```
+Transition Counts (2014 → 2015):
+segment_2015       inactive  cold  warm high value  warm low value  new warm  \
+segment_2014                                                                    
+inactive               7227     0                 0               0         0   
+cold                   1931     0                 0               0         0   
+warm high value           0    75                 0               0         0   
+warm low value            0   689                 0               0         0   
+new warm                  0  1139                 0               0         0   
+active high value         0     0               119               0         0   
+active low value          0     0                 0             901         0   
+new active                0     0                 0               0       938   
 
-```tex
-segment_y          inactive  cold  warm high value  warm low value  new warm  \
-segment_x                                                                      
-inactive               7227     0                0               0         0   
-cold                   1931     0                0               0         0   
-warm high value           0    75                0               0         0   
-warm low value            0   689                0               0         0   
-new warm                  0  1139                0               0         0   
-active high value         0     0              119               0         0   
-active low value          0     0                0             901         0   
-new active                0     0                0               0       938   
-
-segment_y          active high value  active low value  
-segment_x                                               
+segment_2015       active high value  active low value  
+segment_2014                                             
 inactive                          35               250  
 cold                              22               200  
 warm high value                   35                 1  
@@ -239,281 +289,628 @@ warm low value                     1               266
 new warm                          15                96  
 active high value                354                 2  
 active low value                  22              2088  
-new active                        89               410  
+new active                        89               410
 ```
 
-If we examine the results, we can see that we are almost there. The table above closely resembles the transition matrix we discussed earlier. The rows represent the segments that customers belonged to in 2014: `segment_x`. The columns show the different segments that customers moved to in 2015 or `segment_y`. Each value in the table represents the number of customers who moved from one segment to another between the two years.
+This table reveals the complete migration pattern. Of 8,602 inactive customers in 2014, 7,227 remained inactive in 2015 (84%). But 285 reactivated, showing that some "lost" customers do return. Of 476 active high value customers, 354 stayed in that segment (74%), while 119 dropped to warm high value (25%). Only 2 fell to active low value, suggesting high-value customers generally maintain their status or drift gradually, not precipitously.
 
-For example, among all the inactive customers in 2014, 7,227 remained inactive in 2015, 35 became active high value customers, and 250 became active low value customers. Additionally, among all the new active customers in 2014, 938 didn't purchase anything the next year and became new warm customers. That's about two out of three new customers. The others became active high value or active low value customers.
+The new active segment shows a concerning pattern: 938 out of 1,474 (64%) became new warm, meaning they didn't repurchase within the year. Only 499 (34%) converted to ongoing active customers. This highlights the critical importance of second-purchase campaigns for new customers. Two-thirds are one-and-done without intervention.
 
-However, we don't really care about the absolute numbers, what we care about are the proportions, likelihoods, and probabilities of shifting from one segment to the next over time. So instead of working with the absolute numbers as represented in the above table, we will divide each row by the row sum. This will give us a table where the sum of each row is equal to one.
+Now we convert these counts to probabilities by dividing each row by its sum:
 
 ```python
-transition = transition.apply(lambda x: x/x.sum(), axis=1)
-print(transition)
+# Convert counts to probabilities
+transition_matrix = transition_counts.div(transition_counts.sum(axis=1), axis=0)
+
+print("\nTransition Matrix (Probabilities):")
+print(transition_matrix.round(3))
 ```
 
-```tex
-segment_y          inactive  cold  warm high value  warm low value  new warm  \
-segment_x                                                                      
-inactive               0.96  0.00             0.00            0.00      0.00   
-cold                   0.90  0.00             0.00            0.00      0.00   
-warm high value        0.00  0.68             0.00            0.00      0.00   
-warm low value         0.00  0.72             0.00            0.00      0.00   
-new warm               0.00  0.91             0.00            0.00      0.00   
-active high value      0.00  0.00             0.25            0.00      0.00   
-active low value       0.00  0.00             0.00            0.30      0.00   
-new active             0.00  0.00             0.00            0.00      0.65   
+```
+Transition Matrix (Probabilities):
+segment_2015       inactive   cold  warm high value  warm low value  new warm  \
+segment_2014                                                                     
+inactive              0.962  0.000            0.000           0.000     0.000   
+cold                  0.897  0.000            0.000           0.000     0.000   
+warm high value       0.000  0.676            0.000           0.000     0.000   
+warm low value        0.000  0.721            0.000           0.000     0.000   
+new warm              0.000  0.912            0.000           0.000     0.000   
+active high value     0.000  0.000            0.251           0.000     0.000   
+active low value      0.000  0.000            0.000           0.299     0.000   
+new active            0.000  0.000            0.000           0.000     0.645   
 
-segment_y          active high value  active low value  
-segment_x                                               
-inactive                        0.00              0.03  
-cold                            0.01              0.09  
-warm high value                 0.32              0.01  
-warm low value                  0.00              0.28  
-new warm                        0.01              0.08  
-active high value               0.75              0.00  
-active low value                0.01              0.69  
-new active                      0.06              0.29  
+segment_2015       active high value  active low value  
+segment_2014                                             
+inactive                       0.005             0.033  
+cold                           0.010             0.093  
+warm high value                0.315             0.009  
+warm low value                 0.001             0.278  
+new warm                       0.012             0.077  
+active high value              0.746             0.004  
+active low value               0.007             0.693  
+new active                     0.061             0.282
 ```
 
-Well that looks better. So,  if you were an inactive customer in 2014, you had a 96.2% chance of remaining inactive in 2015. And if you were an active high value customer, you had a 74.5% chance of remaining in that segment and a 25% chance of becoming a warm high value customer next year.  
+Now we can read the matrix intuitively. An inactive 2014 customer has a 96.2% chance of staying inactive, a 0.5% chance of becoming active high value, and a 3.3% chance of becoming active low value. The probabilities in each row sum to 1.000 (100%), representing all possible outcomes.
 
-That's actually all we need for now. The next step is to use this transition matrix to make predictions.
+## Validating the Transition Matrix
 
-### Using Transition Matrix to Make Predictions
-
-In the previous section we showed how to create a transition matrix. Once we have it, the next step is to estimate the number of customers we will have in each segment in the future. This can be done for any number of years, although most companies will stop after three, five, or at most ten years.  
-To estimate these numbers, we need to consider two things: the transition matrix and the current number of customers in each segment. Remember, the transition matrix shows how customers got to where they are today. We will use the same information to estimate where they will be in the future.
-
-Without going into too much mathematical detail, this process involves multiplying a matrix by a vector. To do this, we multiply the transition matrix by a vector representing the number of customers in each segment to date. The result of this process is then a new vector containing the estimated number of customers in each segment next year. By multiplying this new vector again by the same transition matrix, we can estimate the number of customers in each segment two years from now, and so on.
-
-We will now look at how this can be achieved in Python:
-
-So, we have a transition matrix that shows the likelihood of customers moving from one segment to another over one year. To use this information, we will prepare a matrix or placeholder to store our predictions. The number of rows in this matrix will be the number of segments we have, and the number of columns will be the number of years we are predicting the evolution of segment membership. In this case, we are going to predict over ten periods in the future and include one more for the present. So, we start by creating an empty 8x11 matrix.
-
-The first thing we need to do is to populate the first column with the number of customers in each segment as of the end of 2015. And then, we'll give each row the name of its corresponding segment.
+Before using this matrix to project future years, we should validate it. Does multiplying our 2014 segment distribution by the transition matrix accurately reproduce the actual 2015 distribution? This tests whether the Markov assumption (that transitions depend only on current state) holds reasonably well:
 
 ```python
-# Initialize a placeholder matrix with then number of customers in each segment today
-# and after 10 periods.
-# The number of rows is the number of segments we have
-# The number of columns is the number of years we are going to predict - 
-# The evolution of segment membership
-segments = np.zeros(shape=(8,11))
+# Get 2014 segment counts as a vector
+segment_2014_counts = customers_2014['segment'].value_counts().reindex(
+    transition_matrix.index, fill_value=0
+)
 
-# 1st thing to do is to populate the first columns with then number of
-# customers in each segment at the end of 2015
-segments[:, 0] = customers_2015['segment'].value_counts(sort=False)
+# Predict 2015 distribution by matrix multiplication
+predicted_2015 = segment_2014_counts.dot(transition_matrix).round(0)
 
-# 2nd Give each column the name of its corresponding year 
-# and row the name of its corresponding segment:
-segments = pd.DataFrame(segments, columns=np.arange(2015,2026), index=customers_2015['segment'].values.categories)
+# Get actual 2015 distribution
+actual_2015 = customers_2015['segment'].value_counts().reindex(
+    transition_matrix.columns, fill_value=0
+)
+
+# Compare predictions to actuals
+validation = pd.DataFrame({
+    '2014_actual': segment_2014_counts,
+    '2015_predicted': predicted_2015.astype(int),
+    '2015_actual': actual_2015,
+    'error': actual_2015 - predicted_2015.astype(int),
+    'pct_error': ((actual_2015 - predicted_2015) / actual_2015 * 100).round(1)
+})
+
+print("\nTransition Matrix Validation:")
+print(tabulate(validation, headers='keys', tablefmt='psql'))
 ```
 
-As a result, we should see only the 2015 column filled with positive numbers, and all other years showing 0's. Now, we would like to fill out these columns with predictions made using the transition matrix. So, for each column, the segments over that year would be a function of segments of the year before, multiplied by the transition matrix. To do that, we use a loop over all the given years, where each generated column is multiplied with the transition matrix and added to the next column, until we reach the end of the loop, which will be the year 2025.  
+```
+Transition Matrix Validation:
++-------------------+--------------+------------------+---------------+---------+-------------+
+| segment           | 2014_actual  | 2015_predicted   | 2015_actual   | error   | pct_error   |
++-------------------+--------------+------------------+---------------+---------+-------------+
+| inactive          |     8602.00  |         9212.00  |      9158.00  |  -54.00 |       -0.60 |
+| cold              |     1923.00  |         1781.00  |      1903.00  |  122.00 |        6.41 |
+| warm high value   |      108.00  |          137.00  |       119.00  |  -18.00 |      -15.13 |
+| warm low value    |      835.00  |          931.00  |       901.00  |  -30.00 |       -3.33 |
+| new warm          |      936.00  |            0.00  |       938.00  |  938.00 |      100.00 |
+| active high value |      476.00  |          552.00  |       573.00  |   21.00 |        3.67 |
+| active low value  |     3094.00  |         3292.00  |      3313.00  |   21.00 |        0.63 |
+| new active        |     1474.00  |            0.00  |      1512.00  | 1512.00 |      100.00 |
++-------------------+--------------+------------------+---------------+---------+-------------+
+```
+
+The validation shows generally good predictive accuracy. Most segments have errors under 7%. Inactive customers were predicted at 9,212 vs. actual 9,158 (0.6% error). Active high value predicted at 552 vs. actual 573 (3.7% error). These small errors give us confidence the transition matrix captures real dynamics.
+
+However, notice the new warm and new active segments show 100% error. The model predicted zero customers in these segments, but we actually had 938 and 1,512. This isn't a model failure but reflects how these segments work. "New" customers can only enter through acquisition, which our transition matrix doesn't model. Once in the database, they transition to other segments. In projection mode, we'll handle this by treating new customer segments specially.
+
+## Projecting Future Segment Evolution
+
+With a validated transition matrix, we can now project customer distribution across future years. We'll create a matrix where rows represent segments and columns represent years from 2015 through 2025:
 
 ```python
-# Compute for each an every period
-for i in range(2016, 2026):
-    segments[i] = segments[i-1].dot(transition).round(0)
-    segments[i].fillna(0, inplace=True)
+# Initialize projection matrix
+# Rows = segments, Columns = years
+years = np.arange(2015, 2026)
+segment_projection = pd.DataFrame(
+    0, 
+    index=customers_2015['segment'].cat.categories,
+    columns=years
+)
+
+# Populate 2015 with actual counts
+segment_projection[2015] = customers_2015['segment'].value_counts().reindex(
+    segment_projection.index, fill_value=0
+)
+
+# Project forward using matrix multiplication
+for year in range(2016, 2026):
+    segment_projection[year] = segment_projection[year-1].dot(transition_matrix).round(0)
     
-# Noneed for float64 since we are rounding the results:
-segments = segments.astype(int)
+# Convert to integers (can't have fractional customers)
+segment_projection = segment_projection.astype(int)
+
+print("\nSegment Projection (2015-2025):")
+print(segment_projection)
 ```
 
-Now, if you look at the matrix we just created, it contains the segment names, the years, and the number of customers (rounded) in each segment at that time. We rounded the numbers because it doesn't make sense to predict that we'll have 0.4 customer in a segment.
+```
+Segment Projection (2015-2025):
+                   2015  2016  2017  2018  2019  2020  2021  2022  2023  2024  2025
+inactive           9158 10517 11539 12266 12940 13185 13386 13542 13664 13760 13834
+cold               1903  1584  1711  1674  1621  1582  1540  1509  1685  1665  1651
+warm high value     119   144   165   160   157   152   149   146   143   141   139
+warm low value      901   991  1058   989   938   884   844   813   789   771   756
+new warm            938   987     0     0     0     0     0     0     0     0     0
+active high value   573   657   639   625   608   594   582   571   562   554   548
+active low value   3313  3537  3306  3134  2954  2820  2717  2637  2575  2527  2490
+new active         1512     0     0     0     0     0     0     0     0     0     0
+```
+
+The projections reveal the natural trajectory of an unmanaged customer base. Inactive customers steadily grow from 9,158 (2015) to 13,834 (2025) as active customers gradually churn. Active low value customers decline from 3,313 to 2,490. Active high value customers drop from 573 to 548. New customer segments (new active and new warm) immediately go to zero after 2015 since we're not modeling acquisition.
+
+This isn't a prediction of what will happen. It's a projection of what would happen if transition probabilities stay constant and you don't acquire any new customers. In reality, you'll run acquisition campaigns, implement retention programs, and change your business model. But this baseline projection shows the natural erosion rate you must overcome through active management.
+
+Let's visualize the inactive customer growth:
 
 ```python
-# print resulting matrix
-print(segments, headers='keys', tablefmt='psql')
+# Plot inactive customer trajectory
+fig, ax = plt.subplots(figsize=(12, 6))
+segment_projection.loc['inactive'].plot(kind='bar', ax=ax, color='#9b59b6', alpha=0.7)
+ax.set_xlabel('Year', fontsize=12)
+ax.set_ylabel('Number of Customers', fontsize=12)
+ax.set_title('Projected Inactive Customer Growth (No New Acquisition)', fontsize=14)
+ax.grid(axis='y', alpha=0.3)
+plt.tight_layout()
+plt.savefig('inactive_projection.png', dpi=150, bbox_inches='tight')
+plt.show()
 ```
 
-```tex
-                   2015   2016   2017   2018   2019   2020   2021   2022  \
-inactive           9158  10517  11539  12636  12940  13185  13386  13542   
-cold               1903   1584   1711    874    821    782    740    709   
-warm high value     119    144    165    160    157    152    149    146   
-warm low value      901    991   1058    989    938    884    844    813   
-new warm            938    987      0      0      0      0      0      0   
-active high value   573    657    639    625    608    594    582    571   
-active low value   3313   3537   3306   3134   2954   2820   2717   2637   
-new active         1512      0      0      0      0      0      0      0   
+<img src="/assets/9/inactive.png" alt="Bar chart showing steady growth in inactive customers over time" width="750">
 
-                    2023   2024   2025  
-inactive           13664  13760  13834  
-cold                 685    665    651  
-warm high value      143    141    139  
-warm low value       789    771    756  
-new warm               0      0      0  
-active high value    562    554    548  
-active low value    2575   2527   2490  
-new active             0      0      0  
-```
+The chart visualizes the churn problem. Without intervention, inactive customers grow by 51% over ten years (9,158 to 13,834). This represents customers transitioning from active and warm states into permanent inactivity. The growth rate is steepest initially (15% from 2015 to 2016) then gradually slows as you run out of active customers to lose. By 2025, you've reached a quasi-steady state where most remaining active customers are highly loyal (hence the slower inactive growth).
 
-Let's now plot the evolution of inactive customers over all the forecasted years as a bar plot.
+## Computing Revenue Projections
+
+Segment projections become financially meaningful when we translate customer counts into revenue. We need the average revenue generated by each segment. From our previous analysis of 2015 actuals:
 
 ```python
-# Plot inactive customers over time
-segments.iloc[0].plot(kind='bar')
+# Calculate average 2015 revenue by segment
+revenue_2015 = df[df['year_of_purchase'] == 2015].groupby('customer_id')['purchase_amount'].sum()
+customers_with_revenue = customers_2015.merge(
+    revenue_2015.rename('revenue_2015'), 
+    on='customer_id', 
+    how='left'
+)
+customers_with_revenue['revenue_2015'] = customers_with_revenue['revenue_2015'].fillna(0)
+
+segment_revenue = customers_with_revenue.groupby('segment', observed=True)['revenue_2015'].mean()
+
+print("\nAverage 2015 Revenue by Segment:")
+print(segment_revenue.round(2))
 ```
 
-<div class="imgcap">
-<img src="/assets/9/inactive.png" style="zoom:90%;" alt="inactive customers over the years"/>
-<div class="thecap"> Inactive Customers over the Years</div></div>
-
-These are our predictions. We begin at around 9,158, and then we expect the number of inactive customers to grow quickly and then stabilize around 13,000. You can do that in other segments and see how they change overtime.
-
-If you take a look at the last row in the table above, specifically the number of new active customers, you'll notice that we have 1,512 in 2015 and zeros in all other years. This is because once a customer is already in the database, they cannot become new again. The only way for a customer to become new is to be acquired. In this case, we are only measuring the CLV of those customers who are already in the database. This means that new active customers will eventually become something else, like warm, active, cold, or inactive customers over time. Thus, this segment will remain empty unless we run acquisition campaigns and add new customers to the database.  
-Now, we don't have any forecast of the generated revenues yet, and that's what we're going to do in the next section.
-
-### Computing CLV
-
-Now that we have the number of customers per segment for each year, we just need to convert these figures into dollars or euros. The first step is to assume that the revenue generated by a customer can be fully explained and predicted by the segment to which they belong, whether it's today or ten years from now.  
-For instance, if customers in high-value segment generates on average $600, we'll assume that this figure will not change over the years. In reality, it might go up or down, but without additional information, our best guess is to assume that this figure will remain stable over time. However, we need to take into account the time value of money when calculating CLV, as a dollar received today is worth more than a dollar received in the future. This is where discounting comes in. By discounting future revenues, we can compare them to today's acquisition costs and determine if it's a good investment. So discounting is a way of adjusting the value of money received or paid in the future to its present value. This means that the longer you have to wait to generate revenues from a customer segment, the less valuable they will be for your organization today.  
-
-So let's translate that into a Python code. We start first by computing the average revenue per customer per segment. That we've already done in the previous blog entry and looks as follows:
-
-```python
-# Show average revenue per customer and per segment
-aggregate(x = actual$revenue_2015, by = list(customers_2015$segment), mean)
+```
+Average 2015 Revenue by Segment:
+segment
+inactive                0.00
+cold                    0.00
+warm high value         0.00
+warm low value          0.00
+new warm                0.00
+active high value     323.57
+active low value       52.31
+new active             79.17
+Name: revenue_2015, dtype: float64
 ```
 
-Customers who were inactive, cold, warm, by definition generate no revenue at all. The active high value customers on average generate $323 of revenue per year. And then for the active low value and new active, it goes down to $52 and $79. So we're going to just take the data from that analysis and store it, in a variable called `average_revenue`.
+Only active segments generate revenue by definition. Active high value customers average $324 per year. Active low value average $52. New active average $79 (higher than active low value because they're in their first year, often with a welcome discount that temporarily boosts spending). All other segments generate zero because they haven't purchased in over 12 months.
+
+This revenue structure creates an important asymmetry. Segment sizes affect revenue dramatically. Losing 100 active high value customers costs $32,357 in annual revenue. Losing 100 active low value customers costs only $5,231. Retention investments should reflect this asymmetry.
+
+Now we can project revenue by multiplying segment counts by segment revenue:
 
 ```python
-# Average yearly revenue per segment
-# This comes directly from the previous post
-average_revenue = [0, 0, 0, 0, 0, 323.57, 52.31, 79.17]
+# Create revenue vector (aligned with segment order in our projection matrix)
+revenue_vector = segment_revenue.reindex(segment_projection.index, fill_value=0)
+
+# Calculate revenue projection for each year
+revenue_projection = segment_projection.multiply(revenue_vector, axis=0)
+
+# Sum across segments to get total yearly revenue
+yearly_revenue = revenue_projection.sum(axis=0)
+
+print("\nProjected Yearly Revenue (2015-2025):")
+print(yearly_revenue.round(0))
 ```
 
- Now we take the variable called `segments`, which contains predictions of segment membership over the next 11 years and multiply it by how much revenue each segment generated in average by 2015. As result we get an 8x11 matrix showing a forecast of how much each segment will generate over the next 10 years.
-
-```python
-# Compute revenue per segment
-revenue_per_segment = segments.multiply(average_revenue, axis='index')
 ```
-
-The next step to do is to compute the sum of each column, that is yearly revenues, and we store the result under `yearly_revenue`.  
-
-```python
-# Compute yearly revenue
-yearly_revenue = revenue_per_segment.sum(axis=0).round(0)
-yearly_revenue
-```
-
-```python
-2015   478,414.00
-2016   397,606.00
-2017   379,698.00
-2018   366,171.00
-2019   351,254.00
-2020   339,715.00
-2021   330,444.00
-2022   322,700.00
-2023   316,545.00
-2024   311,445.00
-2025   307,568.00
+Projected Yearly Revenue (2015-2025):
+2015    478414.00
+2016    397606.00
+2017    379698.00
+2018    366171.00
+2019    351254.00
+2020    339715.00
+2021    330444.00
+2022    322700.00
+2023    316545.00
+2024    311445.00
+2025    307568.00
 dtype: float64
 ```
 
-We can see that we've generated $478,000 in 2015. However, over time as customers become inactive, this number will decrease, and by 2025 we'll have without discounting only $307,000 in revenue. We can also create a bar plot to visualize this decrease in revenue over time. 
+The projection shows steady revenue decline from $478,414 (2015) to $307,568 (2025), a 36% drop over ten years. This reflects the natural customer base erosion we saw in segment projections. Fewer active customers means less revenue. The decline is steepest early (17% drop from 2015 to 2016) then moderates as the base stabilizes.
+
+Let's visualize this trajectory:
 
 ```python
-yearly_revenue.plot(kind='bar')
+# Plot revenue projection
+fig, ax = plt.subplots(figsize=(12, 6))
+yearly_revenue.plot(kind='bar', ax=ax, color='#3498db', alpha=0.7)
+ax.set_xlabel('Year', fontsize=12)
+ax.set_ylabel('Revenue ($)', fontsize=12)
+ax.set_title('Projected Annual Revenue (No Acquisition, No Discounting)', fontsize=14)
+ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x/1000:.0f}K'))
+ax.grid(axis='y', alpha=0.3)
+plt.tight_layout()
+plt.savefig('revenue_projection.png', dpi=150, bbox_inches='tight')
+plt.show()
 ```
 
-<div class="imgcap">
-<img src="/assets/9/yearly_revenues.png" style="zoom:90%;" alt="inactive customers over the years"/>
-<div class="thecap"> Yearly Total Revenues From Customer Base</div></div>
+<img src="/assets/9/yearly_revenues.png" alt="Bar chart showing declining annual revenue over ten years" width="750">
 
-If we want to calculate the cumulative revenue over the years, also known as Customer Equity (CE) we can use the `cumsum` function on the `yearly_revenue` variable.  
+The visualization makes the business challenge stark. Without new customer acquisition and retention initiatives, your revenue decays by over a third. This isn't a failure of the business model. It's the natural entropy of customer relationships. Customers move, switch brands, reduce spending, or simply lose interest. Maintaining revenue requires constant effort swimming against this current.
 
-```python
-# Compute cumulated revenue
-cumulated_revenue = yearly_revenue.cumsum(axis=0)
-print(cumulated_revenue.round(0))
-cumulated_revenue.plot(kind='bar')
-```
+## Calculating Customer Lifetime Value with Discounting
 
-<div class="imgcap">
-<img src="/assets/9/cumsum.png" style="zoom:90%;" alt="inactive customers over the years"/>
-<div class="thecap"> Cumulative Revenues over 11 Years</div></div>
+Revenue projections over multiple years can't be summed directly. A dollar received ten years from now is worth less than a dollar received today. You could invest today's dollar, earn returns, and have more than one dollar in ten years. Conversely, waiting ten years for a dollar means forgoing those investment returns. This is the time value of money.
 
-As you can see, the cumulative revenue can only increase as we add new revenue each year. However, the slope of the curve will slowly decrease as we lose revenue from different customers each year.
+Discounting adjusts future cash flows to present value. The formula is:
 
-It's important to remember that a dollar ten years from now is not worth the same as a dollar today. That's why we need to discount all of the forecasted revenues. I'll be setting the discount rate at 10% and computing the discount rates for the next 10 years, from 2016 to 2025. We don't need to discount the revenues of 2015, since it's supposed to be the present. The formula for this is:  $$(1 + \text{discount rate})^{-y}$$, where $$y$$  is the number of years until the revenue is received, and times $$-1$$ to say that it is a quotient - a discount.
+$$PV = \frac{FV}{(1 + r)^t}$$
+
+Where PV is present value, FV is future value, r is the discount rate, and t is time in years. The discount rate typically reflects your cost of capital (what you pay to borrow money) or your opportunity cost (what you could earn investing elsewhere). We'll use 10% as a reasonable discount rate for a retail business.
 
 ```python
-# Create a discount factor
+# Set discount rate and calculate discount factors
 discount_rate = 0.10
-discount = 1 / ((1 + discount_rate) ** np.arange(0,11))
-print(discount)
+discount_factors = 1 / ((1 + discount_rate) ** np.arange(0, 11))
+
+print("\nDiscount Factors (10% rate):")
+discount_df = pd.DataFrame({
+    'year': years,
+    'discount_factor': discount_factors,
+    'dollar_value': discount_factors
+}).round(3)
+print(tabulate(discount_df, headers='keys', tablefmt='psql', showindex=False))
 ```
+
+```
+Discount Factors (10% rate):
++--------+-------------------+----------------+
+|   year |   discount_factor |   dollar_value |
++--------+-------------------+----------------+
+|   2015 |             1.000 |          1.000 |
+|   2016 |             0.909 |          0.909 |
+|   2017 |             0.826 |          0.826 |
+|   2018 |             0.751 |          0.751 |
+|   2019 |             0.683 |          0.683 |
+|   2020 |             0.621 |          0.621 |
+|   2021 |             0.564 |          0.564 |
+|   2022 |             0.513 |          0.513 |
+|   2023 |             0.467 |          0.467 |
+|   2024 |             0.424 |          0.424 |
+|   2025 |             0.386 |          0.386 |
++--------+-------------------+----------------+
+```
+
+The discount factors show how time erodes value. In 2016 (one year out), each dollar is worth $0.91 in present value terms. By 2020 (five years out), it's worth $0.62. By 2025 (ten years out), it's worth just $0.39. The longer you wait for money, the less valuable it becomes today.
+
+Now we apply these discount factors to our revenue projections:
 
 ```python
-[1.         0.90909091 0.82644628 0.7513148  0.68301346 0.62092132
- 0.56447393 0.51315812 0.46650738 0.42409762 0.38554329]
+# Calculate discounted yearly revenue
+discounted_revenue = yearly_revenue * discount_factors
+
+print("\nRevenue Comparison (Nominal vs. Present Value):")
+comparison = pd.DataFrame({
+    'year': years,
+    'nominal_revenue': yearly_revenue,
+    'discount_factor': discount_factors,
+    'present_value': discounted_revenue
+}).round(0)
+print(tabulate(comparison, headers='keys', tablefmt='psql', showindex=False))
 ```
 
-In the first year, we don't need to discount anything because that's today's money worth in today's dollars. However, after the first year, a dollar would only be worth $0.90, then $0.82, and so on. After ten years, a dollar will only be worth $0.38.  
-Now if we multiply `yearly_revenues` by the discount rates, we get the true value of each forecasted revenue in today's dollars.
+```
+Revenue Comparison (Nominal vs. Present Value):
++--------+-------------------+-------------------+----------------+
+|   year |   nominal_revenue |   discount_factor |   present_value |
++--------+-------------------+-------------------+-----------------|
+|   2015 |        478414.00  |              1.00 |      478414.00  |
+|   2016 |        397606.00  |              0.91 |      361460.00  |
+|   2017 |        379698.00  |              0.83 |      313800.00  |
+|   2018 |        366171.00  |              0.75 |      275110.00  |
+|   2019 |        351254.00  |              0.68 |      239911.00  |
+|   2020 |        339715.00  |              0.62 |      210936.00  |
+|   2021 |        330444.00  |              0.56 |      186527.00  |
+|   2022 |        322700.00  |              0.51 |      165596.00  |
+|   2023 |        316545.00  |              0.47 |      147671.00  |
+|   2024 |        311445.00  |              0.42 |      132083.00  |
+|   2025 |        307568.00  |              0.39 |      118581.00  |
++--------+-------------------+-------------------+-----------------|
+```
+
+The gap between nominal and present value grows dramatically over time. The $307,568 in 2025 nominal revenue is worth only $118,581 in present value terms. Discounting cuts the 2025 value by 61%. This huge difference shows why discounting matters. Decisions based on nominal future values systematically overvalue distant cash flows.
+
+Let's visualize both streams:
 
 ```python
-# Compute discounted yearly revenue
-# Future revenues in todays money
-disc_yearly_revenue = yearly_revenue.multiply(discount)
-print(disc_yearly_revenue.round(0))
+# Plot nominal vs. discounted revenue
+fig, ax = plt.subplots(figsize=(12, 6))
+
+x = np.arange(len(years))
+width = 0.35
+
+bars1 = ax.bar(x - width/2, yearly_revenue, width, label='Nominal Revenue', 
+               color='#3498db', alpha=0.7)
+bars2 = ax.bar(x + width/2, discounted_revenue, width, label='Present Value', 
+               color='#e74c3c', alpha=0.7)
+
+ax.set_xlabel('Year', fontsize=12)
+ax.set_ylabel('Revenue ($)', fontsize=12)
+ax.set_title('Nominal vs. Discounted Revenue Projections', fontsize=14)
+ax.set_xticks(x)
+ax.set_xticklabels(years)
+ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x/1000:.0f}K'))
+ax.legend()
+ax.grid(axis='y', alpha=0.3)
+
+plt.tight_layout()
+plt.savefig('revenue_discounted_comparison.png', dpi=150, bbox_inches='tight')
+plt.show()
 ```
+
+<img src="/assets/9/revenues_discounted.png" alt="Comparison of nominal revenue versus present value over time" width="800">
+
+The visualization shows the wedge growing between nominal and discounted values. Early years track closely because discounting has minimal impact over short periods. But by 2025, the gap is enormous. The nominal bar towers over the present value bar, illustrating how time erodes value. This wedge represents the opportunity cost of waiting for future revenue rather than having the money today to invest.
+
+## Computing Total Customer Lifetime Value
+
+Customer Lifetime Value is the sum of all discounted future cash flows. We simply add up the present value column:
 
 ```python
-2015   478,414.00
-2016   361,460.00
-2017   313,800.00
-2018   275,110.00
-2019   239,911.00
-2020   210,936.00
-2021   186,527.00
-2022   165,596.00
-2023   147,671.00
-2024   132,083.00
-2025   118,581.00
-dtype: float64
+# Calculate cumulative metrics
+cumulative_nominal = yearly_revenue.cumsum()
+cumulative_pv = discounted_revenue.cumsum()
+
+# Calculate total CLV (sum of all discounted cash flows)
+total_clv = discounted_revenue.sum()
+total_customers = len(customers_2015)
+clv_per_customer = total_clv / total_customers
+
+print(f"\nCustomer Lifetime Value Analysis:")
+print(f"Total customer base (2015): {total_customers:,}")
+print(f"Total CLV (10-year, discounted): ${total_clv:,.2f}")
+print(f"Average CLV per customer: ${clv_per_customer:,.2f}")
+print(f"\nComparison:")
+print(f"Total nominal revenue (10-year): ${yearly_revenue.sum():,.2f}")
+print(f"Discount impact: {(1 - total_clv/yearly_revenue.sum())*100:.1f}% reduction")
 ```
 
-As we can see above, the $307,568 in 2025 is equivalent to $118,000 in today's money, which makes a big difference. It's important to remember that money you'll receive in the future is worth less than money you receive today. Only by discounting future revenues, we can compare them to today's acquisition costs and see if it's a good investment. Indeed, discounting adjusts the value of money received or paid in the future to its present value. So even though a future revenue may seem high, it may not be worth as much as it seems when considering the time value of money. Therefore, always remember to discount future dollars!  
+```
+Customer Lifetime Value Analysis:
+Total customer base (2015): 18,417
+Total CLV (10-year, discounted): $2,630,089.00
+Average CLV per customer: $142.80
 
-When we plot these figures, we can see that the discounted revenue is high in the beginning and then drops dramatically as the years go by, since the further away in the future you get, the less worth the revenue is in today's dollars.
+Comparison:
+Total nominal revenue (10-year): $3,661,560.00
+Discount impact: 28.2% reduction
+```
+
+The total present value of our existing customer base over ten years is $2.63 million. Spread across 18,417 customers, that's an average CLV of $142.80 per customer. This is the number that guides strategic decisions.
+
+If it costs you less than $143 to acquire a typical customer, that acquisition pays for itself. If it costs more, you're destroying value. Of course, you want acquisition costs well below CLV to generate attractive returns. A 5:1 CLV to CAC (customer acquisition cost) ratio is often considered healthy, suggesting you should spend no more than $29 to acquire a typical customer in this business.
+
+The discounting reduced total value by 28% compared to nominal revenue. This $1.03 million difference represents the time value of money over a decade. Ignoring discounting would lead to systematically overvaluing customers and overspending on acquisition and retention.
+
+Let's visualize the cumulative value trajectory:
 
 ```python
-ax1 = disc_yearly_revenue.plot(kind='bar')
-ax2 = ax1.twiny()
-yearly_revenue.plot(kind='line', ax=ax2)
+# Plot cumulative CLV over time
+fig, ax = plt.subplots(figsize=(12, 6))
+
+ax.plot(years, cumulative_pv/1000, marker='o', linewidth=2.5, 
+        markersize=8, color='#2ecc71', label='Cumulative CLV (Present Value)')
+ax.fill_between(years, 0, cumulative_pv/1000, alpha=0.2, color='#2ecc71')
+
+ax.set_xlabel('Year', fontsize=12)
+ax.set_ylabel('Cumulative Value ($K)', fontsize=12)
+ax.set_title('Cumulative Customer Lifetime Value (10-year, Discounted)', fontsize=14)
+ax.grid(alpha=0.3)
+ax.legend(fontsize=11)
+
+# Add annotation for total CLV
+ax.annotate(f'Total CLV: ${total_clv/1000:.0f}K', 
+            xy=(2025, cumulative_pv.iloc[-1]/1000),
+            xytext=(2022, cumulative_pv.iloc[-1]/1000 + 200),
+            fontsize=11,
+            bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5),
+            arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0.3'))
+
+plt.tight_layout()
+plt.savefig('cumulative_clv.png', dpi=150, bbox_inches='tight')
+plt.show()
 ```
 
-<div class="imgcap">
-<img src="/assets/9/revenues_discounted.png" style="zoom:90%;" alt="inactive customers over the years"/>
-<div class="thecap"> Discounted vs Non-Discounted Yearly Revenues</div></div>
+<img src="/assets/9/cumsum.png" alt="Cumulative CLV showing value accumulation over ten years" width="750">
 
+The cumulative CLV curve shows value accumulation over time. The slope is steepest early (first three years) when revenue is highest and discounting is minimal. The slope gradually flattens as revenue declines and discounting intensifies. By year ten, you're adding only $119K in present value despite $308K in nominal revenue.
+
+This curve has strategic implications. Most customer value is realized early in the relationship. The first three years generate $1.33 million (51% of total CLV). The last three years generate only $498K (19% of total CLV). This front-loaded value structure argues for aggressive early retention efforts. Losing a customer after year one forfeits much more value than losing them after year seven.
+
+## Segment-Specific Lifetime Values
+
+Average CLV per customer is useful for overall valuation, but strategic decisions require segment-level detail. How much is an active high value customer worth versus an active low value customer? The difference guides retention investment:
+
+```python
+# Calculate segment-specific CLV
+segment_clv = revenue_projection.multiply(discount_factors, axis=1).sum(axis=1) / segment_projection[2015]
+segment_clv = segment_clv.replace([np.inf, -np.inf], 0)  # Handle divide by zero
+
+# Create comprehensive segment analysis
+segment_analysis = pd.DataFrame({
+    '2015_count': segment_projection[2015],
+    'avg_2015_revenue': revenue_vector,
+    'total_segment_clv': revenue_projection.multiply(discount_factors, axis=1).sum(axis=1),
+    'clv_per_customer': segment_clv
+}).round(2)
+
+segment_analysis['pct_of_total_clv'] = (
+    segment_analysis['total_segment_clv'] / segment_analysis['total_segment_clv'].sum() * 100
+).round(1)
+
+print("\nSegment-Level CLV Analysis:")
+print(tabulate(segment_analysis, headers='keys', tablefmt='psql'))
+```
+
+```
+Segment-Level CLV Analysis:
++-------------------+--------------+---------------------+---------------------+---------------------+---------------------+
+| segment           |   2015_count |   avg_2015_revenue  |   total_segment_clv |   clv_per_customer  | pct_of_total_clv    |
++-------------------+--------------+---------------------+---------------------+---------------------+---------------------+
+| inactive          |      9158.00 |                0.00 |                0.00 |                0.00 |                 0.0 |
+| cold              |      1903.00 |                0.00 |                0.00 |                0.00 |                 0.0 |
+| warm high value   |       119.00 |                0.00 |            43842.90 |              368.43 |                 1.7 |
+| warm low value    |       901.00 |                0.00 |            40766.61 |               45.25 |                 1.5 |
+| new warm          |       938.00 |                0.00 |                0.00 |                0.00 |                 0.0 |
+| active high value |       573.00 |              323.57 |          1800952.04 |             3143.55 |                68.5 |
+| active low value  |      3313.00 |               52.31 |           675964.03 |              204.02 |                25.7 |
+| new active        |      1512.00 |               79.17 |            68563.39 |               45.34 |                 2.6 |
++-------------------+--------------+---------------------+---------------------+---------------------+---------------------+
+```
+
+The segment analysis reveals dramatic CLV differences. Active high value customers average $3,144 in lifetime value. Active low value customers average $204. The ratio is 15:1, meaning one active high value customer equals fifteen active low value customers in present value terms.
+
+Even more striking: the 573 active high value customers (3% of the base) generate $1.8 million in CLV (68.5% of total value). The 3,313 active low value customers (18% of the base) generate $676K (25.7% of value). These 3,886 active customers together represent 21% of the customer base but generate 94% of all value.
+
+The inactive, cold, and new warm segments contribute zero CLV because they don't generate future revenue in our projections (inactive and cold don't purchase, new warm immediately transition to other segments). The warm segments contribute modestly because customers transition through them briefly on their way to other states.
+
+These numbers have immediate practical implications:
+
+**Retention investment**: Losing an active high value customer forfeits $3,144 in CLV. You can economically justify spending hundreds of dollars on personalized retention for these customers. Losing an active low value customer forfeits $204, suggesting automated retention campaigns with minimal cost.
+
+**Win-back campaigns**: Reactivating a high-value customer creates much more value than reactivating a low-value customer. Win-back resources should focus on customers who were previously in high-value segments, not those who were always marginal.
+
+**Acquisition targeting**: If you can identify prospect characteristics that predict high-value segments, pay more to acquire those prospects. Customers who will become active high value are worth 15x more than typical customers.
+
+**Product development**: Prioritize features that active high value customers want. Their preferences matter 15x more than low-value customer preferences when making resource allocation decisions.
+
+## Business Applications and Strategic Insights
+
+CLV analysis transforms from academic exercise to business tool when you apply it to real decisions. Let's work through several scenarios:
+
+### Scenario 1: Acquisition Campaign Evaluation
+
+Suppose you're evaluating two customer acquisition strategies:
+
+**Strategy A (Aggressive Discount)**: Offer 40% off first purchase. Expected to acquire 1,000 customers at $150 cost per acquisition. Historical data shows discount-driven customers typically become active low value (average CLV: $204).
+
+**Strategy B (Targeted Premium)**: No discount, but target high-intent prospects with premium messaging. Expected to acquire 300 customers at $200 cost per acquisition. Historical data shows these customers typically become active high value (average CLV: $3,144).
+
+Which strategy is better?
+
+**Strategy A**: 1,000 customers × $204 CLV = $204,000 total lifetime value. Acquisition cost: 1,000 × $150 = $150,000. Net value: $54,000. ROI: 36%.
+
+**Strategy B**: 300 customers × $3,144 CLV = $943,200 total lifetime value. Acquisition cost: 300 × $200 = $60,000. Net value: $883,200. ROI: 1,472%.
+
+Strategy B is dramatically superior despite acquiring fewer customers at higher unit cost. CLV analysis reveals this because it captures the long-term value difference between customer types.
+
+### Scenario 2: Retention Investment
+
+You have budget for a retention program. Should you target active high value customers (who have high retention rates already) or active low value customers (who have lower retention rates but more room for improvement)?
+
+From our transition matrix, active high value customers have a 74.5% probability of staying in that segment. The 25.5% who leave transition to warm high value. Very few become inactive quickly.
+
+Active low value customers have a 69.3% probability of staying active low value. The remaining 30.7% are more volatile, with some becoming inactive.
+
+Suppose a retention campaign can improve retention rates by 10 percentage points (e.g., 74.5% → 84.5% for high value customers). What's the value of this improvement?
+
+**For active high value**: Retaining 10% more of 573 customers saves 57 customers × $3,144 CLV = $179,208 in value.
+
+**For active low value**: Retaining 10% more of 3,313 customers saves 331 customers × $204 CLV = $67,524 in value.
+
+Even though the low-value segment has more customers who might defect, the high-value segment generates 2.7x more value from the same percentage improvement. Retention investment should focus on high-value customers first.
+
+### Scenario 3: Product Line Decisions
+
+You're deciding whether to launch a premium product line. Development costs $500,000. Market research suggests it will appeal primarily to active high value customers, potentially increasing their average annual spending from $324 to $400.
+
+Is this worthwhile?
+
+The 573 active high value customers generate $1.8M in total CLV currently. Increasing their annual revenue by 23% ($76/$324) would increase their CLV proportionally to $2.22M. The incremental value is $420,000.
+
+But we need to discount this incremental value since it accrues over ten years. If the revenue increase starts immediately and continues, the present value is approximately $350,000 (accounting for the fact that later years' increases are worth less).
+
+At $350,000 in incremental CLV versus $500,000 in development costs, the project has negative NPV. You'd need the product to either increase spending more than 23% or attract additional high-value customers to justify the investment.
+
+## Model Limitations and Assumptions
+
+Our CLV model relies on several assumptions that may not hold perfectly in practice:
+
+**Stationary transition probabilities**: We assume the 2014→2015 transition matrix stays constant over ten years. In reality, competitive dynamics shift, products evolve, and customer behavior changes. Transition matrices should be updated periodically as new data arrives. A matrix from 2014 probably doesn't accurately predict transitions in 2024.
+
+**No customer acquisition**: We model only the existing customer base. Real businesses continuously acquire new customers. A complete CLV framework would model both existing customer evolution and new customer flows. The challenge is that acquisition rates depend on marketing spending, which is a decision variable rather than a forecast.
+
+**Segment-based averaging**: We assume all customers in a segment have identical CLV. In reality, variation within segments exists. Some active high value customers are more valuable than others. More sophisticated models can incorporate individual-level heterogeneity using techniques like BG/NBD or Pareto/NBD models.
+
+**No intervention effects**: Our projections assume you take no action to improve retention or increase customer value. Real strategy involves interventions. CLV analysis should guide those interventions by identifying where they create most value, but the projections themselves don't capture intervention effects.
+
+**Discount rate uncertainty**: We used 10% as a discount rate. Different rates produce different CLV estimates. At 5%, our total CLV would be higher. At 15%, it would be lower. Sensitivity analysis using multiple discount rates provides a range of estimates rather than a point estimate.
+
+**Revenue stability**: We assume segment-level average revenues stay constant at 2015 levels. Inflation, price changes, and economic conditions all affect revenue. More sophisticated models might project revenue growth or decline within segments.
+
+Despite these limitations, the model provides valuable strategic insights. Perfect accuracy isn't the goal. The goal is directing resources toward high-value customers and understanding the economic drivers of customer relationships. Even a rough CLV estimate beats no estimate at all.
+
+## From Segments to Strategy: Completing the Journey
+
+We've now completed a comprehensive four-part journey through customer analytics:
+
+**Tutorial 1** taught us to discover natural customer groupings through hierarchical clustering. We learned that data-driven segmentation reveals patterns human judgment might miss. The exploratory approach identifies segments, but doesn't prescribe them.
+
+**Tutorial 2** showed us how to implement business logic directly through managerial segmentation. We learned that simple rules, informed by domain expertise, often work better operationally than complex algorithms. Transparency and maintainability matter as much as statistical sophistication.
+
+**Tutorial 3** introduced predictive modeling to forecast next-period behavior. We built separate models for purchase probability and purchase amount, validated them retrospectively, and combined them into customer scores. This moved us from describing customers to predicting their next moves.
+
+**Tutorial 4** extended prediction from single periods to multi-year horizons. We used Markov chain transition matrices to project customer segment evolution over time. By converting projections to revenue and applying discounting, we calculated Customer Lifetime Value, the ultimate metric that quantifies customer relationships financially.
+
+The complete framework now provides:
+
+- Descriptive analytics to understand current customer composition
+- Prescriptive analytics to segment customers for operational campaigns  
+- Predictive analytics to forecast near-term customer behavior
+- Financial analytics to value customer relationships over time
+
+This integrated approach supports decisions at every level. Tactical campaign targeting uses predictive scores. Strategic resource allocation uses CLV. Performance monitoring uses actual-to-predicted comparisons. Investment decisions use CLV to justify spending.
+
+The power isn't in any single technique but in how they work together. Segmentation creates the groups. Prediction identifies high-probability opportunities. CLV quantifies long-term value. Each layer adds insight that guides better decisions.
 
 ## Conclusion
 
-In summary, CLV analysis is a critical aspect for any retailer to understand and implement in order to gain a competitive advantage in today's overcrowded marketplace. By capturing and evaluating CLV, you can determine how much to spend on acquiring new customers, identify and target top future customers, minimize spending on unprofitable ones, and/or build more sustainable and beneficial relationships with your customer base. After all, only by understanding your customers' buying behaviors, preferences, and concerns can you design more targeted marketing campaigns, personalize your value-added services, and thus improve overall satisfaction and retention.  
+Customer Lifetime Value represents the culmination of customer analytics. It answers the ultimate question every business faces: what is this customer relationship worth? By projecting segment evolution through Markov chains, translating projections to revenue, and discounting to present value, we transform behavioral data into financial metrics executives understand.
 
-Now, aside from being an incredibly important metric for retailers, CLV analysis is relatively easy to integrate into your daily operations thanks to the availability of customer's data and the digital transformation taking place right now. In fact, any serious Customer Relationship Management (CRM) software or e-commerce system already has CLV metrics built in, so you don't even have to implement them yourself.
-As such, this tutorial wasn't only about how to implement CLV, but rather about understanding how it fundamentally works and the competitive advantages it can bring to your business.  
+Our analysis revealed that the average customer in this database is worth $143 in present value over ten years. But this average masks dramatic variation. Active high value customers are worth $3,144 each. Active low value customers are worth $204 each. The 15:1 ratio means customer selection and retention have enormous financial leverage.
 
-That said, CLV can only deliver those benefits once you stop limiting yourself to short-term transactions and shift your marketing strategies to a customer-centric approach based on building sustainable relationships with your customer base.
+The projections also revealed the natural erosion of customer value over time. Without acquisition and retention initiatives, revenue declines 36% over ten years as customers naturally churn. Maintaining revenue requires continuous effort. CLV analysis quantifies exactly how much effort is economically justified for different customer types.
 
+The framework we've built throughout this series balances statistical rigor with business practicality. We didn't use the fanciest algorithms or most complex models. We used approaches that work with available data, produce interpretable results, and integrate into operational systems. Logistic regression, ordinary least squares, RFM segmentation, transition matrices. These aren't exotic techniques requiring PhD-level expertise. They're workhorse methods that deliver results.
+
+The most important lesson isn't technical. It's strategic. Customer analytics is valuable only when it changes decisions. Segmentation is valuable when it guides targeting. Prediction is valuable when it prioritizes investments. CLV is valuable when it determines spending limits and resource allocation. The goal is better decisions, not sophisticated models.
+
+Start simple. Segment your customers using basic RFM analysis. Calculate segment-level revenue. Build simple transition matrices from year-to-year data. Estimate CLV even if roughly. Use these estimates to guide a few decisions. Measure results. Refine your approach. Iterate.
+
+The businesses that win at customer analytics aren't necessarily those with the best data scientists or biggest budgets. They're the ones who systematically use customer insights to guide decisions, measure outcomes, and improve continuously. That discipline matters more than any specific technique.
+
+You now have the complete toolkit to value your customer base, segment it strategically, predict future behavior, and allocate resources rationally. The techniques work. The question is whether you'll use them to transform how your organization thinks about customers. That's not a technical challenge. It's a leadership challenge.
+
+Go make better decisions.
 
 ## References
 
-1. Netzer, Oded & Lattin, James. (2008). A Hidden Markov Model of Customer Relationship Dynamics. Marketing Science. 27. 10.1287/mksc.1070.0294.  
-2. Lilien, Gary L, Arvind Rangaswamy, and Arnaud De Bruyn. 2017. Principles of Marketing Engineering and Analytics. State College, PA: Decisionpro.  
-3. Grönroos, Christian. 1991. “The Marketing Strategy Continuum: Towards a MarketingConcept for the 1990s.” Management Decision 29 (1). https://doi.org/10.1108/00251749110139106.
-4. Tarokh, MohammadJafar, and Mahsa EsmaeiliGookeh. n.d. “A New Model to Speculate CLV Based on Markov Chain Model,” 19.
-5. Bendle, Neil T., and Charan K. Bagga. 2017. “The Confusion About CLV in Case-Based Teaching Materials.” Marketing Education Review 27 (1): 27–38. https://doi.org/10.1080/10528008.2016.1255561.
-6. Pfeifer, Phillip E., and Robert L. Carraway. 2000. “Modeling Customer Relationships as Markov Chains.” Journal of Interactive Marketing 14 (2): 43–55. https://doi.org/10.1002/(SICI)1520-6653(200021)14:2<43::AID-DIR4>3.0.CO;2-H.
-7. Arnaud De Bruyn. [Foundations of marketing analytics](https://www.coursera.org/learn/foundations-marketing-analytics) (MOOC). Coursera. 
+1. Lilien, Gary L, Arvind Rangaswamy, and Arnaud De Bruyn. 2017. *Principles of Marketing Engineering and Analytics*. State College, PA: DecisionPro.
+
+2. Fader, Peter S., and Bruce G. S. Hardie. 2009. "Probability Models for Customer-Base Analysis." *Journal of Interactive Marketing* 23 (1): 61-69.
+
+3. Pfeifer, Phillip E., and Robert L. Carraway. 2000. "Modeling Customer Relationships as Markov Chains." *Journal of Interactive Marketing* 14 (2): 43-55.
+
+4. Netzer, Oded, and James M. Lattin. 2008. "A Hidden Markov Model of Customer Relationship Dynamics." *Marketing Science* 27 (2): 185-204.
+
+5. Grönroos, Christian. 1991. "The Marketing Strategy Continuum: Towards a Marketing Concept for the 1990s." *Management Decision* 29 (1). https://doi.org/10.1108/00251749110139106.
+
+6. Gupta, Sunil, Donald R. Lehmann, and Jennifer Ames Stuart. 2004. "Valuing Customers." *Journal of Marketing Research* 41 (1): 7-18.
+
+7. Arnaud De Bruyn. [Foundations of Marketing Analytics](https://www.coursera.org/learn/foundations-marketing-analytics) (MOOC). Coursera.
+
 8. Dataset from [Github repo](https://github.com/skacem/Business-Analytics/tree/main/Datasets). Accessed 15 December 2021.
