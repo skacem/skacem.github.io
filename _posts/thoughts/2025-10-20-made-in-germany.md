@@ -2,7 +2,7 @@
 layout: post
 category: thoughts
 comments: true
-title: 'How "Made in Germany" Became "Made by Someone We Won''t Hire": A Tragedy in Six Acts'
+title: 'How "Made in Germany" Became "Made by Someone We Won''t Hire": A Tragedy in Eight Acts'
 author: "Skander Kacem"
 tags:
   - Society
@@ -24,7 +24,7 @@ The bill is coming due. It is arriving not in moral arguments but in innovation 
 Pay attention. This is suicide disguised as optimization.
 
 
-#Act I: The Illusion of Access
+## Act I: The Illusion of Access
 
 The entry point into the German industrial machine is a masterclass in bureaucratic opacity.
 
@@ -45,7 +45,7 @@ The direct hire door is decorative. The actual entry is the service entrance, ma
 
 This is standard.
 
-# Act II: The Legal Alchemy
+## Act II: The Legal Alchemy
 
 German law forbids treating humans as rentable equipment. The *Arbeitnehmerüberlassungsgesetz* protects worker dignity.
 
@@ -62,7 +62,7 @@ The immigrant accepts these terms or leaves. Either way, wages stay suppressed. 
 Profits are recorded. Efficiency is achieved. The foundation cracks.
 
 
-# Act III: The Lottery Strategy
+## Act III: The Lottery Strategy
 
 A system built on exploitation requires fuel. The cheapest fuel is hope.
 
@@ -137,7 +137,6 @@ The titans call this "flexible resource management."
 The treasury calls it Tuesday.
 
 This is not a bug. This is the business model.
-
 
 
 ## Act VII: The Unprosecutable Crime
