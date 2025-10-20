@@ -2,7 +2,7 @@
 layout: post
 category: thoughts
 comments: true
-title: 'How "Made in Germany" Became "Made by Someone We Won't Hire": A Tragedy in Six Acts'
+title: "How "Made in Germany" Became "Made by Someone We Won't Hire": A Tragedy in Six Acts"
 author: "Skander Kacem"
 tags:
   - Society
