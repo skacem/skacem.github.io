@@ -13,7 +13,6 @@ featured: true
 
 ## Foreword: The Efficiency Paradox
 
-Forget morality. Forget fairness. This is not a diversity seminar. This is an autopsy of a system failure.
 
 "Made in Germany" once signified engineering supremacy. Today, it masks a Byzantine labor structure optimized for short term wage suppression at the expense of long term survival. It is a system that imports global talent only to treat it as a disposable commodity.
 
