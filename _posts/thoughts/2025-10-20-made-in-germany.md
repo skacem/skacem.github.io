@@ -58,7 +58,9 @@ Germany maintains one of the world's most protected workforces while operating a
 
 The immigrant accepts these terms or leaves. Either way, wages stay suppressed. Domestic engineers watch their salaries plateau. They blame the slaves, never the slave masters.
 
-Profits are recorded. Efficiency is achieved. The foundation cracks.
+Profits are recorded. Efficiency is achieved. 
+
+The foundation cracks.
 
 
 ## Act III: The Lottery Strategy
@@ -67,11 +69,13 @@ A system built on exploitation requires fuel. The cheapest fuel is hope.
 
 Therefore, with great fanfare, an occasional contractor is converted to a permanent employee. The "Golden Ticket." Announcements are made. Proof that the firewall is permeable.
 
-This is HR as casino. A minuscule conversion rate is statistically abysmal but motivationally perfect. It provides the illusion of meritocracy. Just enough success to keep the remainingcompliant, hoping they will be next.
+This is HR as casino. A minuscule conversion rate is statistically abysmal but motivationally perfect. It provides the illusion of meritocracy. Just enough success to keep the remaining compliant, hoping they will be next.
 
 Hope is significantly cheaper than competitive salaries.
 
-The workforce optimizes for visibility over contribution, compliance over innovation. Exactly as designed.
+The workforce optimizes for visibility over contribution, compliance over innovation. 
+
+Exactly as designed.
 
 ## Act IV: The Permanent Ceiling
 
@@ -98,6 +102,7 @@ Eventually, the talent recognizes the illusion and leaves.
 This creates the great German lament: the *Fachkräftemangel*. The skills shortage.
 
 Germany has a shortage of skilled workers. Simultaneously, hundreds of thousands of qualified engineers collect *Arbeitslosengeld*. Both facts are true. Neither is questioned.
+
 
 There is no shortage of skilled workers. There is a shortage of skilled workers willing to accept exploitation. The crisis is artificial, manufactured by the industry's refusal to pay market rates or offer stability.
 
@@ -160,7 +165,7 @@ No one wanted to open that door.
 
 ## Act VIII: The Equilibrium
 
-TWhy does it continue?
+Why does it continue?
 
 Because every actor optimizes individually within a collectively suicidal structure.
 
