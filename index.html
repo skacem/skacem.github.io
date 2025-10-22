@@ -61,9 +61,19 @@ permalink: /
           {% if site.data.readings.currently_reading %}
           <div class="currently-reading">
             <div class="book-display">
-              <img src="{{ site.data.readings.currently_reading.cover }}" alt="{{ site.data.readings.currently_reading.title }}" class="book-cover">
+              {% if site.data.readings.currently_reading.notes_url and site.data.readings.currently_reading.notes_url != "" %}
+                <a href="{{ site.data.readings.currently_reading.notes_url }}" class="book-link">
+                  <img src="{{ site.data.readings.currently_reading.cover }}" alt="{{ site.data.readings.currently_reading.title }}" class="book-cover">
+                </a>
+              {% else %}
+                <img src="{{ site.data.readings.currently_reading.cover }}" alt="{{ site.data.readings.currently_reading.title }}" class="book-cover">
+              {% endif %}
               <div class="book-info">
-                <h3 class="book-title">{{ site.data.readings.currently_reading.title }}</h3>
+                {% if site.data.readings.currently_reading.notes_url and site.data.readings.currently_reading.notes_url != "" %}
+                  <h3 class="book-title"><a href="{{ site.data.readings.currently_reading.notes_url }}" class="book-title-link">{{ site.data.readings.currently_reading.title }}</a></h3>
+                {% else %}
+                  <h3 class="book-title">{{ site.data.readings.currently_reading.title }}</h3>
+                {% endif %}
                 <p class="book-author">by {{ site.data.readings.currently_reading.author }}</p>
               </div>
             </div>
@@ -203,11 +213,25 @@ permalink: /
     align-items: flex-start;
   }
 
+  .book-link {
+    display: block;
+    transition: transform 0.2s;
+  }
+
+  .book-link:hover {
+    transform: translateY(-2px);
+  }
+
   .book-cover {
     width: 150px;
     height: auto;
     border: 1px solid #ddd;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s;
+  }
+
+  .book-link:hover .book-cover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
 
   .book-info {
@@ -222,6 +246,17 @@ permalink: /
     font-weight: 500;
     margin: 0 0 0.5rem 0;
     color: #333;
+  }
+
+  .book-title-link {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .book-title-link:hover {
+    color: #0066cc;
+    text-decoration: underline;
   }
 
   .book-author {

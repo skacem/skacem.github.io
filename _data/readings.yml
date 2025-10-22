@@ -3,16 +3,18 @@ currently_reading:
   author: "Cathy O'Neil"
   cover: "/assets/images/books/weapons-of-math-destruction.jpg"
   started_date: "2025-10-21"
+  notes_url: ""  # Add the URL to your reading notes post here (e.g., "/2025/10/21/weapons-of-math-destruction/")
 
 previous:
   # Add books you've finished reading here
   # - title: "Book Title"
   #   author: "Author Name"
-  #   cover: "/assets/images/books/book-cover.jpg"
   #   finished_date: "YYYY-MM-DD"
+  #   notes_url: "/path/to/your/notes/"  # Link to your reading notes
+  #   tags: [tag1, tag2]  # Optional tags
 
 to_read:
   # Add books you plan to read here
   # - title: "Book Title"
   #   author: "Author Name"
-  #   cover: "/assets/images/books/book-cover.jpg"
+  #   tags: [tag1, tag2]  # Optional tags
