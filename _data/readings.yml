@@ -1,0 +1,18 @@
+currently_reading:
+  title: "Weapons of Math Destruction"
+  author: "Cathy O'Neil"
+  cover: "/assets/images/books/weapons-of-math-destruction.jpg"
+  started_date: "2025-10-21"
+
+previous:
+  # Add books you've finished reading here
+  # - title: "Book Title"
+  #   author: "Author Name"
+  #   cover: "/assets/images/books/book-cover.jpg"
+  #   finished_date: "YYYY-MM-DD"
+
+to_read:
+  # Add books you plan to read here
+  # - title: "Book Title"
+  #   author: "Author Name"
+  #   cover: "/assets/images/books/book-cover.jpg"
