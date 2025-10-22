@@ -58,25 +58,30 @@ permalink: /
       <div class="section-card">
         <h2><a href="/readings/">Readings</a></h2>
         <div class="recent-posts">
-          {% if site.data.readings.currently_reading %}
-          <div class="currently-reading">
-            <div class="book-display">
-              {% if site.data.readings.currently_reading.notes_url and site.data.readings.currently_reading.notes_url != "" %}
-                <a href="{{ site.data.readings.currently_reading.notes_url }}" class="book-link">
-                  <img src="{{ site.data.readings.currently_reading.cover }}" alt="{{ site.data.readings.currently_reading.title }}" class="book-cover">
-                </a>
-              {% else %}
-                <img src="{{ site.data.readings.currently_reading.cover }}" alt="{{ site.data.readings.currently_reading.title }}" class="book-cover">
+          {% assign reading_count = 0 %}
+          {% for post in site.posts %}
+            {% if post.category == 'readings' or post.categories contains 'readings' %}
+              {% if post.reading_status == 'reading' %}
+                {% assign reading_count = reading_count | plus: 1 %}
               {% endif %}
-              <div class="book-info">
-                {% if site.data.readings.currently_reading.notes_url and site.data.readings.currently_reading.notes_url != "" %}
-                  <h3 class="book-title"><a href="{{ site.data.readings.currently_reading.notes_url }}" class="book-title-link">{{ site.data.readings.currently_reading.title }}</a></h3>
-                {% else %}
-                  <h3 class="book-title">{{ site.data.readings.currently_reading.title }}</h3>
+            {% endif %}
+          {% endfor %}
+
+          {% if reading_count > 0 %}
+          <div class="currently-reading-books">
+            {% for post in site.posts %}
+              {% if post.category == 'readings' or post.categories contains 'readings' %}
+                {% if post.reading_status == 'reading' %}
+                  <div class="book-display">
+                    <img src="{{ post.cover }}" alt="{{ post.title }}" class="book-cover">
+                    <div class="book-info">
+                      <h3 class="book-title">{{ post.title }}</h3>
+                      <p class="book-author">by {{ post.author }}</p>
+                    </div>
+                  </div>
                 {% endif %}
-                <p class="book-author">by {{ site.data.readings.currently_reading.author }}</p>
-              </div>
-            </div>
+              {% endif %}
+            {% endfor %}
           </div>
           {% else %}
           <p class="no-posts">No current reading. Check back soon!</p>
@@ -203,7 +208,7 @@ permalink: /
     text-align: center;
   }
 
-  .currently-reading {
+  .currently-reading-books {
     margin: 0.5rem 0 1rem 0;
   }
 
@@ -211,6 +216,11 @@ permalink: /
     display: flex;
     gap: 1.5rem;
     align-items: flex-start;
+    margin-bottom: 1.5rem;
+  }
+
+  .book-display:last-child {
+    margin-bottom: 0;
   }
 
   .book-link {
