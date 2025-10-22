@@ -13,15 +13,15 @@ featured: true
 
 ## Foreword: The Efficiency Paradox
 
-
 "Made in Germany" once signified engineering supremacy. Today, it masks a Byzantine labor structure optimized for short term wage suppression at the expense of long term survival. It is a system that imports global talent only to treat it as a disposable commodity.
 
 The German industrial titans, the BMWs, Siemens, Volkswagens, and Boschs, have engineered a masterpiece of plausible deniability. A two tier workforce that is legally sound yet strategically bankrupt.
 
 The bill is coming due. It is arriving not in moral arguments but in innovation metrics and the quiet erosion of the state itself.
 
-Pay attention. This is suicide disguised as optimization.
+Pay attention. 
 
+This is suicide disguised as optimization.
 
 ## Act I: The Illusion of Access
 
@@ -61,7 +61,6 @@ The immigrant accepts these terms or leaves. Either way, wages stay suppressed. 
 Profits are recorded. Efficiency is achieved. 
 
 The foundation cracks.
-
 
 ## Act III: The Lottery Strategy
 
@@ -115,7 +114,9 @@ Endure the slave contract just long enough to secure permanent residency. The mo
 
 The irony: some engineers feel more integrated while unemployed than while working for a *Sklaventreiber*. Unemployment is honest. The *Werkvertrag* is theater.
 
-The system calls this abuse. The engineer calls it dignity.
+The system calls this abuse. 
+
+The engineer calls it dignity.
 
 ## Act VI: The Socialized Cost
 
@@ -136,12 +137,11 @@ The crime is not incompetence. The crime is leaving. You stole their investment,
 
 The punishment is a reference that ensures you stay unemployed longer, cost the state more.
 
-The titans call this "flexible resource management."
+The titans call this "flexible resource management." The treasury calls it Tuesday.
 
-The treasury calls it Tuesday.
+This is not a bug. 
 
-This is not a bug. This is the business model.
-
+This is the business model.
 
 ## Act VII: The Unprosecutable Crime
 
@@ -180,7 +180,6 @@ The shortage and the solution are the same people.
 But admitting this would require admitting the system creates the problem intentionally.
 
 That conversation will not happen.
-
 
 ## Epilogue: Autopsy in Progress
 
