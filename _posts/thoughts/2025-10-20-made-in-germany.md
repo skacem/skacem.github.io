@@ -8,6 +8,7 @@ tags:
   - Society
   - Germany
   - Politics
+featured: false
 ---
 
 ## Foreword: The Efficiency Paradox
