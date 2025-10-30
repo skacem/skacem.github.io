@@ -4,10 +4,10 @@ category: ml
 comments: true
 title: Introduction to Web Scraping with Python
 author: "Skander Kacem"
-tags: 
- - Python
- - Web Crawler
- - BeautifulSoup
+tags:
+  - Python
+  - Web Crawler
+  - BeautifulSoup
 katex: true
 ---
 
