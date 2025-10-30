@@ -9,7 +9,8 @@ permalink: /readings/
   <p class="page-description">Notes and reflections on books and articles about finance, politics, culture, and philosophy.</p>
 
   <!-- Currently Reading Section -->
-  {% assign reading_books = site.posts | where_exp: "post", "post.reading_status == 'reading'" | where_exp: "post", "post.category == 'readings' or post.categories contains 'readings'" %}
+  {% assign all_reading_books = site.posts | where: "reading_status", "reading" %}
+  {% assign reading_books = all_reading_books | where: "category", "readings" %}
   {% if reading_books.size > 0 %}
   <section class="reading-section">
     <h2 class="section-title">Currently Reading</h2>
@@ -29,7 +30,8 @@ permalink: /readings/
   {% endif %}
 
   <!-- Previous Readings Section -->
-  {% assign previous_books = site.posts | where_exp: "post", "post.reading_status == 'previous'" | where_exp: "post", "post.category == 'readings' or post.categories contains 'readings'" %}
+  {% assign all_previous_books = site.posts | where: "reading_status", "previous" %}
+  {% assign previous_books = all_previous_books | where: "category", "readings" %}
   <section class="reading-section">
     <h2 class="section-title">Previous Readings</h2>
     {% if previous_books.size > 0 %}
@@ -59,7 +61,8 @@ permalink: /readings/
   </section>
 
   <!-- To Read Section -->
-  {% assign to_read_books = site.posts | where_exp: "post", "post.reading_status == 'to_read'" | where_exp: "post", "post.category == 'readings' or post.categories contains 'readings'" %}
+  {% assign all_to_read_books = site.posts | where: "reading_status", "to_read" %}
+  {% assign to_read_books = all_to_read_books | where: "category", "readings" %}
   <section class="reading-section">
     <h2 class="section-title">To Read</h2>
     {% if to_read_books.size > 0 %}
