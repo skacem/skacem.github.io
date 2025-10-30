@@ -3,15 +3,12 @@ layout: post
 category: ml
 comments: true
 title: "GitHub Crawler: Beyond Basic Scraping"
-excerpt: "In the previous post, we learned the basics of web crawling and developed our first one-page crawler. In this post, we implement something more fun and challenging. Something that every Github user could use: a Github Users Crawler.
-Disclaimer: This project is intended for Educational Purposes ONLY."
 author: "Skander Kacem"
 tags:
   - Python
   - Web Crawler
   - BeautifulSoup
 katex: true
-
 ---
 
 In the [previous post](/ml/2021/06/25/Web-Crawlers/), we learned the fundamentals of web scraping and built our first crawler for movie data. Today, we're taking things further by building a GitHub users crawler. But more importantly, we'll explore when scraping makes sense, when it doesn't, and how to do it responsibly.
